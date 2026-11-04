@@ -1,189 +1,97 @@
-import type { AppSource, CannedResponse, DemoAccount } from '../types/crm';
+import type { AppSource, CannedResponse, DemoAccount, TicketCategory, TicketPriority, TicketStatus } from '../types/crm';
+import { SEED_APPS } from './seedData';
 
-export const VPS_APPS: AppSource[] = [
-  {
-    id: 'recruiter',
-    name: 'Recruiter Portal',
-    prefix: 'REC',
-    appUrl: 'https://43.156.236.102/recruiter/login',
-    adminDbUrl: 'https://43.156.236.102/recruiter-pb/_/',
-    color: '#3B82F6',
-    description: 'Platform rekrutmen UMKM dan kandidat kerja',
-  },
-  {
-    id: 'snackloop',
-    name: 'Snackloop-ERP',
-    prefix: 'SNK',
-    appUrl: 'https://43.156.236.102/snackloop/',
-    color: '#F59E0B',
-    description: 'Sistem ERP manajemen produksi snack',
-  },
-  {
-    id: 'wedding',
-    name: 'Wedding Planner Web',
-    prefix: 'WED',
-    appUrl: 'https://43.156.236.102/wedding/login',
-    adminDbUrl: 'https://43.156.236.102/_/',
-    color: '#EC4899',
-    description: 'Platform perencanaan dan manajemen acara pernikahan',
-  },
-  {
-    id: 'life-planner',
-    name: 'Life Planner Web',
-    prefix: 'LFP',
-    appUrl: 'https://43.156.236.102/life-planner/',
-    adminDbUrl: 'https://43.156.236.102/life-planner-pb/_/',
-    color: '#8B5CF6',
-    description: 'Aplikasi perencanaan hidup dan habit tracker',
-  },
-  {
-    id: 'ai-endurance',
-    name: 'AI Endurance Platform',
-    prefix: 'AIE',
-    appUrl: 'https://43.156.236.102:8445/login.html',
-    color: '#10B981',
-    description: 'Platform pelatihan lari berbasis AI untuk atlet',
-  },
-  {
-    id: 'kept',
-    name: 'Kept Password Vault',
-    prefix: 'KPT',
-    appUrl: 'https://43.156.236.102/kept/',
-    color: '#6366F1',
-    description: 'Manajer dan vault kata sandi yang aman',
-  },
-  {
-    id: 'diskon-bot',
-    name: 'Diskon Bot Web',
-    prefix: 'BOT',
-    appUrl: 'https://43.156.236.102/diskon-bot/',
-    color: '#EF4444',
-    description: 'Bot pencari diskon dan promo otomatis',
-  },
-];
+export const VPS_APPS: AppSource[] = SEED_APPS;
+
+export const ADMIN_EMAIL = 'admin@crm.local';
+
+export function getApp(appId: string | undefined): AppSource | undefined {
+  return VPS_APPS.find((a) => a.id === appId);
+}
+
+export const STATUS_LABEL: Record<TicketStatus, string> = {
+  open: 'Open',
+  in_progress: 'In progress',
+  waiting_on_user: 'Menunggu user',
+  solved: 'Solved',
+  closed: 'Closed',
+};
+
+export const STATUS_ORDER: TicketStatus[] = ['open', 'in_progress', 'waiting_on_user', 'solved', 'closed'];
+
+export const PRIORITY_LABEL: Record<TicketPriority, string> = {
+  low: 'Rendah',
+  medium: 'Sedang',
+  high: 'Tinggi',
+  urgent: 'Darurat',
+};
+
+export const PRIORITY_ORDER: TicketPriority[] = ['urgent', 'high', 'medium', 'low'];
+
+export const CATEGORY_LABEL: Record<TicketCategory, string> = {
+  bug_error: 'Bug / error fitur',
+  account_login: 'Akun & akses login',
+  data_transaction: 'Selisih data / transaksi',
+  feature_question: 'Pertanyaan / request fitur',
+  other: 'Lainnya',
+};
 
 export const CANNED_RESPONSES: CannedResponse[] = [
   {
-    id: 'cr-1',
-    title: 'Sedang Investigasi',
-    content: 'Halo, terima kasih atas laporannya. Kami sedang menginvestigasi masalah ini dan akan memberikan update segera.',
-    category: 'general',
+    id: 'cr-ack',
+    title: 'Sedang dicek',
+    content: 'Halo, terima kasih laporannya. Kendala ini sedang kami cek dan kabarnya akan kami tulis di tiket ini.',
   },
   {
-    id: 'cr-2',
-    title: 'Minta Screenshot',
-    content: 'Bisa tolong kirimkan screenshot atau rekaman layar dari error yang Anda alami? Ini akan sangat membantu kami dalam mengidentifikasi masalah.',
-    category: 'general',
+    id: 'cr-shot',
+    title: 'Minta screenshot',
+    content: 'Boleh kirim screenshot layar saat error muncul? Kalau ada pesan error berwarna merah, pastikan ikut terlihat.',
   },
   {
-    id: 'cr-3',
-    title: 'Masalah Sudah Diperbaiki',
-    content: 'Kabar baik! Masalah yang Anda laporkan sudah berhasil kami perbaiki. Silakan coba lagi dan beritahu kami jika masih ada kendala.',
-    category: 'resolution',
+    id: 'cr-steps',
+    title: 'Minta langkah reproduksi',
+    content: 'Supaya bisa kami ulangi, tolong tuliskan langkahnya: menu apa yang dibuka, tombol apa yang ditekan, dan apa yang muncul setelahnya.',
   },
   {
-    id: 'cr-4',
-    title: 'Clear Cache Browser',
-    content: 'Silakan coba clear cache dan cookies browser Anda, lalu refresh halaman. Langkah: Settings > Privacy > Clear browsing data.',
-    category: 'troubleshooting',
+    id: 'cr-cache',
+    title: 'Hard refresh',
+    content: 'Coba tekan Ctrl+Shift+R (atau Cmd+Shift+R di Mac) untuk memuat ulang tanpa cache, lalu ulangi langkahnya. Kabari kami hasilnya.',
+    category: 'bug_error',
   },
   {
-    id: 'cr-5',
-    title: 'Reset Password',
-    content: 'Untuk masalah login, silakan gunakan fitur "Lupa Password" di halaman login untuk mereset password Anda.',
-    category: 'account',
+    id: 'cr-login',
+    title: 'Reset kata sandi',
+    content: 'Kata sandi akun Anda sudah kami reset. Silakan login ulang dan segera ganti kata sandinya dari menu Profil.',
+    category: 'account_login',
   },
   {
-    id: 'cr-6',
-    title: 'Perlu Info Tambahan',
-    content: 'Untuk mempercepat penyelesaian masalah Anda, kami memerlukan informasi tambahan: (1) Browser dan versi yang digunakan, (2) Sistem operasi, (3) Langkah-langkah yang dilakukan sebelum error terjadi.',
-    category: 'general',
+    id: 'cr-data',
+    title: 'Data sudah dikoreksi',
+    content: 'Selisih datanya sudah kami koreksi langsung di database. Silakan buka ulang halamannya dan cocokkan angkanya.',
+    category: 'data_transaction',
   },
   {
-    id: 'cr-7',
-    title: 'Masalah Server Maintenance',
-    content: 'Mohon maaf atas ketidaknyamanannya. Saat ini sistem sedang dalam proses maintenance terjadwal. Layanan akan kembali normal dalam 1-2 jam ke depan.',
-    category: 'system',
+    id: 'cr-fixed',
+    title: 'Sudah diperbaiki',
+    content: 'Perbaikannya sudah kami pasang di server. Silakan coba lagi. Kalau masih terjadi, balas tiket ini dan kami buka kembali.',
   },
   {
-    id: 'cr-8',
-    title: 'Tiket Ditutup',
-    content: 'Tiket ini ditutup karena tidak ada respons dalam 7 hari. Jika masalah masih terjadi, silakan buat tiket baru. Terima kasih.',
-    category: 'closure',
+    id: 'cr-feature',
+    title: 'Masuk daftar fitur',
+    content: 'Usulan ini kami catat di daftar pengembangan. Kami kabari di tiket ini begitu fiturnya tersedia.',
+    category: 'feature_question',
   },
 ];
 
+// Accounts used by the integration simulator and the simulation bar.
 export const DEMO_ACCOUNTS: DemoAccount[] = [
-  {
-    compositeKey: 'snackloop:staff1',
-    appId: 'snackloop',
-    uid: 'staff1',
-    name: 'Staff Rekap',
-    role: 'Staff Rekap & Transaksi Harian',
-    label: 'Staff Snackloop-ERP',
-  },
-  {
-    compositeKey: 'snackloop:admin_kiky',
-    appId: 'snackloop',
-    uid: 'admin_kiky',
-    name: 'Admin Kiky',
-    role: 'Super Admin Owner',
-    label: 'Admin Snackloop-ERP',
-  },
-  {
-    compositeKey: 'recruiter:employer@demo.com',
-    appId: 'recruiter',
-    uid: 'employer@demo.com',
-    name: 'Employer UMKM',
-    role: 'Employer UMKM',
-    label: 'Employer Recruiter',
-  },
-  {
-    compositeKey: 'recruiter:kandidat@demo.com',
-    appId: 'recruiter',
-    uid: 'kandidat@demo.com',
-    name: 'Kandidat Demo',
-    role: 'Candidate',
-    label: 'Kandidat Recruiter',
-  },
-  {
-    compositeKey: 'wedding:admin@wedding.local',
-    appId: 'wedding',
-    uid: 'admin@wedding.local',
-    name: 'Owner Wedding',
-    role: 'Owner Web Acara',
-    label: 'Owner Wedding Planner',
-  },
-  {
-    compositeKey: 'life-planner:kiky@lifeplanner.local',
-    appId: 'life-planner',
-    uid: 'kiky@lifeplanner.local',
-    name: 'Kiky Life Planner',
-    role: 'User / Superadmin',
-    label: 'User Life Planner',
-  },
-  {
-    compositeKey: 'ai-endurance:kipchoge@berlin.org',
-    appId: 'ai-endurance',
-    uid: 'kipchoge@berlin.org',
-    name: 'Kipchoge',
-    role: 'Athlete',
-    label: 'Atlet AI Endurance',
-  },
-  {
-    compositeKey: 'kept:user@kept.local',
-    appId: 'kept',
-    uid: 'user@kept.local',
-    name: 'Vault User',
-    role: 'Vault User',
-    label: 'User Kept Vault',
-  },
-  {
-    compositeKey: 'diskon-bot:8503838227',
-    appId: 'diskon-bot',
-    uid: '8503838227',
-    name: 'Bot Member',
-    role: 'Bot Member',
-    label: 'Member Diskon Bot',
-  },
+  { compositeKey: 'snackloop:staff1', appId: 'snackloop', uid: 'staff1', name: 'Rina (Staff Rekap)', role: 'Staff Rekap & Transaksi Harian', label: 'staff1', fromUrl: 'https://43.156.236.102/snackloop/rekap-harian' },
+  { compositeKey: 'snackloop:admin_kiky', appId: 'snackloop', uid: 'admin_kiky', name: 'Kiky', role: 'Super Admin Owner', label: 'admin_kiky', fromUrl: 'https://43.156.236.102/snackloop/laporan' },
+  { compositeKey: 'recruiter:employer@demo.com', appId: 'recruiter', uid: 'employer@demo.com', name: 'CV Sumber Rejeki', role: 'Employer UMKM', label: 'employer@demo.com', fromUrl: 'https://43.156.236.102/recruiter/employer/dashboard' },
+  { compositeKey: 'recruiter:kandidat@demo.com', appId: 'recruiter', uid: 'kandidat@demo.com', name: 'Dimas Pratama', role: 'Candidate', label: 'kandidat@demo.com', fromUrl: 'https://43.156.236.102/recruiter/profile/cv' },
+  { compositeKey: 'wedding:admin@wedding.local', appId: 'wedding', uid: 'admin@wedding.local', name: 'Sekar Ayu', role: 'Owner Web Acara', label: 'admin@wedding.local', fromUrl: 'https://43.156.236.102/wedding/guests' },
+  { compositeKey: 'life-planner:kiky@lifeplanner.local', appId: 'life-planner', uid: 'kiky@lifeplanner.local', name: 'Kiky', role: 'User / Superadmin', label: 'kiky@lifeplanner.local', fromUrl: 'https://43.156.236.102/life-planner/habits' },
+  { compositeKey: 'ai-endurance:kipchoge@berlin.org', appId: 'ai-endurance', uid: 'kipchoge@berlin.org', name: 'Eliud Kipchoge', role: 'Athlete', label: 'kipchoge@berlin.org', fromUrl: 'https://43.156.236.102:8445/dashboard.html' },
+  { compositeKey: 'kept:user@kept.local', appId: 'kept', uid: 'user@kept.local', name: 'Vault User', role: 'Vault User', label: 'user@kept.local', fromUrl: 'https://43.156.236.102/kept/' },
+  { compositeKey: 'diskon-bot:8503838227', appId: 'diskon-bot', uid: '8503838227', name: 'Bot Member 8503838227', role: 'Bot Member', label: '8503838227', fromUrl: 'https://43.156.236.102/diskon-bot/' },
 ];

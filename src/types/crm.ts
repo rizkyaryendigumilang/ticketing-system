@@ -3,33 +3,34 @@ export type TicketPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type TicketCategory = 'bug_error' | 'account_login' | 'data_transaction' | 'feature_question' | 'other';
 
 export interface AppSource {
-  id: string;
-  name: string;
-  prefix: string;
-  appUrl: string;
-  adminDbUrl?: string;
-  color: string;
+  id: string;              // 'recruiter' | 'snackloop' | 'wedding' | 'life-planner' | 'ai-endurance' | 'kept' | 'diskon-bot'
+  name: string;            // 'Snackloop-ERP'
+  prefix: string;          // 'SNK'
+  appUrl: string;          // URL aplikasi
+  adminDbUrl?: string;     // URL pintasan database (PocketBase / Supabase)
+  color: string;           // Warna identitas badge aplikasi
   description: string;
 }
 
 export interface CrmUser {
-  id: string;
-  compositeKey: string;
-  appId: string;
-  externalUid: string;
-  name: string;
+  id: string;              // Internal ID (15 char, PocketBase-compatible)
+  compositeKey: string;    // Unique: '{appId}:{externalUid}' contoh: 'snackloop:staff1'
+  appId: string;           // Relasi ke AppSource.id
+  externalUid: string;     // Username/Email dari aplikasi asal ('staff1')
+  name: string;            // Nama tampilan
   email?: string;
-  appRole: string;
+  appRole: string;         // Role di aplikasi asal ('Staff Rekap', 'Employer UMKM', dll)
   systemRole: 'admin' | 'requester';
+  lastSeenUrl?: string;    // Halaman terakhir saat user menekan tombol Help
   createdAt: string;
   lastActiveAt: string;
 }
 
 export interface Ticket {
   id: string;
-  ticketNumber: string;
-  appId: string;
-  requesterId: string;
+  ticketNumber: string;    // Format: 'SNK-001', 'REC-002'
+  appId: string;           // Relasi ke AppSource.id
+  requesterId: string;     // Relasi ke CrmUser.id
   requesterName: string;
   requesterUid: string;
   requesterRole: string;
@@ -38,10 +39,10 @@ export interface Ticket {
   category: TicketCategory;
   priority: TicketPriority;
   status: TicketStatus;
-  sourcePageUrl?: string;
-  deviceInfo?: string;
-  attachments: string[];
-  resolutionSummary?: string;
+  sourcePageUrl?: string;  // URL halaman saat terjadi kendala
+  deviceInfo?: string;     // Browser / OS
+  attachments: string[];   // Array DataURL / URL gambar screenshot
+  resolutionSummary?: string; // Catatan solusi saat di-set Solved
   createdAt: string;
   updatedAt: string;
   solvedAt?: string;
@@ -55,7 +56,7 @@ export interface TicketMessage {
   senderRole: 'admin' | 'requester' | 'system';
   body: string;
   attachments?: string[];
-  isInternalNote: boolean;
+  isInternalNote: boolean; // Jika true, hanya terlihat oleh Admin di CRM
   createdAt: string;
 }
 
@@ -73,4 +74,13 @@ export interface DemoAccount {
   name: string;
   role: string;
   label: string;
+  fromUrl: string;
+}
+
+export interface HandoffParams {
+  app: string;
+  uid: string;
+  name: string;
+  role: string;
+  fromUrl?: string;
 }
