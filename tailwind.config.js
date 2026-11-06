@@ -17,6 +17,10 @@ export default {
         ink: '#16202B',
         'ink-muted': '#5B6672',
         'ink-faint': '#8A949E',
+        // Admin command rail (dark sidebar)
+        rail: '#1A1F27',
+        'rail-line': '#2A303A',
+        'rail-hover': '#252B35',
       },
     },
   },
