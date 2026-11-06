@@ -1,369 +1,107 @@
-import { pb, checkPbOnline, mapRecord, prepareRecord, onPbStatusChange } from './pbClient';
-import { VPS_APPS } from '../config/vpsAppsConfig';
-import { buildSeed } from '../config/seedData';
-import { newId, sortQueue } from './crmLogic';
+// Local store: the UI always reads from here. PocketBase sync lives in pbClient.ts.
+import { buildSeed, SEED_APPS } from '../config/seedData';
 import type { AppSource, CrmUser, Ticket, TicketMessage } from '../types/crm';
 
-const LS = {
-  apps: 'crm_v2_apps',
-  users: 'crm_v2_users',
-  tickets: 'crm_v2_tickets',
-  messages: 'crm_v2_messages',
+export interface CrmData {
+  apps: AppSource[];
+  users: CrmUser[];
+  tickets: Ticket[];
+  messages: TicketMessage[];
+}
+
+export type Collection = 'crm_users' | 'tickets' | 'ticket_messages';
+type Item = CrmUser | Ticket | TicketMessage;
+
+const LIST: Record<Collection, 'users' | 'tickets' | 'messages'> = {
+  crm_users: 'users',
+  tickets: 'tickets',
+  ticket_messages: 'messages',
 };
 
-function lsGet<T>(key: string): T[] {
+/** A change made locally that PocketBase has not confirmed yet. */
+export interface OutboxOp {
+  collection: Collection;
+  item: Item; // full record after the change
+  patch?: Record<string, unknown>; // present for updates: only the changed fields
+  asAdmin: boolean; // needs a PocketBase superuser session to be accepted
+}
+
+const DATA_KEY = 'vps-crm:data:v3';
+const OUTBOX_KEY = 'vps-crm:outbox:v3';
+
+function read<T>(key: string, fallback: () => T): T {
   try {
     const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T[]) : [];
+    return raw ? (JSON.parse(raw) as T) : fallback();
   } catch {
-    return [];
+    return fallback();
   }
 }
 
-function lsSet<T>(key: string, data: T[]): void {
+function write(key: string, value: unknown) {
   try {
-    localStorage.setItem(key, JSON.stringify(data));
+    localStorage.setItem(key, JSON.stringify(value));
   } catch (e) {
-    console.warn('localStorage write failed:', e);
+    // shortcut: screenshots are base64 in localStorage (~5 MB quota); past it, changes live in memory until reload.
+    console.warn('Penyimpanan browser penuh, perubahan hanya ada di memori sampai PocketBase aktif.', e);
   }
 }
 
-const nowIso = (): string => new Date().toISOString();
+const seed = (): CrmData => ({ apps: SEED_APPS, ...buildSeed() });
 
-export function seedIfEmpty(): void {
-  const hasTickets = lsGet<Ticket>(LS.tickets).length > 0;
-  const hasUsers = lsGet<CrmUser>(LS.users).length > 0;
-  if (hasTickets && hasUsers) return;
+let data = read<CrmData>(DATA_KEY, seed);
+let outbox = read<OutboxOp[]>(OUTBOX_KEY, () => []);
+const listeners = new Set<() => void>();
+const notify = () => listeners.forEach((fn) => fn());
 
-  const seed = buildSeed();
-  lsSet(LS.apps, VPS_APPS);
-  if (!hasUsers) lsSet(LS.users, seed.users);
-  if (!hasTickets) {
-    lsSet(LS.tickets, seed.tickets);
-    lsSet(LS.messages, seed.messages);
-  }
-}
+export const getData = () => data;
+export const getOutbox = () => outbox;
 
-export function resetSeedData(): void {
-  const seed = buildSeed();
-  lsSet(LS.apps, VPS_APPS);
-  lsSet(LS.users, seed.users);
-  lsSet(LS.tickets, seed.tickets);
-  lsSet(LS.messages, seed.messages);
-}
-
-/**
- * When PocketBase becomes online, push any local records that aren't in PocketBase yet.
- */
-export async function syncLocalToPocketBase(): Promise<void> {
-  const online = await checkPbOnline();
-  if (!online) return;
-
-  try {
-    const localUsers = lsGet<CrmUser>(LS.users);
-    const remoteUsers = await pb.collection('crm_users').getFullList();
-    const remoteUserKeys = new Set(remoteUsers.map((r) => r['composite_key'] as string));
-    for (const u of localUsers) {
-      if (u.systemRole === 'admin') continue;
-      if (!remoteUserKeys.has(u.compositeKey)) {
-        await pb
-          .collection('crm_users')
-          .create(prepareRecord('crm_users', u as unknown as Record<string, unknown>))
-          .catch(() => {});
-      }
-    }
-
-    const localTickets = lsGet<Ticket>(LS.tickets);
-    const remoteTickets = await pb.collection('tickets').getFullList();
-    const remoteNumbers = new Set(remoteTickets.map((r) => r['ticket_number'] as string));
-    for (const t of localTickets) {
-      if (!remoteNumbers.has(t.ticketNumber)) {
-        await pb
-          .collection('tickets')
-          .create(prepareRecord('tickets', t as unknown as Record<string, unknown>))
-          .catch(() => {});
-      }
-    }
-  } catch {
-    // Silent: PocketBase collections may not be initialized yet via npm run pb:init
-  }
-}
-
-onPbStatusChange((online) => {
-  if (online) {
-    syncLocalToPocketBase().catch(() => {});
-  }
-});
-
-// ── APPS ─────────────────────────────────────────────────────────────────────
-export async function getApps(): Promise<AppSource[]> {
-  if (await checkPbOnline()) {
-    try {
-      const records = await pb.collection('apps').getFullList({ sort: 'name' });
-      if (records.length > 0) {
-        const mapped = records.map((r) => mapRecord<AppSource>('apps', r));
-        lsSet(LS.apps, mapped);
-        return mapped;
-      }
-    } catch {
-      // fall through to local
-    }
-  }
-  const local = lsGet<AppSource>(LS.apps);
-  return local.length > 0 ? local : VPS_APPS;
-}
-
-// ── CRM USERS ────────────────────────────────────────────────────────────────
-export async function getUsers(): Promise<CrmUser[]> {
-  seedIfEmpty();
-  if (await checkPbOnline()) {
-    try {
-      const records = await pb.collection('crm_users').getFullList({ sort: '-created_at' });
-      if (records.length > 0) {
-        const mapped = records.map((r) => mapRecord<CrmUser>('crm_users', r));
-        lsSet(LS.users, mapped);
-        return mapped;
-      }
-    } catch {
-      // fall through
-    }
-  }
-  return lsGet<CrmUser>(LS.users).sort((a, b) => b.lastActiveAt.localeCompare(a.lastActiveAt));
-}
-
-export async function getUserByCompositeKey(compositeKey: string): Promise<CrmUser | null> {
-  seedIfEmpty();
-  if (await checkPbOnline()) {
-    try {
-      const escaped = compositeKey.replace(/"/g, '\\"');
-      const r = await pb.collection('crm_users').getFirstListItem(`composite_key="${escaped}"`);
-      return mapRecord<CrmUser>('crm_users', r);
-    } catch {
-      // fall through
-    }
-  }
-  const users = lsGet<CrmUser>(LS.users);
-  return users.find((u) => u.compositeKey === compositeKey) ?? null;
-}
-
-export async function upsertUser(
-  data: Omit<CrmUser, 'id' | 'createdAt' | 'lastActiveAt'>,
-): Promise<CrmUser> {
-  seedIfEmpty();
-  const existing = await getUserByCompositeKey(data.compositeKey);
-  const ts = nowIso();
-
-  if (await checkPbOnline()) {
-    try {
-      if (existing) {
-        const updatePayload = prepareRecord('crm_users', {
-          name: data.name || existing.name,
-          email: data.email ?? existing.email,
-          appRole: data.appRole || existing.appRole,
-          lastSeenUrl: data.lastSeenUrl ?? existing.lastSeenUrl,
-          lastActiveAt: ts,
-        });
-        const r = await pb.collection('crm_users').update(existing.id, updatePayload);
-        const mapped = mapRecord<CrmUser>('crm_users', r);
-        syncUserToLocal(mapped);
-        return mapped;
-      } else {
-        const full: CrmUser = {
-          ...data,
-          id: newId(),
-          createdAt: ts,
-          lastActiveAt: ts,
-        };
-        const r = await pb
-          .collection('crm_users')
-          .create(prepareRecord('crm_users', full as unknown as Record<string, unknown>));
-        const mapped = mapRecord<CrmUser>('crm_users', r);
-        syncUserToLocal(mapped);
-        return mapped;
-      }
-    } catch {
-      // fall through to localStorage
-    }
-  }
-
-  const users = lsGet<CrmUser>(LS.users);
-  if (existing) {
-    const updated: CrmUser = {
-      ...existing,
-      ...data,
-      name: data.name || existing.name,
-      appRole: data.appRole || existing.appRole,
-      lastSeenUrl: data.lastSeenUrl ?? existing.lastSeenUrl,
-      lastActiveAt: ts,
-    };
-    lsSet(
-      LS.users,
-      users.map((u) => (u.compositeKey === existing.compositeKey ? updated : u)),
-    );
-    return updated;
-  }
-
-  const created: CrmUser = {
-    ...data,
-    id: newId(),
-    createdAt: ts,
-    lastActiveAt: ts,
+export function subscribeStore(fn: () => void) {
+  listeners.add(fn);
+  return () => {
+    listeners.delete(fn);
   };
-  lsSet(LS.users, [created, ...users]);
-  return created;
 }
 
-function syncUserToLocal(user: CrmUser) {
-  const users = lsGet<CrmUser>(LS.users);
-  const exists = users.some((u) => u.compositeKey === user.compositeKey);
-  lsSet(
-    LS.users,
-    exists ? users.map((u) => (u.compositeKey === user.compositeKey ? user : u)) : [user, ...users],
-  );
+function commit(next: CrmData) {
+  data = next;
+  write(DATA_KEY, data);
+  notify();
 }
 
-// ── TICKETS ──────────────────────────────────────────────────────────────────
-export async function getTickets(): Promise<Ticket[]> {
-  seedIfEmpty();
-  if (await checkPbOnline()) {
-    try {
-      const records = await pb.collection('tickets').getFullList({ sort: '-created_at' });
-      if (records.length > 0) {
-        const mapped = records.map((r) => mapRecord<Ticket>('tickets', r));
-        lsSet(LS.tickets, mapped);
-        return sortQueue(mapped);
-      }
-    } catch {
-      // fall through
-    }
+export function upsertLocal(collection: Collection, item: Item) {
+  const key = LIST[collection];
+  const list = data[key] as Item[];
+  const exists = list.some((x) => x.id === item.id);
+  commit({ ...data, [key]: exists ? list.map((x) => (x.id === item.id ? item : x)) : [...list, item] });
+}
+
+export function removeLocal(collection: Collection, id: string) {
+  const key = LIST[collection];
+  commit({ ...data, [key]: (data[key] as Item[]).filter((x) => x.id !== id) });
+}
+
+/** Replace everything with what PocketBase returned, then re-apply changes it has not accepted yet. */
+export function replaceAll(next: CrmData) {
+  const merged = { ...next, apps: next.apps.length ? next.apps : data.apps };
+  for (const op of outbox) {
+    const key = LIST[op.collection];
+    const list = merged[key] as Item[];
+    merged[key] = [...list.filter((x) => x.id !== op.item.id), op.item] as never;
   }
-  return sortQueue(lsGet<Ticket>(LS.tickets));
+  commit(merged);
 }
 
-export async function getTicket(id: string): Promise<Ticket | null> {
-  seedIfEmpty();
-  if (await checkPbOnline()) {
-    try {
-      const r = await pb.collection('tickets').getOne(id);
-      return mapRecord<Ticket>('tickets', r);
-    } catch {
-      // fall through
-    }
-  }
-  const tickets = lsGet<Ticket>(LS.tickets);
-  return tickets.find((t) => t.id === id || t.ticketNumber === id) ?? null;
+export function setOutbox(next: OutboxOp[]) {
+  outbox = next;
+  write(OUTBOX_KEY, outbox);
+  notify();
 }
 
-export async function createTicket(
-  data: Omit<Ticket, 'id' | 'createdAt' | 'updatedAt'>,
-): Promise<Ticket> {
-  seedIfEmpty();
-  const ts = nowIso();
-  const ticket: Ticket = {
-    ...data,
-    id: newId(),
-    createdAt: ts,
-    updatedAt: ts,
-  };
+export const enqueue = (op: OutboxOp) => setOutbox([...outbox, op]);
 
-  if (await checkPbOnline()) {
-    try {
-      const r = await pb
-        .collection('tickets')
-        .create(prepareRecord('tickets', ticket as unknown as Record<string, unknown>));
-      const mapped = mapRecord<Ticket>('tickets', r);
-      const local = lsGet<Ticket>(LS.tickets);
-      lsSet(LS.tickets, [mapped, ...local]);
-      return mapped;
-    } catch {
-      // fall through
-    }
-  }
-
-  const tickets = lsGet<Ticket>(LS.tickets);
-  lsSet(LS.tickets, [ticket, ...tickets]);
-  return ticket;
-}
-
-export async function updateTicket(id: string, patch: Partial<Ticket>): Promise<Ticket> {
-  seedIfEmpty();
-  const ts = nowIso();
-  const fullPatch: Partial<Ticket> = { ...patch, updatedAt: ts };
-
-  if (await checkPbOnline()) {
-    try {
-      const r = await pb
-        .collection('tickets')
-        .update(id, prepareRecord('tickets', fullPatch as unknown as Record<string, unknown>));
-      const mapped = mapRecord<Ticket>('tickets', r);
-      const local = lsGet<Ticket>(LS.tickets);
-      lsSet(
-        LS.tickets,
-        local.map((t) => (t.id === id ? { ...t, ...mapped } : t)),
-      );
-      return mapped;
-    } catch {
-      // fall through
-    }
-  }
-
-  const tickets = lsGet<Ticket>(LS.tickets);
-  const idx = tickets.findIndex((t) => t.id === id);
-  if (idx === -1) throw new Error(`Tiket ${id} tidak ditemukan`);
-  const updated: Ticket = { ...tickets[idx], ...fullPatch };
-  tickets[idx] = updated;
-  lsSet(LS.tickets, tickets);
-  return updated;
-}
-
-// ── MESSAGES ─────────────────────────────────────────────────────────────────
-export async function getMessages(ticketId: string): Promise<TicketMessage[]> {
-  seedIfEmpty();
-  if (await checkPbOnline()) {
-    try {
-      const escaped = ticketId.replace(/"/g, '\\"');
-      const records = await pb.collection('ticket_messages').getFullList({
-        filter: `ticket_id="${escaped}"`,
-        sort: 'created_at',
-      });
-      if (records.length > 0) {
-        return records.map((r) => mapRecord<TicketMessage>('ticket_messages', r));
-      }
-    } catch {
-      // fall through
-    }
-  }
-  return lsGet<TicketMessage>(LS.messages)
-    .filter((m) => m.ticketId === ticketId)
-    .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
-}
-
-export async function addMessage(
-  data: Omit<TicketMessage, 'id' | 'createdAt'>,
-): Promise<TicketMessage> {
-  seedIfEmpty();
-  const msg: TicketMessage = {
-    ...data,
-    attachments: data.attachments ?? [],
-    id: newId(),
-    createdAt: nowIso(),
-  };
-
-  if (await checkPbOnline()) {
-    try {
-      const r = await pb
-        .collection('ticket_messages')
-        .create(prepareRecord('ticket_messages', msg as unknown as Record<string, unknown>));
-      const mapped = mapRecord<TicketMessage>('ticket_messages', r);
-      const local = lsGet<TicketMessage>(LS.messages);
-      lsSet(LS.messages, [...local, mapped]);
-      return mapped;
-    } catch {
-      // fall through
-    }
-  }
-
-  const messages = lsGet<TicketMessage>(LS.messages);
-  lsSet(LS.messages, [...messages, msg]);
-  return msg;
+export function resetToSeed() {
+  setOutbox([]);
+  commit(seed());
 }

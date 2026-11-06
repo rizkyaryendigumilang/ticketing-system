@@ -1,133 +1,90 @@
-import { ADMIN_EMAIL, DEMO_ACCOUNTS, VPS_APPS } from '../config/vpsAppsConfig';
-import { compositeKeyOf, parseHandoff, safeHttpUrl } from './crmLogic';
-import { checkPbOnline, pb } from './pbClient';
-import { getUserByCompositeKey, upsertUser } from './storageService';
+// Sessions and SSO handoff. The Superadmin session and the requester session are stored separately,
+// so the simulation bar can switch between both views with one click.
+import { DEMO_ADMIN, getApp } from '../config/vpsAppsConfig';
+import { compositeKeyOf, userIdFor } from './crmLogic';
+import { getConnection, pb, saveRecord, startSync } from './pbClient';
+import { getData } from './storageService';
 import type { CrmUser, HandoffParams } from '../types/crm';
 
-const SESSION_KEY = 'crm_v2_session';
+const ADMIN_KEY = 'vps-crm:admin-session';
+const REQUESTER_KEY = 'vps-crm:requester-id';
 
-export function getCurrentUser(): CrmUser | null {
+export interface AdminSession {
+  name: string;
+  email: string;
+  /** 'demo' = signed in while PocketBase was offline; admin changes wait until a real login. */
+  mode: 'pocketbase' | 'demo';
+}
+
+export function getAdminSession(): AdminSession | null {
   try {
-    const raw = localStorage.getItem(SESSION_KEY);
-    return raw ? (JSON.parse(raw) as CrmUser) : null;
+    return JSON.parse(localStorage.getItem(ADMIN_KEY) ?? 'null') as AdminSession | null;
   } catch {
     return null;
   }
 }
 
-export function saveSession(user: CrmUser): void {
-  localStorage.setItem(SESSION_KEY, JSON.stringify(user));
-}
+export const getRequesterId = () => localStorage.getItem(REQUESTER_KEY);
 
-export function logout(): void {
-  localStorage.removeItem(SESSION_KEY);
-  try {
-    pb.authStore.clear();
-  } catch {
-    // ignore
-  }
-}
-
-export function buildSuperadminUser(email = ADMIN_EMAIL): CrmUser {
-  return {
-    id: 'usrsuperadmin00',
-    compositeKey: 'system:admin',
-    appId: 'system',
-    externalUid: 'admin',
-    name: 'Superadmin VPS',
-    email,
-    appRole: 'VPS Owner & Superadmin',
-    systemRole: 'admin',
-    createdAt: '2026-09-01T00:00:00.000Z',
-    lastActiveAt: new Date().toISOString(),
-  };
-}
-
-export async function loginAsAdmin(email: string, password: string): Promise<CrmUser> {
-  const trimmedEmail = email.trim().toLowerCase();
-  if (await checkPbOnline()) {
+export async function loginAdmin(email: string, password: string): Promise<AdminSession> {
+  await startSync();
+  const cleanEmail = email.trim().toLowerCase();
+  let session: AdminSession;
+  if (getConnection() === 'online') {
     try {
-      await pb.collection('_superusers').authWithPassword(trimmedEmail, password);
-      const admin = buildSuperadminUser(trimmedEmail);
-      saveSession(admin);
-      return admin;
+      await pb.collection('_superusers').authWithPassword(cleanEmail, password);
     } catch {
-      // fall through to local credential check
+      throw new Error('Email atau kata sandi superuser PocketBase salah.');
     }
+    session = { name: 'Superadmin', email: cleanEmail, mode: 'pocketbase' };
+  } else {
+    if (cleanEmail !== DEMO_ADMIN.email || password !== DEMO_ADMIN.password) {
+      throw new Error(`PocketBase belum aktif. Mode demo hanya menerima ${DEMO_ADMIN.email} dengan kata sandi demo.`);
+    }
+    session = { name: 'Superadmin', email: cleanEmail, mode: 'demo' };
   }
-
-  if (trimmedEmail === ADMIN_EMAIL && password === 'Admin@CRM123!') {
-    const admin = buildSuperadminUser(trimmedEmail);
-    saveSession(admin);
-    return admin;
-  }
-
-  throw new Error('Email atau kata sandi Superadmin tidak sesuai.');
+  localStorage.setItem(ADMIN_KEY, JSON.stringify(session));
+  return session;
 }
 
-export function switchToSuperadmin(): CrmUser {
-  const admin = buildSuperadminUser();
-  saveSession(admin);
-  return admin;
+export function logoutAdmin() {
+  pb.authStore.clear();
+  localStorage.removeItem(ADMIN_KEY);
 }
 
-export function validateHandoffQuery(search: URLSearchParams) {
-  return parseHandoff(
-    search,
-    VPS_APPS.map((a) => a.id),
-  );
-}
+/** Just-in-time provisioning: find the user by "{app}:{uid}", create it if missing, then sign in. */
+export async function handoff(params: HandoffParams): Promise<CrmUser> {
+  await startSync(); // load PocketBase data first, so a known user is updated instead of re-created
+  const compositeKey = compositeKeyOf(params.app, params.uid);
+  const existing = getData().users.find((u) => u.compositeKey === compositeKey);
+  const lastSeenUrl = params.fromUrl ?? existing?.lastSeenUrl ?? getApp(params.app)?.appUrl;
+  const ts = new Date().toISOString();
 
-export async function processHandoff(params: HandoffParams): Promise<CrmUser> {
-  const appId = params.app.trim();
-  const externalUid = params.uid.trim();
-  const appSource = VPS_APPS.find((a) => a.id === appId);
-  if (!appSource) {
-    throw new Error(
-      `Aplikasi "${appId}" tidak terdaftar. Slug yang valid: ${VPS_APPS.map((a) => a.id).join(', ')}`,
-    );
+  let user: CrmUser;
+  if (existing) {
+    const patch = { name: params.name, appRole: params.role, lastSeenUrl, lastActiveAt: ts };
+    user = { ...existing, ...patch };
+    saveRecord('crm_users', user, patch);
+  } else {
+    user = {
+      id: userIdFor(compositeKey),
+      compositeKey,
+      appId: params.app,
+      externalUid: params.uid,
+      name: params.name,
+      email: params.uid.includes('@') ? params.uid : undefined,
+      appRole: params.role,
+      systemRole: 'requester',
+      lastSeenUrl,
+      createdAt: ts,
+      lastActiveAt: ts,
+    };
+    saveRecord('crm_users', user);
   }
-  if (!externalUid) {
-    throw new Error('Parameter uid wajib diisi.');
-  }
-
-  const compositeKey = compositeKeyOf(appId, externalUid);
-  const existing = await getUserByCompositeKey(compositeKey);
-  const cleanUrl = safeHttpUrl(params.fromUrl) ?? existing?.lastSeenUrl ?? appSource.appUrl;
-
-  const user = await upsertUser({
-    compositeKey,
-    appId,
-    externalUid,
-    name: params.name?.trim() || existing?.name || externalUid,
-    email: externalUid.includes('@') ? externalUid : existing?.email,
-    appRole: params.role?.trim() || existing?.appRole || 'User',
-    systemRole: 'requester',
-    lastSeenUrl: cleanUrl,
-  });
-
-  saveSession(user);
+  localStorage.setItem(REQUESTER_KEY, user.id);
   return user;
 }
 
-export async function loginAsDemo(compositeKey: string): Promise<CrmUser> {
-  const demo = DEMO_ACCOUNTS.find((d) => d.compositeKey === compositeKey);
-  if (demo) {
-    return processHandoff({
-      app: demo.appId,
-      uid: demo.uid,
-      name: demo.name,
-      role: demo.role,
-      fromUrl: demo.fromUrl,
-    });
-  }
-
-  const existing = await getUserByCompositeKey(compositeKey);
-  if (!existing) {
-    throw new Error(`Akun demo ${compositeKey} tidak ditemukan.`);
-  }
-  saveSession(existing);
-  return existing;
+export function logoutRequester() {
+  localStorage.removeItem(REQUESTER_KEY);
 }
-
-export type { HandoffParams };

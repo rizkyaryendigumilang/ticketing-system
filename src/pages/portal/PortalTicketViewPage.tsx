@@ -1,75 +1,34 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import {
-  ArrowLeft,
-  CheckCircle2,
-  ExternalLink,
-  Send,
-} from 'lucide-react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowLeft, CheckCircle2, ExternalLink, Send } from 'lucide-react';
 import { CATEGORY_LABEL, STATUS_LABEL } from '../../config/vpsAppsConfig';
 import { useCrm } from '../../context/CrmContext';
 import { timeAgo, visibleMessages } from '../../services/crmLogic';
-import type { Ticket, TicketMessage, TicketStatus } from '../../types/crm';
+import { markSolvedByRequester, replyToTicket } from '../../services/ticketCrmService';
+import { useParams } from 'react-router-dom';
+import type { TicketStatus } from '../../types/crm';
 import { PriorityBadge } from '../../components/common/PriorityBadge';
 import { ScreenshotUploader } from '../../components/common/ScreenshotUploader';
 import { StatusBadge } from '../../components/common/StatusBadge';
 
-const STEPS: TicketStatus[] = [
-  'open',
-  'in_progress',
-  'waiting_on_user',
-  'solved',
-];
+const STEPS: TicketStatus[] = ['open', 'in_progress', 'waiting_on_user', 'solved'];
 
 export function PortalTicketViewPage() {
   const { id } = useParams<{ id: string }>();
-  const {
-    currentUser,
-    getTicket,
-    getMessages,
-    sendMessage,
-    markSolvedByUser,
-  } = useCrm();
+  const { data, requester, requesterActor } = useCrm();
 
-  const [ticket, setTicket] = useState<Ticket | null>(null);
-  const [messages, setMessages] = useState<TicketMessage[]>([]);
   const [replyBody, setReplyBody] = useState('');
   const [attachments, setAttachments] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
 
-  const loadTicket = useCallback(async () => {
-    if (!id) return;
-    const t = await getTicket(id);
-    setTicket(t);
-    if (t) {
-      const allMsgs = await getMessages(t.id);
-      // Strictly strip internal admin notes from requester view
-      setMessages(visibleMessages(allMsgs, 'requester'));
-    }
-    setLoading(false);
-  }, [id, getTicket, getMessages]);
+  const ticket = data.tickets.find((t) => t.id === id) ?? null;
 
-  useEffect(() => {
-    setLoading(true);
-    loadTicket();
-  }, [loadTicket]);
-
-  if (loading) {
-    return (
-      <div className="py-8 text-xs text-ink-muted">
-        Memuat detail laporan...
-      </div>
-    );
-  }
-
-  if (!ticket) {
+  // Security: requester can only view their own ticket
+  if (!ticket || !requester || (ticket.requesterId !== requester.id && ticket.requesterUid !== requester.externalUid)) {
     return (
       <div className="rounded border border-line bg-panel p-6 text-center">
-        <p className="text-sm font-semibold text-ink">
-          Tiket tidak ditemukan.
-        </p>
+        <p className="text-sm font-semibold text-ink">Tiket tidak ditemukan.</p>
         <Link
           to="/portal"
           className="mt-3 inline-flex items-center gap-1.5 rounded bg-ink px-3 py-1.5 text-xs font-semibold text-white"
@@ -81,34 +40,28 @@ export function PortalTicketViewPage() {
     );
   }
 
-  const isSolved = ticket.status === 'solved' || ticket.status === 'closed';
-  const currentStepIdx =
-    ticket.status === 'closed'
-      ? 3
-      : Math.max(0, STEPS.indexOf(ticket.status));
+  const messages = visibleMessages(
+    data.messages.filter((m) => m.ticketId === ticket.id),
+    'requester',
+  );
 
-  const handleReply = async (e: React.FormEvent) => {
+  const isSolved = ticket.status === 'solved' || ticket.status === 'closed';
+  const currentStepIdx = ticket.status === 'closed' ? 3 : Math.max(0, STEPS.indexOf(ticket.status));
+
+  const handleReply = (e: React.FormEvent) => {
     e.preventDefault();
     if (!replyBody.trim() && attachments.length === 0) return;
+    if (!requesterActor) return;
     setSubmitting(true);
-    try {
-      await sendMessage(ticket.id, replyBody, false, attachments);
-      setReplyBody('');
-      setAttachments([]);
-      await loadTicket();
-    } finally {
-      setSubmitting(false);
-    }
+    replyToTicket(ticket, requesterActor, replyBody, { attachments });
+    setReplyBody('');
+    setAttachments([]);
+    setSubmitting(false);
   };
 
-  const handleMarkSolved = async () => {
-    setSubmitting(true);
-    try {
-      await markSolvedByUser(ticket.id);
-      await loadTicket();
-    } finally {
-      setSubmitting(false);
-    }
+  const handleMarkSolved = () => {
+    if (!requesterActor) return;
+    markSolvedByRequester(ticket, requesterActor);
   };
 
   return (
@@ -140,18 +93,12 @@ export function PortalTicketViewPage() {
       <div className="rounded border border-line bg-panel p-4">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-sm font-bold text-ink">
-              {ticket.ticketNumber}
-            </span>
+            <span className="font-mono text-sm font-bold text-ink">{ticket.ticketNumber}</span>
             <StatusBadge status={ticket.status} />
             <PriorityBadge priority={ticket.priority} />
-            <span className="text-xs text-ink-muted">
-              · {CATEGORY_LABEL[ticket.category]}
-            </span>
+            <span className="text-xs text-ink-muted">· {CATEGORY_LABEL[ticket.category]}</span>
           </div>
-          <span className="font-mono text-xs text-ink-muted">
-            Dilaporkan {timeAgo(ticket.createdAt)}
-          </span>
+          <span className="font-mono text-xs text-ink-muted">Dilaporkan {timeAgo(ticket.createdAt)}</span>
         </div>
 
         {/* 4-Step Lifecycle Indicator */}
@@ -163,20 +110,12 @@ export function PortalTicketViewPage() {
               <div key={step} className="space-y-1">
                 <div
                   className={`h-1.5 w-full rounded-full ${
-                    reached
-                      ? step === 'solved' || isSolved
-                        ? 'bg-emerald-600'
-                        : 'bg-ink'
-                      : 'bg-line'
+                    reached ? (step === 'solved' || isSolved ? 'bg-emerald-600' : 'bg-ink') : 'bg-line'
                   }`}
                 />
                 <div
                   className={`text-[11px] ${
-                    isCurrent
-                      ? 'font-semibold text-ink'
-                      : reached
-                        ? 'text-ink-muted'
-                        : 'text-ink-faint'
+                    isCurrent ? 'font-semibold text-ink' : reached ? 'text-ink-muted' : 'text-ink-faint'
                   }`}
                 >
                   {STATUS_LABEL[step]}
@@ -187,7 +126,7 @@ export function PortalTicketViewPage() {
         </div>
       </div>
 
-      {/* Resolution Banner if Solved */}
+      {/* Resolution Banner */}
       {ticket.resolutionSummary && (
         <div className="rounded border border-emerald-300 bg-emerald-50 p-4">
           <div className="flex items-center gap-2 text-xs font-semibold text-emerald-900">
@@ -235,11 +174,7 @@ export function PortalTicketViewPage() {
                   onClick={() => setLightboxImg(src)}
                   className="overflow-hidden rounded border border-line bg-subtle"
                 >
-                  <img
-                    src={src}
-                    alt={`Screenshot ${idx + 1}`}
-                    className="h-20 w-full object-cover"
-                  />
+                  <img src={src} alt={`Screenshot ${idx + 1}`} className="h-20 w-full object-cover" />
                 </button>
               ))}
             </div>
@@ -262,26 +197,17 @@ export function PortalTicketViewPage() {
             messages.map((m) => {
               if (m.senderRole === 'system') {
                 return (
-                  <div
-                    key={m.id}
-                    className="bg-subtle/40 px-4 py-2 font-mono text-[11px] text-ink-muted"
-                  >
+                  <div key={m.id} className="bg-subtle/40 px-4 py-2 font-mono text-[11px] text-ink-muted">
                     {m.body} · {timeAgo(m.createdAt)}
                   </div>
                 );
               }
-
               const isFromAdmin = m.senderRole === 'admin';
               return (
-                <div
-                  key={m.id}
-                  className={`p-4 ${isFromAdmin ? 'bg-sky-50/40' : 'bg-panel'}`}
-                >
+                <div key={m.id} className={`p-4 ${isFromAdmin ? 'bg-sky-50/40' : 'bg-panel'}`}>
                   <div className="flex items-center justify-between gap-2 text-xs">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-ink">
-                        {m.senderName}
-                      </span>
+                      <span className="font-semibold text-ink">{m.senderName}</span>
                       <span
                         className={`rounded border px-1.5 py-0.5 text-[10px] font-medium ${
                           isFromAdmin
@@ -289,20 +215,12 @@ export function PortalTicketViewPage() {
                             : 'border-line bg-subtle text-ink-muted'
                         }`}
                       >
-                        {isFromAdmin
-                          ? 'Superadmin Support'
-                          : currentUser?.appRole ?? 'Pelapor'}
+                        {isFromAdmin ? 'Superadmin Support' : requester.appRole}
                       </span>
                     </div>
-                    <span className="font-mono text-[11px] text-ink-faint">
-                      {timeAgo(m.createdAt)}
-                    </span>
+                    <span className="font-mono text-[11px] text-ink-faint">{timeAgo(m.createdAt)}</span>
                   </div>
-
-                  <p className="mt-2 whitespace-pre-wrap text-xs leading-relaxed text-ink">
-                    {m.body}
-                  </p>
-
+                  <p className="mt-2 whitespace-pre-wrap text-xs leading-relaxed text-ink">{m.body}</p>
                   {m.attachments && m.attachments.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-2">
                       {m.attachments.map((src, i) => (
@@ -312,11 +230,7 @@ export function PortalTicketViewPage() {
                           onClick={() => setLightboxImg(src)}
                           className="overflow-hidden rounded border border-line"
                         >
-                          <img
-                            src={src}
-                            alt={`Lampiran ${i + 1}`}
-                            className="h-16 w-24 object-cover"
-                          />
+                          <img src={src} alt={`Lampiran ${i + 1}`} className="h-16 w-24 object-cover" />
                         </button>
                       ))}
                     </div>
@@ -329,15 +243,9 @@ export function PortalTicketViewPage() {
       </div>
 
       {/* Reply Form */}
-      <form
-        onSubmit={handleReply}
-        className="space-y-3 rounded border border-line bg-panel p-4"
-      >
+      <form onSubmit={handleReply} className="space-y-3 rounded border border-line bg-panel p-4">
         <div className="flex items-center justify-between">
-          <label
-            htmlFor="portal-reply"
-            className="text-xs font-semibold text-ink"
-          >
+          <label htmlFor="portal-reply" className="text-xs font-semibold text-ink">
             {isSolved
               ? 'Masih ada kendala? Balas untuk membuka kembali tiket ini'
               : 'Balas Pesan / Tambah Info Tambahan'}
@@ -353,18 +261,12 @@ export function PortalTicketViewPage() {
           className="w-full rounded border border-line bg-canvas p-3 text-xs leading-relaxed text-ink placeholder:text-ink-faint focus:border-ink focus:bg-panel focus:outline-none"
         />
 
-        <ScreenshotUploader
-          attachments={attachments}
-          onChange={setAttachments}
-          compact
-        />
+        <ScreenshotUploader attachments={attachments} onChange={setAttachments} />
 
         <div className="flex justify-end">
           <button
             type="submit"
-            disabled={
-              submitting || (!replyBody.trim() && attachments.length === 0)
-            }
+            disabled={submitting || (!replyBody.trim() && attachments.length === 0)}
             className="inline-flex items-center gap-1.5 rounded bg-ink px-4 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-40"
           >
             <Send className="h-3.5 w-3.5" />
@@ -373,6 +275,7 @@ export function PortalTicketViewPage() {
         </div>
       </form>
 
+      {/* Lightbox */}
       {lightboxImg && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"

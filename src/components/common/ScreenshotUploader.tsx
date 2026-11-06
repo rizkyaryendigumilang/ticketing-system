@@ -1,194 +1,118 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Clipboard, ImagePlus, Trash2, ZoomIn, X } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ImagePlus, X } from 'lucide-react';
+
+const MAX_EDGE = 1600;
+
+/** Downscale to max 1600 px JPEG so screenshots stay small enough for localStorage and upload. */
+async function compress(file: File): Promise<string> {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, MAX_EDGE / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  const ctx = canvas.getContext('2d')!;
+  ctx.fillStyle = '#fff'; // JPEG has no transparency
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL('image/jpeg', 0.85);
+}
+
+const images = (files: FileList | File[] | null | undefined) =>
+  Array.from(files ?? []).filter((f) => f.type.startsWith('image/'));
 
 interface Props {
   attachments: string[];
   onChange: (attachments: string[]) => void;
-  maxFiles?: number;
-  compact?: boolean;
-  enableGlobalPaste?: boolean;
+  max?: number;
 }
 
-function fileToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-export function ScreenshotUploader({
-  attachments,
-  onChange,
-  maxFiles = 5,
-  compact = false,
-  enableGlobalPaste = false,
-}: Props) {
+/** File picker, drag & drop, and Ctrl+V anywhere inside the surrounding form. */
+export function ScreenshotUploader({ attachments, onChange, max = 5 }: Props) {
+  const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [pasteNotice, setPasteNotice] = useState<string | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const latest = useRef({ attachments, onChange });
+  latest.current = { attachments, onChange };
 
-  const addFiles = useCallback(
+  const add = useCallback(
     async (files: File[]) => {
-      const images = files.filter((f) => f.type.startsWith('image/'));
-      if (images.length === 0) return;
-      const slots = Math.max(0, maxFiles - attachments.length);
-      if (slots === 0) return;
-      const encoded = await Promise.all(images.slice(0, slots).map(fileToDataUrl));
-      onChange([...attachments, ...encoded]);
-      setPasteNotice(`${encoded.length} screenshot dilampirkan`);
-      setTimeout(() => setPasteNotice(null), 2500);
+      const { attachments: current, onChange: update } = latest.current;
+      const picked = files.slice(0, max - current.length);
+      if (picked.length) update([...current, ...(await Promise.all(picked.map(compress)))]);
     },
-    [attachments, maxFiles, onChange],
+    [max],
   );
 
   useEffect(() => {
-    if (!enableGlobalPaste) return;
-    const onWindowPaste = (e: ClipboardEvent) => {
-      const items = Array.from(e.clipboardData?.items ?? []);
-      const imgFiles = items
-        .filter((item) => item.type.startsWith('image/'))
-        .map((item) => item.getAsFile())
-        .filter((f): f is File => f !== null);
-      if (imgFiles.length > 0) {
-        addFiles(imgFiles);
+    const target = rootRef.current?.closest('form') ?? rootRef.current;
+    if (!target) return;
+    const onPaste = (e: Event) => {
+      const files = images((e as ClipboardEvent).clipboardData?.files);
+      if (files.length) {
+        e.preventDefault();
+        void add(files);
       }
     };
-    window.addEventListener('paste', onWindowPaste);
-    return () => window.removeEventListener('paste', onWindowPaste);
-  }, [enableGlobalPaste, addFiles]);
-
-  const handlePaste = async (e: React.ClipboardEvent) => {
-    const items = Array.from(e.clipboardData.items);
-    const imgFiles = items
-      .filter((item) => item.type.startsWith('image/'))
-      .map((item) => item.getAsFile())
-      .filter((f): f is File => f !== null);
-    if (imgFiles.length > 0) {
-      await addFiles(imgFiles);
-    }
-  };
-
-  const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []);
-    await addFiles(files);
-    if (inputRef.current) inputRef.current.value = '';
-  };
-
-  const handleDrop = async (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    await addFiles(Array.from(e.dataTransfer.files));
-  };
-
-  const removeAt = (idx: number) => {
-    onChange(attachments.filter((_, i) => i !== idx));
-  };
-
-  const isFull = attachments.length >= maxFiles;
+    target.addEventListener('paste', onPaste);
+    return () => target.removeEventListener('paste', onPaste);
+  }, [add]);
 
   return (
-    <div className="space-y-2.5" onPaste={handlePaste}>
+    <div ref={rootRef} className="space-y-2">
+      {attachments.length < max && (
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragging(false);
+            void add(images(e.dataTransfer.files));
+          }}
+          className={`flex w-full items-center gap-2 rounded-md border border-dashed px-3 py-2.5 text-left text-sm text-ink-muted ${
+            dragging ? 'border-ink bg-subtle' : 'border-line-strong hover:border-ink'
+          }`}
+        >
+          <ImagePlus className="h-4 w-4 shrink-0" />
+          <span>
+            Pilih atau tarik screenshot ke sini, atau tekan <kbd className="font-mono text-xs">Ctrl+V</kbd>.
+          </span>
+          <span className="ml-auto text-xs">
+            {attachments.length}/{max}
+          </span>
+        </button>
+      )}
       <input
         ref={inputRef}
         type="file"
         accept="image/*"
         multiple
-        className="hidden"
-        onChange={handleFileInput}
+        hidden
+        onChange={(e) => {
+          void add(images(e.target.files));
+          e.target.value = '';
+        }}
       />
 
-      {!isFull && (
-        <div
-          onClick={() => inputRef.current?.click()}
-          onDragOver={(e) => {
-            e.preventDefault();
-            setIsDragging(true);
-          }}
-          onDragLeave={() => setIsDragging(false)}
-          onDrop={handleDrop}
-          className={`cursor-pointer rounded border border-dashed transition-colors ${
-            compact ? 'px-3 py-2' : 'px-4 py-3.5'
-          } ${
-            isDragging
-              ? 'border-ink bg-subtle'
-              : 'border-line-strong bg-panel hover:border-ink/50 hover:bg-subtle/60'
-          }`}
-        >
-          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-ink-muted">
-            <span className="inline-flex items-center gap-2 font-medium text-ink">
-              <ImagePlus className="h-4 w-4 text-ink-muted" />
-              Pilih gambar screenshot atau tarik ke sini
-            </span>
-            <span className="inline-flex items-center gap-1 rounded bg-subtle px-2 py-0.5 font-mono text-[11px] text-ink-muted">
-              <Clipboard className="h-3 w-3" />
-              Paste Ctrl+V aktif ({attachments.length}/{maxFiles})
-            </span>
-          </div>
-        </div>
-      )}
-
-      {pasteNotice && (
-        <p className="text-xs font-medium text-emerald-700">{pasteNotice}</p>
-      )}
-
       {attachments.length > 0 && (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {attachments.map((src, idx) => (
-            <div
-              key={idx}
-              className="group relative overflow-hidden rounded border border-line bg-subtle"
-            >
-              <img
-                src={src}
-                alt={`Lampiran ${idx + 1}`}
-                className="h-20 w-full object-cover cursor-pointer"
-                onClick={() => setPreviewUrl(src)}
-              />
-              <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-black/65 px-2 py-1 text-[11px] text-white opacity-0 transition-opacity group-hover:opacity-100">
-                <button
-                  type="button"
-                  onClick={() => setPreviewUrl(src)}
-                  className="inline-flex items-center gap-1 hover:underline"
-                >
-                  <ZoomIn className="h-3 w-3" />
-                  Perbesar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => removeAt(idx)}
-                  className="text-red-300 hover:text-red-200"
-                  title="Hapus screenshot"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              </div>
+        <div className="flex flex-wrap gap-2">
+          {attachments.map((src, i) => (
+            <div key={i} className="relative">
+              <img src={src} alt={`Screenshot ${i + 1}`} className="h-16 w-24 rounded-md border border-line object-cover" />
+              <button
+                type="button"
+                onClick={() => onChange(attachments.filter((_, j) => j !== i))}
+                className="absolute -right-1.5 -top-1.5 rounded-full border border-line bg-panel p-0.5 text-ink-muted hover:text-red-700"
+                aria-label={`Hapus screenshot ${i + 1}`}
+              >
+                <X className="h-3 w-3" />
+              </button>
             </div>
           ))}
-        </div>
-      )}
-
-      {previewUrl && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
-          onClick={() => setPreviewUrl(null)}
-        >
-          <div className="relative max-h-[90vh] max-w-4xl">
-            <button
-              type="button"
-              onClick={() => setPreviewUrl(null)}
-              className="absolute -top-9 right-0 inline-flex items-center gap-1 text-xs text-white/90 hover:text-white"
-            >
-              <X className="h-4 w-4" /> Tutup
-            </button>
-            <img
-              src={previewUrl}
-              alt="Preview screenshot"
-              className="max-h-[85vh] max-w-full rounded border border-white/20 object-contain"
-            />
-          </div>
         </div>
       )}
     </div>

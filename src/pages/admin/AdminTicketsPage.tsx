@@ -1,35 +1,32 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Columns3, Table2 } from 'lucide-react';
+import { VPS_APPS } from '../../config/vpsAppsConfig';
 import { filterTickets, sortQueue } from '../../services/crmLogic';
+import { changeTicket } from '../../services/ticketCrmService';
 import { useCrm } from '../../context/CrmContext';
 import type { TicketPriority, TicketStatus } from '../../types/crm';
 import { TicketInboxTable } from '../../components/crm-admin/TicketInboxTable';
 import { TicketKanbanBoard } from '../../components/crm-admin/TicketKanbanBoard';
 
 export function AdminTicketsPage() {
-  const { tickets, updateStatus } = useCrm();
+  const { data, adminActor } = useCrm();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [viewMode, setViewMode] = useState<'table' | 'kanban'>(
     searchParams.get('view') === 'kanban' ? 'kanban' : 'table',
   );
-  const [selectedApp, setSelectedApp] = useState<string>(
-    searchParams.get('app') ?? 'all',
+  const [selectedApp, setSelectedApp] = useState<string>(searchParams.get('app') ?? 'all');
+  const [selectedStatus, setSelectedStatus] = useState<TicketStatus | 'active' | 'all'>(
+    (searchParams.get('status') as TicketStatus | 'active' | 'all') ?? 'all',
   );
-  const [selectedStatus, setSelectedStatus] = useState<
-    TicketStatus | 'active' | 'all'
-  >((searchParams.get('status') as TicketStatus | 'active' | 'all') ?? 'all');
-  const [selectedPriority, setSelectedPriority] = useState<
-    TicketPriority | 'all'
-  >('all');
+  const [selectedPriority, setSelectedPriority] = useState<TicketPriority | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const appParam = searchParams.get('app');
-    if (appParam) setSelectedApp(appParam);
-    else setSelectedApp('all');
+    setSelectedApp(appParam ?? 'all');
   }, [searchParams]);
 
   const handleAppChange = (appId: string) => {
@@ -40,21 +37,20 @@ export function AdminTicketsPage() {
     setSearchParams(next, { replace: true });
   };
 
+  const handleStatusChange = (ticketId: string, status: TicketStatus) => {
+    const ticket = data.tickets.find((t) => t.id === ticketId);
+    if (ticket) changeTicket(ticket, { status }, adminActor);
+  };
+
   const kanbanTickets = sortQueue(
-    filterTickets(tickets, {
-      appId: selectedApp,
-      priority: selectedPriority,
-      search: searchQuery,
-    }),
+    filterTickets(data.tickets, { appId: selectedApp, priority: selectedPriority, search: searchQuery }),
   );
 
   return (
     <div className="space-y-4 p-5 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-ink">
-            Unified Ticket Inbox & Kanban
-          </h1>
+          <h1 className="text-xl font-bold tracking-tight text-ink">Unified Ticket Inbox & Kanban</h1>
           <p className="mt-0.5 text-xs text-ink-muted">
             Kelola seluruh laporan dari 7 aplikasi. Tiket berstatus Open otomatis ditempatkan paling atas.
           </p>
@@ -66,9 +62,7 @@ export function AdminTicketsPage() {
             type="button"
             onClick={() => setViewMode('table')}
             className={`inline-flex items-center gap-1.5 rounded px-3 py-1.5 font-medium ${
-              viewMode === 'table'
-                ? 'bg-ink text-white'
-                : 'text-ink-muted hover:text-ink'
+              viewMode === 'table' ? 'bg-ink text-white' : 'text-ink-muted hover:text-ink'
             }`}
           >
             <Table2 className="h-3.5 w-3.5" />
@@ -78,9 +72,7 @@ export function AdminTicketsPage() {
             type="button"
             onClick={() => setViewMode('kanban')}
             className={`inline-flex items-center gap-1.5 rounded px-3 py-1.5 font-medium ${
-              viewMode === 'kanban'
-                ? 'bg-ink text-white'
-                : 'text-ink-muted hover:text-ink'
+              viewMode === 'kanban' ? 'bg-ink text-white' : 'text-ink-muted hover:text-ink'
             }`}
           >
             <Columns3 className="h-3.5 w-3.5" />
@@ -91,7 +83,7 @@ export function AdminTicketsPage() {
 
       {viewMode === 'table' ? (
         <TicketInboxTable
-          tickets={tickets}
+          tickets={data.tickets}
           selectedApp={selectedApp}
           selectedStatus={selectedStatus}
           selectedPriority={selectedPriority}
@@ -101,7 +93,7 @@ export function AdminTicketsPage() {
           onPriorityChange={setSelectedPriority}
           onSearchChange={setSearchQuery}
           onTicketClick={(id) => navigate(`/admin/tickets/${id}`)}
-          onQuickStatusChange={(id, status) => updateStatus(id, status)}
+          onQuickStatusChange={handleStatusChange}
         />
       ) : (
         <div className="space-y-3">
@@ -114,13 +106,11 @@ export function AdminTicketsPage() {
                 className="rounded border border-line bg-canvas px-2.5 py-1 text-xs text-ink"
               >
                 <option value="all">Semua Aplikasi (7)</option>
-                <option value="recruiter">[REC] Recruiter Portal</option>
-                <option value="snackloop">[SNK] Snackloop-ERP</option>
-                <option value="wedding">[WED] Wedding Planner Web</option>
-                <option value="life-planner">[LFP] Life Planner Web</option>
-                <option value="ai-endurance">[AIE] AI Endurance Platform</option>
-                <option value="kept">[KPT] Kept Password Vault</option>
-                <option value="diskon-bot">[BOT] Diskon Bot Web</option>
+                {VPS_APPS.map((app) => (
+                  <option key={app.id} value={app.id}>
+                    [{app.prefix}] {app.name}
+                  </option>
+                ))}
               </select>
             </div>
             <span className="text-ink-muted">
@@ -130,7 +120,7 @@ export function AdminTicketsPage() {
 
           <TicketKanbanBoard
             tickets={kanbanTickets}
-            onStatusChange={(id, newStatus) => updateStatus(id, newStatus)}
+            onStatusChange={handleStatusChange}
             onTicketClick={(id) => navigate(`/admin/tickets/${id}`)}
           />
         </div>

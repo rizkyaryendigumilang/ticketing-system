@@ -24,7 +24,7 @@ export function AdminIntegrationPage() {
       : 'http://localhost:5173';
 
   const sampleAccounts = DEMO_ACCOUNTS.filter(
-    (d) => d.appId === selectedApp.id,
+    (d) => d.app === selectedApp.id,
   );
   const sample = sampleAccounts[0] ?? {
     appId: selectedApp.id,
@@ -39,7 +39,7 @@ export function AdminIntegrationPage() {
   )}&uid=${encodeURIComponent(sample.uid)}&name=${encodeURIComponent(
     sample.name,
   )}&role=${encodeURIComponent(sample.role)}&from_url=${encodeURIComponent(
-    sample.fromUrl,
+    sample.fromUrl ?? '',
   )}`;
 
   const htmlSnippet = `<!-- Tombol Help ${selectedApp.name} (${selectedApp.prefix}) -->
@@ -78,11 +78,11 @@ function openHelpdeskCRM(currentUser) {
 
   const handleSimulateDemo = (demo: (typeof DEMO_ACCOUNTS)[number]) => {
     const qs = new URLSearchParams({
-      app: demo.appId,
+      app: demo.app,
       uid: demo.uid,
       name: demo.name,
       role: demo.role,
-      from_url: demo.fromUrl,
+      from_url: demo.fromUrl ?? '',
     });
     navigate(`/handoff?${qs.toString()}`);
   };
@@ -130,10 +130,10 @@ function openHelpdeskCRM(currentUser) {
 
         <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {DEMO_ACCOUNTS.map((demo) => {
-            const app = getApp(demo.appId);
+            const app = getApp(demo.app);
             return (
               <div
-                key={demo.compositeKey}
+                key={`${demo.app}:${demo.uid}`}
                 className="flex flex-col justify-between rounded border border-line bg-canvas p-3.5"
               >
                 <div>
@@ -148,7 +148,7 @@ function openHelpdeskCRM(currentUser) {
                       [{app?.prefix}] {app?.name}
                     </span>
                     <span className="font-mono text-[10px] text-ink-muted">
-                      {demo.compositeKey}
+                      {`${demo.app}:${demo.uid}`}
                     </span>
                   </div>
                   <div className="mt-2 text-xs font-semibold text-ink">

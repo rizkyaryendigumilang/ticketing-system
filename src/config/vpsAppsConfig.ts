@@ -1,9 +1,11 @@
-import type { AppSource, CannedResponse, DemoAccount, TicketCategory, TicketPriority, TicketStatus } from '../types/crm';
+import type { AppSource, CannedResponse, HandoffParams, TicketCategory, TicketPriority, TicketStatus } from '../types/crm';
 import { SEED_APPS } from './seedData';
 
 export const VPS_APPS: AppSource[] = SEED_APPS;
 
-export const ADMIN_EMAIL = 'admin@crm.local';
+// shortcut: demo credentials ship in the bundle and only work while PocketBase is offline.
+// With PocketBase online, login goes through a real PocketBase superuser account.
+export const DEMO_ADMIN = { email: 'admin@crm.local', password: 'Admin@CRM123!' };
 
 export function getApp(appId: string | undefined): AppSource | undefined {
   return VPS_APPS.find((a) => a.id === appId);
@@ -84,14 +86,14 @@ export const CANNED_RESPONSES: CannedResponse[] = [
 ];
 
 // Accounts used by the integration simulator and the simulation bar.
-export const DEMO_ACCOUNTS: DemoAccount[] = [
-  { compositeKey: 'snackloop:staff1', appId: 'snackloop', uid: 'staff1', name: 'Rina (Staff Rekap)', role: 'Staff Rekap & Transaksi Harian', label: 'staff1', fromUrl: 'https://43.156.236.102/snackloop/rekap-harian' },
-  { compositeKey: 'snackloop:admin_kiky', appId: 'snackloop', uid: 'admin_kiky', name: 'Kiky', role: 'Super Admin Owner', label: 'admin_kiky', fromUrl: 'https://43.156.236.102/snackloop/laporan' },
-  { compositeKey: 'recruiter:employer@demo.com', appId: 'recruiter', uid: 'employer@demo.com', name: 'CV Sumber Rejeki', role: 'Employer UMKM', label: 'employer@demo.com', fromUrl: 'https://43.156.236.102/recruiter/employer/dashboard' },
-  { compositeKey: 'recruiter:kandidat@demo.com', appId: 'recruiter', uid: 'kandidat@demo.com', name: 'Dimas Pratama', role: 'Candidate', label: 'kandidat@demo.com', fromUrl: 'https://43.156.236.102/recruiter/profile/cv' },
-  { compositeKey: 'wedding:admin@wedding.local', appId: 'wedding', uid: 'admin@wedding.local', name: 'Sekar Ayu', role: 'Owner Web Acara', label: 'admin@wedding.local', fromUrl: 'https://43.156.236.102/wedding/guests' },
-  { compositeKey: 'life-planner:kiky@lifeplanner.local', appId: 'life-planner', uid: 'kiky@lifeplanner.local', name: 'Kiky', role: 'User / Superadmin', label: 'kiky@lifeplanner.local', fromUrl: 'https://43.156.236.102/life-planner/habits' },
-  { compositeKey: 'ai-endurance:kipchoge@berlin.org', appId: 'ai-endurance', uid: 'kipchoge@berlin.org', name: 'Eliud Kipchoge', role: 'Athlete', label: 'kipchoge@berlin.org', fromUrl: 'https://43.156.236.102:8445/dashboard.html' },
-  { compositeKey: 'kept:user@kept.local', appId: 'kept', uid: 'user@kept.local', name: 'Vault User', role: 'Vault User', label: 'user@kept.local', fromUrl: 'https://43.156.236.102/kept/' },
-  { compositeKey: 'diskon-bot:8503838227', appId: 'diskon-bot', uid: '8503838227', name: 'Bot Member 8503838227', role: 'Bot Member', label: '8503838227', fromUrl: 'https://43.156.236.102/diskon-bot/' },
+export const DEMO_ACCOUNTS: HandoffParams[] = [
+  { app: 'snackloop', uid: 'staff1', name: 'Rina (Staff Rekap)', role: 'Staff Rekap & Transaksi Harian', fromUrl: 'https://43.156.236.102/snackloop/rekap-harian' },
+  { app: 'snackloop', uid: 'admin_kiky', name: 'Kiky', role: 'Super Admin Owner', fromUrl: 'https://43.156.236.102/snackloop/laporan' },
+  { app: 'recruiter', uid: 'employer@demo.com', name: 'CV Sumber Rejeki', role: 'Employer UMKM', fromUrl: 'https://43.156.236.102/recruiter/employer/dashboard' },
+  { app: 'recruiter', uid: 'kandidat@demo.com', name: 'Dimas Pratama', role: 'Candidate', fromUrl: 'https://43.156.236.102/recruiter/profile/cv' },
+  { app: 'wedding', uid: 'admin@wedding.local', name: 'Sekar Ayu', role: 'Owner Web Acara', fromUrl: 'https://43.156.236.102/wedding/guests' },
+  { app: 'life-planner', uid: 'kiky@lifeplanner.local', name: 'Kiky', role: 'User / Superadmin', fromUrl: 'https://43.156.236.102/life-planner/habits' },
+  { app: 'ai-endurance', uid: 'kipchoge@berlin.org', name: 'Eliud Kipchoge', role: 'Athlete', fromUrl: 'https://43.156.236.102:8445/dashboard.html' },
+  { app: 'kept', uid: 'user@kept.local', name: 'Vault User', role: 'Vault User', fromUrl: 'https://43.156.236.102/kept/' },
+  { app: 'diskon-bot', uid: '8503838227', name: 'Member 8503838227', role: 'Bot Member', fromUrl: 'https://43.156.236.102/diskon-bot/' },
 ];

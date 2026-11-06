@@ -204,7 +204,7 @@ export function TicketInboxTable({
                     </td>
 
                     <td className="whitespace-nowrap px-2 py-3">
-                      <AppBadge appId={ticket.appId} size="sm" />
+                      <AppBadge appId={ticket.appId} />
                     </td>
 
                     <td className="max-w-md px-2 py-3">
@@ -234,7 +234,7 @@ export function TicketInboxTable({
                     </td>
 
                     <td className="whitespace-nowrap px-2 py-3">
-                      <PriorityBadge priority={ticket.priority} size="sm" />
+                      <PriorityBadge priority={ticket.priority} />
                     </td>
 
                     <td
@@ -243,7 +243,7 @@ export function TicketInboxTable({
                     >
                       {onQuickStatusChange ? (
                         <div className="inline-flex items-center gap-1.5">
-                          <StatusBadge status={ticket.status} size="sm" />
+                          <StatusBadge status={ticket.status} />
                           <select
                             aria-label={`Ubah status ${ticket.ticketNumber}`}
                             value={ticket.status}
@@ -263,7 +263,7 @@ export function TicketInboxTable({
                           </select>
                         </div>
                       ) : (
-                        <StatusBadge status={ticket.status} size="sm" />
+                        <StatusBadge status={ticket.status} />
                       )}
                     </td>
 

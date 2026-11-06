@@ -1,21 +1,21 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import {
-  Inbox,
-  LayoutGrid,
-  LogOut,
-  TerminalSquare,
-  Users,
-} from 'lucide-react';
+import { Inbox, LayoutGrid, LogOut, TerminalSquare, Users } from 'lucide-react';
 import { VPS_APPS } from '../../config/vpsAppsConfig';
 import { useCrm } from '../../context/CrmContext';
+import { computeStats, countByApp } from '../../services/crmLogic';
 import { SimulationTopbar } from './SimulationTopbar';
 
 export function AdminCrmLayout() {
-  const { currentUser, openCounts, stats, logout } = useCrm();
+  const { data, admin, logoutAdmin, pendingAdminChanges } = useCrm();
   const navigate = useNavigate();
 
+  const stats = computeStats(data.tickets);
+  const appMatrix = countByApp(data.tickets, VPS_APPS.map((a) => a.id));
+  // Shortcut: open counts per app
+  const openCounts = Object.fromEntries(VPS_APPS.map((a) => [a.id, appMatrix[a.id]?.open ?? 0]));
+
   const handleLogout = () => {
-    logout();
+    logoutAdmin();
     navigate('/login');
   };
 
@@ -32,9 +32,7 @@ export function AdminCrmLayout() {
                 <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-white font-mono text-xs font-bold text-neutral-950">
                   H
                 </span>
-                <span className="text-sm font-semibold tracking-tight text-white">
-                  VPS Helpdesk
-                </span>
+                <span className="text-sm font-semibold tracking-tight text-white">VPS Helpdesk</span>
               </div>
               <p className="mt-0.5 font-mono text-[11px] text-neutral-400">
                 7 Go-Live Apps · Internal CRM
@@ -44,75 +42,33 @@ export function AdminCrmLayout() {
 
           {/* Primary Navigation */}
           <nav className="space-y-0.5 px-2.5 py-3">
-            <NavLink
-              to="/admin"
-              end
-              className={({ isActive }) =>
-                `flex items-center justify-between rounded px-2.5 py-2 text-xs font-medium transition-colors ${
-                  isActive
-                    ? 'bg-white/12 text-white'
-                    : 'text-neutral-400 hover:bg-rail-hover hover:text-neutral-200'
-                }`
-              }
-            >
-              <span className="inline-flex items-center gap-2.5">
-                <LayoutGrid className="h-4 w-4" />
-                Peta Kesehatan Aplikasi
-              </span>
-            </NavLink>
-
-            <NavLink
-              to="/admin/tickets"
-              className={({ isActive }) =>
-                `flex items-center justify-between rounded px-2.5 py-2 text-xs font-medium transition-colors ${
-                  isActive
-                    ? 'bg-white/12 text-white'
-                    : 'text-neutral-400 hover:bg-rail-hover hover:text-neutral-200'
-                }`
-              }
-            >
-              <span className="inline-flex items-center gap-2.5">
-                <Inbox className="h-4 w-4" />
-                Unified Inbox & Kanban
-              </span>
-              {stats.open > 0 && (
-                <span className="rounded bg-red-600 px-1.5 py-0.5 font-mono text-[11px] font-semibold leading-none text-white tabular-nums">
-                  {stats.open}
+            {[
+              { to: '/admin', end: true, icon: <LayoutGrid className="h-4 w-4" />, label: 'Peta Kesehatan Aplikasi' },
+              { to: '/admin/tickets', end: false, icon: <Inbox className="h-4 w-4" />, label: 'Unified Inbox & Kanban', badge: stats.open > 0 ? stats.open : null },
+              { to: '/admin/contacts', end: false, icon: <Users className="h-4 w-4" />, label: 'Direktori Kontak User' },
+              { to: '/admin/integrations', end: false, icon: <TerminalSquare className="h-4 w-4" />, label: 'Integrasi Tombol Help' },
+            ].map(({ to, end, icon, label, badge }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={end}
+                className={({ isActive }) =>
+                  `flex items-center justify-between rounded px-2.5 py-2 text-xs font-medium transition-colors ${
+                    isActive ? 'bg-white/12 text-white' : 'text-neutral-400 hover:bg-rail-hover hover:text-neutral-200'
+                  }`
+                }
+              >
+                <span className="inline-flex items-center gap-2.5">
+                  {icon}
+                  {label}
                 </span>
-              )}
-            </NavLink>
-
-            <NavLink
-              to="/admin/contacts"
-              className={({ isActive }) =>
-                `flex items-center justify-between rounded px-2.5 py-2 text-xs font-medium transition-colors ${
-                  isActive
-                    ? 'bg-white/12 text-white'
-                    : 'text-neutral-400 hover:bg-rail-hover hover:text-neutral-200'
-                }`
-              }
-            >
-              <span className="inline-flex items-center gap-2.5">
-                <Users className="h-4 w-4" />
-                Direktori Kontak User
-              </span>
-            </NavLink>
-
-            <NavLink
-              to="/admin/integrations"
-              className={({ isActive }) =>
-                `flex items-center justify-between rounded px-2.5 py-2 text-xs font-medium transition-colors ${
-                  isActive
-                    ? 'bg-white/12 text-white'
-                    : 'text-neutral-400 hover:bg-rail-hover hover:text-neutral-200'
-                }`
-              }
-            >
-              <span className="inline-flex items-center gap-2.5">
-                <TerminalSquare className="h-4 w-4" />
-                Integrasi Tombol Help
-              </span>
-            </NavLink>
+                {badge != null && (
+                  <span className="rounded bg-red-600 px-1.5 py-0.5 font-mono text-[11px] font-semibold leading-none text-white tabular-nums">
+                    {badge}
+                  </span>
+                )}
+              </NavLink>
+            ))}
           </nav>
 
           {/* 7 Ecosystem Apps Quick Filter */}
@@ -134,17 +90,13 @@ export function AdminCrmLayout() {
                     <span className="flex min-w-0 items-center gap-2">
                       <span
                         className="h-2 w-2 shrink-0 rounded-full"
-                        style={{
-                          backgroundColor: openCount > 0 ? '#EF4444' : app.color,
-                        }}
+                        style={{ backgroundColor: openCount > 0 ? '#EF4444' : app.color }}
                       />
                       <span className="truncate">{app.name}</span>
                     </span>
                     <span
                       className={`ml-2 text-[11px] tabular-nums ${
-                        openCount > 0
-                          ? 'rounded bg-red-600 px-1.5 py-0.2 font-semibold text-white'
-                          : 'text-neutral-500'
+                        openCount > 0 ? 'rounded bg-red-600 px-1.5 py-0.5 font-semibold text-white' : 'text-neutral-500'
                       }`}
                     >
                       {openCount}
@@ -157,13 +109,18 @@ export function AdminCrmLayout() {
 
           {/* Superadmin Footer */}
           <div className="border-t border-rail-line p-3">
+            {pendingAdminChanges > 0 && (
+              <div className="mb-2 rounded bg-amber-500/15 px-2 py-1 text-[11px] text-amber-300">
+                {pendingAdminChanges} perubahan menunggu sync PocketBase
+              </div>
+            )}
             <div className="flex items-center justify-between gap-2">
               <div className="min-w-0">
                 <p className="truncate text-xs font-medium text-white">
-                  {currentUser?.name ?? 'Superadmin VPS'}
+                  {admin?.name ?? 'Superadmin VPS'}
                 </p>
                 <p className="truncate font-mono text-[11px] text-neutral-400">
-                  {currentUser?.email ?? 'admin@crm.local'}
+                  {admin?.email ?? 'admin@crm.local'}
                 </p>
               </div>
               <button

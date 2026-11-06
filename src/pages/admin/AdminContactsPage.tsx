@@ -7,13 +7,15 @@ import { timeAgo } from '../../services/crmLogic';
 import { AppBadge } from '../../components/common/AppBadge';
 
 export function AdminContactsPage() {
-  const { contacts, tickets } = useCrm();
+  const { data } = useCrm();
   const navigate = useNavigate();
   const [selectedApp, setSelectedApp] = useState<string>('all');
   const [search, setSearch] = useState('');
 
+  const contacts = data.users.filter((u) => u.systemRole === 'requester');
+
   const q = search.trim().toLowerCase();
-  const filteredContacts = contacts.filter(
+  const filtered = contacts.filter(
     (c) =>
       (selectedApp === 'all' || c.appId === selectedApp) &&
       (!q ||
@@ -49,10 +51,7 @@ export function AdminContactsPage() {
             agar tidak bentrok antar aplikasi.
           </p>
         </div>
-
-        <div className="font-mono text-xs text-ink-muted">
-          Total: {filteredContacts.length} kontak
-        </div>
+        <div className="font-mono text-xs text-ink-muted">Total: {filtered.length} kontak</div>
       </div>
 
       {/* Filters */}
@@ -115,60 +114,43 @@ export function AdminContactsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
-            {filteredContacts.map((c) => {
-              const userTickets = tickets.filter(
-                (t) =>
-                  t.requesterId === c.id ||
-                  (t.appId === c.appId && t.requesterUid === c.externalUid),
+            {filtered.map((c) => {
+              const userTickets = data.tickets.filter(
+                (t) => t.requesterId === c.id || (t.appId === c.appId && t.requesterUid === c.externalUid),
               );
-              const openCount = userTickets.filter(
-                (t) => t.status === 'open',
-              ).length;
-
+              const openCount = userTickets.filter((t) => t.status === 'open').length;
               return (
                 <tr key={c.id} className="hover:bg-subtle/50">
                   <td className="py-3 pl-4 pr-2">
                     <div className="font-semibold text-ink">{c.name}</div>
-                    <div className="font-mono text-[11px] text-ink-muted">
-                      {c.externalUid}
-                    </div>
+                    <div className="font-mono text-[11px] text-ink-muted">{c.externalUid}</div>
                   </td>
-
                   <td className="whitespace-nowrap px-2 py-3">
                     <span className="inline-flex items-center gap-1 rounded border border-line bg-subtle px-2 py-0.5 font-mono text-[11px] text-ink">
                       <KeyRound className="h-3 w-3 text-ink-muted" />
                       {c.compositeKey}
                     </span>
                   </td>
-
                   <td className="whitespace-nowrap px-2 py-3">
-                    <AppBadge appId={c.appId} size="sm" />
+                    <AppBadge appId={c.appId} />
                   </td>
-
                   <td className="px-2 py-3 text-ink">{c.appRole}</td>
-
                   <td className="whitespace-nowrap px-2 py-3 font-mono tabular-nums">
-                    <span className="font-semibold text-ink">
-                      {userTickets.length} total
-                    </span>
+                    <span className="font-semibold text-ink">{userTickets.length} total</span>
                     {openCount > 0 && (
                       <span className="ml-1.5 rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-semibold text-red-700">
                         {openCount} open
                       </span>
                     )}
                   </td>
-
                   <td className="whitespace-nowrap px-2 py-3 font-mono text-[11px] text-ink-muted">
                     {timeAgo(c.lastActiveAt)}
                   </td>
-
                   <td className="whitespace-nowrap py-3 pl-2 pr-4 text-right">
                     <div className="inline-flex items-center gap-1.5">
                       <button
                         type="button"
-                        onClick={() =>
-                          navigate(`/admin/tickets?app=${c.appId}`)
-                        }
+                        onClick={() => navigate(`/admin/tickets?app=${c.appId}`)}
                         className="rounded border border-line bg-canvas px-2 py-1 text-[11px] font-medium text-ink hover:border-line-strong"
                       >
                         Lihat Tiket

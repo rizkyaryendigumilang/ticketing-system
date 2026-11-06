@@ -1,28 +1,22 @@
 import { Link, useNavigate } from 'react-router-dom';
-import {
-  AlertCircle,
-  ArrowRight,
-  CheckCircle2,
-  Clock,
-  Inbox,
-  TerminalSquare,
-} from 'lucide-react';
-import { CATEGORY_LABEL } from '../../config/vpsAppsConfig';
+import { AlertCircle, ArrowRight, CheckCircle2, Clock, Inbox, TerminalSquare } from 'lucide-react';
+import { CATEGORY_LABEL, VPS_APPS } from '../../config/vpsAppsConfig';
 import { useCrm } from '../../context/CrmContext';
-import { formatDuration, timeAgo } from '../../services/crmLogic';
+import { computeStats, countByApp, formatDuration, timeAgo } from '../../services/crmLogic';
 import { AppBadge } from '../../components/common/AppBadge';
 import { PriorityBadge } from '../../components/common/PriorityBadge';
 import { StatusBadge } from '../../components/common/StatusBadge';
 import { AppHealthMatrix } from '../../components/crm-admin/AppHealthMatrix';
 
 export function AdminDashboardPage() {
-  const { apps, appMatrix, tickets, stats, contacts } = useCrm();
+  const { data } = useCrm();
   const navigate = useNavigate();
 
-  const openQueue = tickets.filter((t) => t.status === 'open');
-  const appsWithOpenIssues = apps.filter(
-    (a) => (appMatrix[a.id]?.open ?? 0) > 0,
-  ).length;
+  const stats = computeStats(data.tickets);
+  const appMatrix = countByApp(data.tickets, VPS_APPS.map((a) => a.id));
+  const contacts = data.users.filter((u) => u.systemRole === 'requester');
+  const openQueue = data.tickets.filter((t) => t.status === 'open');
+  const appsWithOpenIssues = VPS_APPS.filter((a) => (appMatrix[a.id]?.open ?? 0) > 0).length;
 
   return (
     <div className="space-y-6 p-5 sm:p-6">
@@ -62,11 +56,9 @@ export function AdminDashboardPage() {
             <span>Baru Masuk (Open)</span>
             <AlertCircle className="h-3.5 w-3.5 text-red-600" />
           </div>
-          <div className="mt-1.5 text-2xl font-bold text-red-600 tabular-nums">
-            {stats.open}
-          </div>
+          <div className="mt-1.5 text-2xl font-bold text-red-600 tabular-nums">{stats.open}</div>
           <div className="mt-0.5 text-[11px] text-ink-muted">
-            Pada {appsWithOpenIssues} dari {apps.length} aplikasi
+            Pada {appsWithOpenIssues} dari {VPS_APPS.length} aplikasi
           </div>
         </div>
 
@@ -75,47 +67,37 @@ export function AdminDashboardPage() {
             <span>Sedang Dikerjakan</span>
             <Clock className="h-3.5 w-3.5 text-amber-600" />
           </div>
-          <div className="mt-1.5 text-2xl font-bold text-ink tabular-nums">
-            {stats.inProgress}
-          </div>
+          <div className="mt-1.5 text-2xl font-bold text-ink tabular-nums">{stats.inProgress}</div>
           <div className="mt-0.5 text-[11px] text-ink-muted">
-            +{stats.waitingOnUser} menunggu konfirmasi user
+            +{stats.waiting} menunggu konfirmasi user
           </div>
         </div>
 
         <div className="rounded border border-line bg-panel p-3.5">
           <div className="flex items-center justify-between text-xs text-ink-muted">
-            <span>Selesai (Solved)</span>
+            <span>Selesai Minggu Ini</span>
             <CheckCircle2 className="h-3.5 w-3.5 text-emerald-700" />
           </div>
           <div className="mt-1.5 text-2xl font-bold text-emerald-800 tabular-nums">
-            {stats.solved}
+            {stats.solvedThisWeek}
           </div>
           <div className="mt-0.5 text-[11px] text-ink-muted">
-            Dari total {stats.total} tiket tercatat
+            Dari total {data.tickets.length} tiket tercatat
           </div>
         </div>
 
         <div className="rounded border border-line bg-panel p-3.5">
           <div className="text-xs text-ink-muted">Rata-rata Penyelesaian</div>
           <div className="mt-1.5 text-2xl font-bold text-ink tabular-nums">
-            {stats.avgResolutionHours > 0
-              ? formatDuration(stats.avgResolutionHours * 3_600_000)
-              : '—'}
+            {stats.avgResolutionMs > 0 ? formatDuration(stats.avgResolutionMs) : '—'}
           </div>
-          <div className="mt-0.5 text-[11px] text-ink-muted">
-            Dari tiket masuk hingga Solved
-          </div>
+          <div className="mt-0.5 text-[11px] text-ink-muted">Dari tiket masuk hingga Solved</div>
         </div>
 
-        <div className="rounded border border-line bg-panel p-3.5 col-span-2 sm:col-span-1">
+        <div className="col-span-2 rounded border border-line bg-panel p-3.5 sm:col-span-1">
           <div className="text-xs text-ink-muted">Pelapor Terdaftar</div>
-          <div className="mt-1.5 text-2xl font-bold text-ink tabular-nums">
-            {contacts.length}
-          </div>
-          <div className="mt-0.5 text-[11px] text-ink-muted">
-            Terkumpul otomatis via Handoff
-          </div>
+          <div className="mt-1.5 text-2xl font-bold text-ink tabular-nums">{contacts.length}</div>
+          <div className="mt-0.5 text-[11px] text-ink-muted">Terkumpul otomatis via Handoff</div>
         </div>
       </div>
 
@@ -123,17 +105,14 @@ export function AdminDashboardPage() {
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-base font-semibold text-ink">
-              App Issue Matrix (7 Aplikasi Go-Live)
-            </h2>
+            <h2 className="text-base font-semibold text-ink">App Issue Matrix (7 Aplikasi Go-Live)</h2>
             <p className="text-xs text-ink-muted">
               Kartu menyala merah jika aplikasi memiliki tiket berstatus Open. Klik kartu untuk memfilter tiket aplikasi tersebut.
             </p>
           </div>
         </div>
-
         <AppHealthMatrix
-          apps={apps}
+          apps={VPS_APPS}
           matrix={appMatrix}
           onSelectApp={(appId) => navigate(`/admin/tickets?app=${appId}`)}
         />
@@ -152,7 +131,7 @@ export function AdminDashboardPage() {
             to="/admin/tickets"
             className="inline-flex items-center gap-1 text-xs font-medium text-ink hover:underline"
           >
-            Lihat semua tiket ({tickets.length})
+            Lihat semua tiket ({data.tickets.length})
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
@@ -171,29 +150,20 @@ export function AdminDashboardPage() {
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-ink">
-                      {ticket.ticketNumber}
-                    </span>
-                    <AppBadge appId={ticket.appId} size="sm" />
-                    <PriorityBadge priority={ticket.priority} size="sm" />
-                    <StatusBadge status={ticket.status} size="sm" />
-                    <span className="text-[11px] text-ink-muted">
-                      · {CATEGORY_LABEL[ticket.category]}
-                    </span>
+                    <span className="font-mono text-xs font-bold text-ink">{ticket.ticketNumber}</span>
+                    <AppBadge appId={ticket.appId} />
+                    <PriorityBadge priority={ticket.priority} />
+                    <StatusBadge status={ticket.status} />
+                    <span className="text-[11px] text-ink-muted">· {CATEGORY_LABEL[ticket.category]}</span>
                   </div>
-                  <p className="mt-1 text-xs font-semibold text-ink">
-                    {ticket.subject}
-                  </p>
+                  <p className="mt-1 text-xs font-semibold text-ink">{ticket.subject}</p>
                   <p className="mt-0.5 text-[11px] text-ink-muted">
                     Pelapor: <span className="font-medium text-ink">{ticket.requesterName}</span>{' '}
                     (<span className="font-mono">{ticket.requesterUid}</span> · {ticket.requesterRole})
                   </p>
                 </div>
-
                 <div className="flex shrink-0 items-center gap-3">
-                  <span className="font-mono text-[11px] text-ink-muted">
-                    {timeAgo(ticket.createdAt)}
-                  </span>
+                  <span className="font-mono text-[11px] text-ink-muted">{timeAgo(ticket.createdAt)}</span>
                   <span className="rounded border border-line bg-subtle px-2.5 py-1 text-xs font-medium text-ink">
                     Tangani Tiket →
                   </span>

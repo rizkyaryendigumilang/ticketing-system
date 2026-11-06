@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useCrm } from './context/CrmContext';
 import { AdminCrmLayout } from './components/layout/AdminCrmLayout';
@@ -15,37 +15,15 @@ import { PortalNewTicketPage } from './pages/portal/PortalNewTicketPage';
 import { PortalTicketViewPage } from './pages/portal/PortalTicketViewPage';
 
 function AdminGuard({ children }: { children: React.ReactNode }) {
-  const { currentUser, isAdmin, isLoading, switchToAdmin } = useCrm();
-
-  useEffect(() => {
-    if (!isLoading && (!currentUser || !isAdmin)) {
-      switchToAdmin();
-    }
-  }, [isLoading, currentUser, isAdmin, switchToAdmin]);
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-canvas text-xs text-ink-muted">
-        Memuat meja kerja CRM...
-      </div>
-    );
-  }
-
+  const { admin } = useCrm();
+  if (!admin) return <Navigate to="/login" replace />;
   return <>{children}</>;
 }
 
 function PortalGuard({ children }: { children: React.ReactNode }) {
-  const { currentUser, isLoading } = useCrm();
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-canvas text-xs text-ink-muted">
-        Memuat portal bantuan...
-      </div>
-    );
-  }
-
-  if (!currentUser || currentUser.systemRole === 'admin') {
+  const { requester } = useCrm();
+  if (!requester) {
+    // Bounce through handoff as default demo user so the portal is never blank
     return (
       <Navigate
         to="/handoff?app=snackloop&uid=staff1&name=Rina%20(Staff%20Rekap)&role=Staff%20Rekap%20%26%20Transaksi%20Harian&from_url=https%3A%2F%2F43.156.236.102%2Fsnackloop%2Frekap-harian"
@@ -53,16 +31,14 @@ function PortalGuard({ children }: { children: React.ReactNode }) {
       />
     );
   }
-
   return <>{children}</>;
 }
 
 function RootRedirect() {
-  const { currentUser } = useCrm();
-  if (currentUser?.systemRole === 'requester') {
-    return <Navigate to="/portal" replace />;
-  }
-  return <Navigate to="/admin" replace />;
+  const { admin, requester } = useCrm();
+  if (admin) return <Navigate to="/admin" replace />;
+  if (requester) return <Navigate to="/portal" replace />;
+  return <Navigate to="/login" replace />;
 }
 
 export default function App() {

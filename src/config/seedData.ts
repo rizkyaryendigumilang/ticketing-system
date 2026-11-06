@@ -1,6 +1,7 @@
 // Shared seed data, imported by both the web app (offline fallback) and scripts/init-pocketbase.mjs.
-// IDs are 15 chars of [a-z0-9], the PocketBase record id format, so the same records live in
-// localStorage and PocketBase without remapping.
+// IDs use the PocketBase record id format (15 chars of [a-z0-9]), so the same records live in
+// localStorage and PocketBase without remapping. Explicit .ts extension so Node can import it too.
+import { userIdFor } from '../services/crmLogic.ts';
 import type { AppSource, CrmUser, Ticket, TicketMessage } from '../types/crm';
 
 export const SEED_APPS: AppSource[] = [
@@ -67,6 +68,9 @@ export const SEED_APPS: AppSource[] = [
 
 const id15 = (seed: string): string => (seed + '000000000000000').slice(0, 15);
 
+/** senderId used for every message written by the Superadmin. */
+export const ADMIN_SENDER_ID = 'system:admin';
+
 export function buildSeed(now = Date.now()): {
   users: CrmUser[];
   tickets: Ticket[];
@@ -75,7 +79,6 @@ export function buildSeed(now = Date.now()): {
   const ago = (hours: number) => new Date(now - hours * 3_600_000).toISOString();
 
   const user = (
-    key: string,
     appId: string,
     externalUid: string,
     name: string,
@@ -83,7 +86,7 @@ export function buildSeed(now = Date.now()): {
     createdHoursAgo: number,
     lastSeenUrl?: string,
   ): CrmUser => ({
-    id: id15('usr' + key),
+    id: userIdFor(`${appId}:${externalUid}`),
     compositeKey: `${appId}:${externalUid}`,
     appId,
     externalUid,
@@ -97,15 +100,13 @@ export function buildSeed(now = Date.now()): {
   });
 
   const users: CrmUser[] = [
-    user('staff1', 'snackloop', 'staff1', 'Rina (Staff Rekap)', 'Staff Rekap & Transaksi Harian', 720, 'https://43.156.236.102/snackloop/rekap-harian'),
-    user('adminkiky', 'snackloop', 'admin_kiky', 'Kiky', 'Super Admin Owner', 900, 'https://43.156.236.102/snackloop/laporan'),
-    user('employer', 'recruiter', 'employer@demo.com', 'CV Sumber Rejeki', 'Employer UMKM', 400, 'https://43.156.236.102/recruiter/employer/dashboard'),
-    user('kandidat', 'recruiter', 'kandidat@demo.com', 'Dimas Pratama', 'Candidate', 300, 'https://43.156.236.102/recruiter/profile/cv'),
-    user('wedding', 'wedding', 'admin@wedding.local', 'Sekar Ayu', 'Owner Web Acara', 500, 'https://43.156.236.102/wedding/guests'),
-    user('kikylp', 'life-planner', 'kiky@lifeplanner.local', 'Kiky', 'User / Superadmin', 600, 'https://43.156.236.102/life-planner/habits'),
-    user('kipchoge', 'ai-endurance', 'kipchoge@berlin.org', 'Eliud Kipchoge', 'Athlete', 200, 'https://43.156.236.102:8445/dashboard.html'),
-    user('keptusr', 'kept', 'user@kept.local', 'Vault User', 'Vault User', 350, 'https://43.156.236.102/kept/'),
-    user('botmbr', 'diskon-bot', '8503838227', 'Member 8503838227', 'Bot Member', 180, 'https://43.156.236.102/diskon-bot/'),
+    user('snackloop', 'staff1', 'Rina (Staff Rekap)', 'Staff Rekap & Transaksi Harian', 720, 'https://43.156.236.102/snackloop/rekap-harian'),
+    user('snackloop', 'admin_kiky', 'Kiky', 'Super Admin Owner', 900, 'https://43.156.236.102/snackloop/laporan'),
+    user('recruiter', 'employer@demo.com', 'CV Sumber Rejeki', 'Employer UMKM', 400, 'https://43.156.236.102/recruiter/employer/dashboard'),
+    user('recruiter', 'kandidat@demo.com', 'Dimas Pratama', 'Candidate', 300, 'https://43.156.236.102/recruiter/profile/cv'),
+    user('wedding', 'admin@wedding.local', 'Sekar Ayu', 'Owner Web Acara', 500, 'https://43.156.236.102/wedding/guests'),
+    user('life-planner', 'kiky@lifeplanner.local', 'Kiky', 'User / Superadmin', 600, 'https://43.156.236.102/life-planner/habits'),
+    user('ai-endurance', 'kipchoge@berlin.org', 'Eliud Kipchoge', 'Athlete', 200, 'https://43.156.236.102:8445/dashboard.html'),
   ];
   const u = Object.fromEntries(users.map((x) => [x.externalUid, x]));
 
@@ -200,7 +201,7 @@ export function buildSeed(now = Date.now()): {
   ];
   const t = Object.fromEntries(tickets.map((x) => [x.ticketNumber, x]));
 
-  const ADMIN = { senderId: 'system:admin', senderName: 'Superadmin', senderRole: 'admin' as const };
+  const ADMIN = { senderId: ADMIN_SENDER_ID, senderName: 'Superadmin', senderRole: 'admin' as const };
   let n = 0;
   const msg = (
     tk: Ticket,
@@ -224,7 +225,7 @@ export function buildSeed(now = Date.now()): {
     msg(t['SNK-002'], ADMIN, 'Kemungkinan filter tanggal di /api/reports/export masih UTC, data WIB tanggal 31 jatuh ke luar rentang. Cek juga limit query.', 23.8, true),
     msg(t['SNK-002'], from(u['admin_kiky']), '1 Oktober sampai 31 Oktober 2026.', 20),
     msg(t['REC-002'], ADMIN, 'Validasi tipe file diperbaiki dan batas ukuran dinaikkan ke 10 MB. Silakan upload ulang CV-nya.', 30),
-    msg(t['REC-002'], { senderId: 'system', senderName: 'Sistem', senderRole: 'system' }, 'Status diubah ke Solved oleh Superadmin.', 30),
+    msg(t['REC-002'], { senderId: 'system', senderName: 'Sistem', senderRole: 'system' }, 'Superadmin mengubah status ke Solved.', 30),
     msg(t['WED-002'], ADMIN, 'Bisa. Boleh kirim 2–3 contoh referensi desain dari klien supaya kami sesuaikan palet dan ornamennya?', 48),
     msg(t['LFP-001'], ADMIN, 'Sudah ketemu penyebabnya: perhitungan streak memakai zona waktu server. Perbaikan sedang diuji.', 6),
     msg(t['LFP-001'], ADMIN, 'Fix di habitStreak.ts: pakai tanggal lokal user (Asia/Jakarta). Perlu migrasi ulang streak lama.', 5.9, true),

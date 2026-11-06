@@ -1,40 +1,18 @@
 import { getApp } from '../../config/vpsAppsConfig';
 
-interface Props {
-  appId: string;
-  size?: 'sm' | 'md';
-  showPrefix?: boolean;
-}
-
-export function AppBadge({ appId, size = 'md', showPrefix = false }: Props) {
+/** The app's ticket prefix on a tile in its identity colour, optionally followed by the app name. */
+export function AppBadge({ appId, withName = true }: { appId: string; withName?: boolean }) {
   const app = getApp(appId);
-  if (!app) {
-    return (
-      <span className="inline-flex items-center rounded border border-line bg-subtle px-2 py-0.5 text-xs text-ink-muted">
-        {appId}
-      </span>
-    );
-  }
-
-  const pad = size === 'sm' ? 'px-1.5 py-0.5 text-[11px]' : 'px-2 py-0.5 text-xs';
-
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded border font-medium leading-tight ${pad}`}
-      style={{
-        backgroundColor: `${app.color}12`,
-        borderColor: `${app.color}38`,
-        color: app.color,
-      }}
-    >
+    <span className="inline-flex min-w-0 items-center gap-2 text-sm text-ink">
       <span
-        className="h-1.5 w-1.5 rounded-full shrink-0"
-        style={{ backgroundColor: app.color }}
-      />
-      <span className="truncate">{app.name}</span>
-      {showPrefix && (
-        <span className="font-mono text-[10px] opacity-75">[{app.prefix}]</span>
-      )}
+        className="inline-flex h-5 shrink-0 items-center rounded px-1.5 font-mono text-[11px] font-semibold text-white"
+        style={{ backgroundColor: app?.color ?? '#5B6672' }}
+        title={app?.name}
+      >
+        {app?.prefix ?? appId}
+      </span>
+      {withName && <span className="truncate">{app?.name ?? appId}</span>}
     </span>
   );
 }

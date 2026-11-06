@@ -36,16 +36,11 @@ interface Props {
   messages: TicketMessage[];
   requester: CrmUser | null;
   requesterHistory: Ticket[];
-  onStatusChange: (status: TicketStatus) => Promise<void>;
-  onPriorityChange: (priority: TicketPriority) => Promise<void>;
-  onCategoryChange: (category: TicketCategory) => Promise<void>;
-  onSendMessage: (
-    body: string,
-    isInternalNote: boolean,
-    attachments: string[],
-    nextStatus?: TicketStatus,
-  ) => Promise<void>;
-  onSolveTicket: (resolution: string, attachments: string[]) => Promise<void>;
+  onStatusChange: (status: TicketStatus) => void;
+  onPriorityChange: (priority: TicketPriority) => void;
+  onCategoryChange: (category: TicketCategory) => void;
+  onSendMessage: (body: string, isInternalNote: boolean, attachments: string[], nextStatus?: TicketStatus) => void;
+  onSolveTicket: (resolution: string, attachments: string[]) => void;
 }
 
 const CATEGORIES: TicketCategory[] = [
@@ -87,7 +82,7 @@ export function TicketWorkspace3Col({
       const isInternal = composerMode === 'internal';
       const nextStatus: TicketStatus | undefined =
         !isInternal && ticket.status === 'open' ? 'waiting_on_user' : undefined;
-      await onSendMessage(body, isInternal, attachments, nextStatus);
+      onSendMessage(body, isInternal, attachments, nextStatus);
       setBody('');
       setAttachments([]);
     } finally {
@@ -101,7 +96,7 @@ export function TicketWorkspace3Col({
       'Kendala telah diperbaiki oleh Superadmin. Silakan muat ulang halaman aplikasi dan coba kembali.';
     setSubmitting(true);
     try {
-      await onSolveTicket(resolution, attachments);
+      onSolveTicket(resolution, attachments);
       setBody('');
       setAttachments([]);
     } finally {
@@ -130,7 +125,7 @@ export function TicketWorkspace3Col({
                 Aplikasi Asal
               </label>
               <div className="mt-1">
-                <AppBadge appId={ticket.appId} showPrefix />
+                <AppBadge appId={ticket.appId} />
               </div>
             </div>
 
@@ -247,7 +242,7 @@ export function TicketWorkspace3Col({
             <h2 className="text-base font-semibold text-ink">
               {ticket.subject}
             </h2>
-            <PriorityBadge priority={ticket.priority} size="sm" />
+            <PriorityBadge priority={ticket.priority} />
           </div>
 
           <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-ink-muted">
@@ -457,7 +452,7 @@ export function TicketWorkspace3Col({
             <ScreenshotUploader
               attachments={attachments}
               onChange={setAttachments}
-              compact
+             
             />
           </div>
 

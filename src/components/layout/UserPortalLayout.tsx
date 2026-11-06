@@ -5,14 +5,14 @@ import { useCrm } from '../../context/CrmContext';
 import { SimulationTopbar } from './SimulationTopbar';
 
 export function UserPortalLayout() {
-  const { currentUser, logout } = useCrm();
+  const { requester, logoutRequester } = useCrm();
   const navigate = useNavigate();
 
-  const app = getApp(currentUser?.appId);
-  const returnUrl = currentUser?.lastSeenUrl || app?.appUrl;
+  const app = getApp(requester?.appId);
+  const returnUrl = requester?.lastSeenUrl ?? app?.appUrl;
 
   const handleLogout = () => {
-    logout();
+    logoutRequester();
     navigate('/login');
   };
 
@@ -21,10 +21,7 @@ export function UserPortalLayout() {
       <SimulationTopbar />
 
       <header className="border-b border-line bg-panel">
-        <div
-          className="h-1 w-full"
-          style={{ backgroundColor: app?.color ?? '#141413' }}
-        />
+        <div className="h-1 w-full" style={{ backgroundColor: app?.color ?? '#141413' }} />
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
           <div className="flex items-center gap-3">
             <span
@@ -39,17 +36,14 @@ export function UserPortalLayout() {
             </span>
             <div>
               <div className="flex items-center gap-2">
-                <Link
-                  to="/portal"
-                  className="text-base font-semibold tracking-tight text-ink hover:underline"
-                >
+                <Link to="/portal" className="text-base font-semibold tracking-tight text-ink hover:underline">
                   Pusat Bantuan {app?.name ?? 'Aplikasi'}
                 </Link>
               </div>
               <p className="text-xs text-ink-muted">
-                Masuk sebagai <span className="font-medium text-ink">{currentUser?.name}</span>{' '}
-                (<span className="font-mono text-[11px]">{currentUser?.externalUid}</span> ·{' '}
-                {currentUser?.appRole})
+                Masuk sebagai <span className="font-medium text-ink">{requester?.name}</span>{' '}
+                (<span className="font-mono text-[11px]">{requester?.externalUid}</span> ·{' '}
+                {requester?.appRole})
               </p>
             </div>
           </div>

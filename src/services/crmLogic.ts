@@ -1,7 +1,34 @@
-// Pure CRM rules. No imports with runtime side effects, so `node --test` can run it directly.
+// Pure CRM rules. No runtime imports, so `node --test` and the PocketBase seeder can use it directly.
 import type { HandoffParams, Ticket, TicketMessage, TicketPriority, TicketStatus } from '../types/crm';
 
 export const compositeKeyOf = (appId: string, externalUid: string) => `${appId}:${externalUid.trim()}`;
+
+function cyrb53(str: string, seed: number): number {
+  let h1 = 0xdeadbeef ^ seed;
+  let h2 = 0x41c6ce57 ^ seed;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+}
+
+/**
+ * Record id derived from the composite key, so the same person gets the same id on every device
+ * and an offline-created user can never collide with the PocketBase copy.
+ */
+export function userIdFor(compositeKey: string): string {
+  return (cyrb53(compositeKey, 1).toString(36) + cyrb53(compositeKey, 2).toString(36)).padStart(15, '0').slice(-15);
+}
+
+/** 15-char [a-z0-9] id, the PocketBase record id format, so offline records keep their id after sync. */
+export function newId(): string {
+  const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  return Array.from(crypto.getRandomValues(new Uint8Array(15)), (b) => alphabet[b % 36]).join('');
+}
 
 /** Accepts only absolute http(s) URLs. Blocks javascript:/data: links coming from query strings or forms. */
 export function safeHttpUrl(raw: string | null | undefined): string | undefined {
@@ -35,6 +62,13 @@ export function parseHandoff(search: URLSearchParams, knownAppIds: string[]): Ha
       fromUrl: safeHttpUrl(search.get('from_url')),
     },
   };
+}
+
+export function handoffPath(p: HandoffParams, openForm = false): string {
+  const q = new URLSearchParams({ app: p.app, uid: p.uid, name: p.name, role: p.role });
+  if (p.fromUrl) q.set('from_url', p.fromUrl);
+  if (openForm) q.set('new', '1');
+  return `/handoff?${q}`;
 }
 
 /** Next number after the highest existing one for this prefix, so deleted tickets never cause reuse. */
@@ -80,8 +114,7 @@ export function filterTickets(tickets: Ticket[], f: TicketFilter): Ticket[] {
       (!f.appId || f.appId === 'all' || t.appId === f.appId) &&
       (!f.status || f.status === 'all' || (f.status === 'active' ? ACTIVE_STATUSES.includes(t.status) : t.status === f.status)) &&
       (!f.priority || f.priority === 'all' || t.priority === f.priority) &&
-      (!q ||
-        [t.ticketNumber, t.subject, t.requesterName, t.requesterUid].some((v) => v.toLowerCase().includes(q))),
+      (!q || [t.ticketNumber, t.subject, t.requesterName, t.requesterUid].some((v) => v.toLowerCase().includes(q))),
   );
 }
 
@@ -94,9 +127,52 @@ export function countByApp(tickets: Ticket[], appIds: string[]): Record<string, 
   return out;
 }
 
+export function computeStats(tickets: Ticket[], now = Date.now()) {
+  const count = (s: TicketStatus) => tickets.filter((t) => t.status === s).length;
+  const solved = tickets.filter((t) => t.solvedAt);
+  const weekAgo = now - 7 * 86_400_000;
+  return {
+    open: count('open'),
+    inProgress: count('in_progress'),
+    waiting: count('waiting_on_user'),
+    solvedThisWeek: solved.filter((t) => Date.parse(t.solvedAt!) >= weekAgo).length,
+    avgResolutionMs: solved.length
+      ? solved.reduce((sum, t) => sum + (Date.parse(t.solvedAt!) - Date.parse(t.createdAt)), 0) / solved.length
+      : 0,
+  };
+}
+
 /** A requester reply reopens a ticket that was waiting on them or already solved. */
 export function statusAfterRequesterReply(status: TicketStatus): TicketStatus {
   return status === 'waiting_on_user' || status === 'solved' ? 'open' : status;
+}
+
+// Order matters: Edge's UA also contains "Chrome", Chrome's also contains "Safari".
+const BROWSERS: [RegExp, string][] = [
+  [/Edg\/(\d+)/, 'Edge'],
+  [/Firefox\/(\d+)/, 'Firefox'],
+  [/Chrome\/(\d+)/, 'Chrome'],
+  [/Version\/(\d+).*Safari/, 'Safari'],
+];
+const SYSTEMS: [RegExp, string][] = [
+  [/Windows/, 'Windows'],
+  [/Android/, 'Android'],
+  [/iPhone|iPad/, 'iOS'],
+  [/Mac OS X/, 'macOS'],
+  [/Linux/, 'Linux'],
+];
+
+export function describeDevice(ua: string): string {
+  let browser = 'Browser lain';
+  for (const [re, name] of BROWSERS) {
+    const m = re.exec(ua);
+    if (m) {
+      browser = `${name} ${m[1]}`;
+      break;
+    }
+  }
+  const os = SYSTEMS.find(([re]) => re.test(ua))?.[1] ?? 'OS lain';
+  return `${browser}, ${os}`;
 }
 
 export function timeAgo(iso: string, now = Date.now()): string {
@@ -115,11 +191,4 @@ export function formatDuration(ms: number): string {
   if (hours < 1) return `${Math.max(1, Math.round(hours * 60))} mnt`;
   if (hours < 48) return `${hours.toFixed(1).replace('.', ',')} jam`;
   return `${Math.round(hours / 24)} hari`;
-}
-
-/** 15-char [a-z0-9] id, the PocketBase record id format, so offline records keep their id after sync. */
-export function newId(): string {
-  const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  const bytes = crypto.getRandomValues(new Uint8Array(15));
-  return Array.from(bytes, (b) => alphabet[b % alphabet.length]).join('');
 }

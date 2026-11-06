@@ -87,7 +87,7 @@ export function TicketKanbanBoard({
                       <span className="font-mono text-xs font-semibold text-ink">
                         {ticket.ticketNumber}
                       </span>
-                      <PriorityBadge priority={ticket.priority} size="sm" />
+                      <PriorityBadge priority={ticket.priority} />
                     </div>
 
                     <p className="mt-1.5 text-xs font-medium text-ink line-clamp-2">
@@ -95,7 +95,7 @@ export function TicketKanbanBoard({
                     </p>
 
                     <div className="mt-2.5 flex items-center justify-between gap-2">
-                      <AppBadge appId={ticket.appId} size="sm" />
+                      <AppBadge appId={ticket.appId} />
                       <span className="font-mono text-[10px] text-ink-faint">
                         {timeAgo(ticket.createdAt)}
                       </span>

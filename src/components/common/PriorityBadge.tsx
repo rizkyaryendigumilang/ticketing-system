@@ -1,38 +1,22 @@
 import { PRIORITY_LABEL } from '../../config/vpsAppsConfig';
 import type { TicketPriority } from '../../types/crm';
 
-const PRIORITY_STYLES: Record<TicketPriority, { pill: string; bar: string }> = {
-  low: {
-    pill: 'text-ink-muted bg-subtle border-line',
-    bar: 'bg-neutral-400',
-  },
-  medium: {
-    pill: 'text-sky-800 bg-sky-50 border-sky-200',
-    bar: 'bg-sky-600',
-  },
-  high: {
-    pill: 'text-orange-800 bg-orange-50 border-orange-200',
-    bar: 'bg-orange-600',
-  },
-  urgent: {
-    pill: 'text-red-800 bg-red-100/80 border-red-300 font-semibold',
-    bar: 'bg-red-600',
-  },
-};
+const LEVEL: Record<TicketPriority, number> = { low: 1, medium: 2, high: 3, urgent: 4 };
 
-interface Props {
-  priority: TicketPriority;
-  size?: 'sm' | 'md';
-}
-
-export function PriorityBadge({ priority, size = 'md' }: Props) {
-  const style = PRIORITY_STYLES[priority];
-  const pad = size === 'sm' ? 'px-1.5 py-0.5 text-[11px]' : 'px-2 py-0.5 text-xs';
+/** Signal bars: the number of filled bars is the priority level. */
+export function PriorityBadge({ priority }: { priority: TicketPriority }) {
+  const urgent = priority === 'urgent';
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded border leading-tight ${pad} ${style.pill}`}
-    >
-      <span className={`h-2 w-0.5 rounded-full ${style.bar}`} />
+    <span className={`inline-flex items-center gap-1.5 whitespace-nowrap text-xs ${urgent ? 'font-semibold text-red-700' : 'text-ink-muted'}`}>
+      <span className="flex items-end gap-px" aria-hidden>
+        {[1, 2, 3, 4].map((n) => (
+          <span
+            key={n}
+            className={`w-[3px] rounded-sm ${n <= LEVEL[priority] ? 'bg-current' : 'bg-line'}`}
+            style={{ height: 3 + n * 2 }}
+          />
+        ))}
+      </span>
       {PRIORITY_LABEL[priority]}
     </span>
   );

@@ -108,8 +108,8 @@ export function UserTicketList({
                   <span className="font-mono text-xs font-bold text-ink">
                     {ticket.ticketNumber}
                   </span>
-                  <StatusBadge status={ticket.status} size="sm" />
-                  <PriorityBadge priority={ticket.priority} size="sm" />
+                  <StatusBadge status={ticket.status} />
+                  <PriorityBadge priority={ticket.priority} />
                   <span className="text-xs text-ink-muted">
                     · {CATEGORY_LABEL[ticket.category]}
                   </span>

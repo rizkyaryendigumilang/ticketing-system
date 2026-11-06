@@ -2,19 +2,20 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { getApp } from '../../config/vpsAppsConfig';
 import { useCrm } from '../../context/CrmContext';
-import type { CreateTicketInput } from '../../services/ticketCrmService';
+import { createTicket } from '../../services/ticketCrmService';
+import type { NewTicketInput } from '../../services/ticketCrmService';
 import { UserTicketForm } from '../../components/user-portal/UserTicketForm';
 
 export function PortalNewTicketPage() {
-  const { currentUser, createTicket } = useCrm();
+  const { requester } = useCrm();
   const navigate = useNavigate();
 
-  if (!currentUser) return null;
+  if (!requester) return null;
 
-  const app = getApp(currentUser.appId);
+  const app = getApp(requester.appId);
 
-  const handleSubmit = async (input: CreateTicketInput) => {
-    const created = await createTicket(input);
+  const handleSubmit = (input: NewTicketInput) => {
+    const created = createTicket(requester, input);
     navigate(`/portal/ticket/${created.id}`);
   };
 
@@ -30,13 +31,13 @@ export function PortalNewTicketPage() {
             Kembali ke Daftar Tiket Saya
           </Link>
           <h1 className="mt-1 text-lg font-bold tracking-tight text-ink">
-            Buat Tiket Laporan Kendala — {app?.name ?? currentUser.appId}
+            Buat Tiket Laporan Kendala — {app?.name ?? requester.appId}
           </h1>
         </div>
       </div>
 
       <UserTicketForm
-        user={currentUser}
+        user={requester}
         onSubmit={handleSubmit}
         onCancel={() => navigate('/portal')}
       />

@@ -1,42 +1,19 @@
 import { STATUS_LABEL } from '../../config/vpsAppsConfig';
 import type { TicketStatus } from '../../types/crm';
 
-const STATUS_STYLES: Record<TicketStatus, { pill: string; dot: string }> = {
-  open: {
-    pill: 'bg-red-50 text-red-700 border-red-200',
-    dot: 'bg-red-600',
-  },
-  in_progress: {
-    pill: 'bg-amber-50 text-amber-800 border-amber-200',
-    dot: 'bg-amber-500',
-  },
-  waiting_on_user: {
-    pill: 'bg-purple-50 text-purple-700 border-purple-200',
-    dot: 'bg-purple-600',
-  },
-  solved: {
-    pill: 'bg-emerald-50 text-emerald-800 border-emerald-200',
-    dot: 'bg-emerald-600',
-  },
-  closed: {
-    pill: 'bg-neutral-100 text-neutral-600 border-neutral-300',
-    dot: 'bg-neutral-400',
-  },
+/** Lifecycle colours from the spec: open red, in progress yellow, waiting purple, solved green, closed grey. */
+export const STATUS_COLOR: Record<TicketStatus, string> = {
+  open: '#D7263D',
+  in_progress: '#C98A04',
+  waiting_on_user: '#7A3FC7',
+  solved: '#1F8A4C',
+  closed: '#8A949E',
 };
 
-interface Props {
-  status: TicketStatus;
-  size?: 'sm' | 'md';
-}
-
-export function StatusBadge({ status, size = 'md' }: Props) {
-  const style = STATUS_STYLES[status];
-  const pad = size === 'sm' ? 'px-2 py-0.5 text-[11px]' : 'px-2.5 py-0.5 text-xs';
+export function StatusBadge({ status }: { status: TicketStatus }) {
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded border font-medium leading-tight ${pad} ${style.pill}`}
-    >
-      <span className={`h-1.5 w-1.5 rounded-full ${style.dot}`} />
+    <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-xs font-medium text-ink">
+      <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: STATUS_COLOR[status] }} />
       {STATUS_LABEL[status]}
     </span>
   );

@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Crown, ExternalLink, Lock, ShieldCheck } from 'lucide-react';
-import { ADMIN_EMAIL, DEMO_ACCOUNTS, getApp } from '../config/vpsAppsConfig';
+import { DEMO_ACCOUNTS, DEMO_ADMIN, getApp } from '../config/vpsAppsConfig';
 import { useCrm } from '../context/CrmContext';
 import { SimulationTopbar } from '../components/layout/SimulationTopbar';
 
 export function LoginPage() {
-  const { loginAsAdmin } = useCrm();
+  const { loginAdmin } = useCrm();
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState(ADMIN_EMAIL);
-  const [password, setPassword] = useState('Admin@CRM123!');
+  const [email, setEmail] = useState(DEMO_ADMIN.email);
+  const [password, setPassword] = useState(DEMO_ADMIN.password);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -19,12 +19,10 @@ export function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      await loginAsAdmin(email, password);
+      await loginAdmin(email, password);
       navigate('/admin');
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Gagal masuk sebagai Superadmin.',
-      );
+      setError(err instanceof Error ? err.message : 'Gagal masuk sebagai Superadmin.');
     } finally {
       setLoading(false);
     }
@@ -32,11 +30,11 @@ export function LoginPage() {
 
   const handleSimulateHandoff = (demo: (typeof DEMO_ACCOUNTS)[number]) => {
     const qs = new URLSearchParams({
-      app: demo.appId,
+      app: demo.app,
       uid: demo.uid,
       name: demo.name,
       role: demo.role,
-      from_url: demo.fromUrl,
+      from_url: demo.fromUrl ?? '',
     });
     navigate(`/handoff?${qs.toString()}`);
   };
@@ -65,9 +63,7 @@ export function LoginPage() {
             <div className="rounded border border-line bg-panel p-5">
               <div className="flex items-center gap-2 border-b border-line pb-3">
                 <Crown className="h-4 w-4 text-amber-600" />
-                <h2 className="text-sm font-semibold text-ink">
-                  Login Superadmin (Owner VPS)
-                </h2>
+                <h2 className="text-sm font-semibold text-ink">Login Superadmin (Owner VPS)</h2>
               </div>
 
               <form onSubmit={handleAdminSubmit} className="mt-4 space-y-3.5">
@@ -78,10 +74,7 @@ export function LoginPage() {
                 )}
 
                 <div>
-                  <label
-                    htmlFor="admin-email"
-                    className="block text-xs font-medium text-ink"
-                  >
+                  <label htmlFor="admin-email" className="block text-xs font-medium text-ink">
                     Email Superadmin
                   </label>
                   <input
@@ -95,10 +88,7 @@ export function LoginPage() {
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="admin-pass"
-                    className="block text-xs font-medium text-ink"
-                  >
+                  <label htmlFor="admin-pass" className="block text-xs font-medium text-ink">
                     Kata Sandi
                   </label>
                   <input
@@ -116,8 +106,8 @@ export function LoginPage() {
                     <Lock className="h-3 w-3" />
                     Kredensial Demo Terisi Otomatis
                   </div>
-                  <div className="mt-0.5">Email: {ADMIN_EMAIL}</div>
-                  <div>Pass: Admin@CRM123!</div>
+                  <div className="mt-0.5">Email: {DEMO_ADMIN.email}</div>
+                  <div>Pass: {DEMO_ADMIN.password}</div>
                 </div>
 
                 <button
@@ -140,16 +130,25 @@ export function LoginPage() {
                   Simulasi Klik Tombol &ldquo;Help&rdquo; dari 7 Aplikasi (SSO Handoff)
                 </h2>
                 <p className="mt-0.5 text-xs text-ink-muted">
-                  Menguji endpoint <code className="rounded bg-subtle px-1 py-0.5 font-mono text-[11px]">/handoff?app=...&amp;uid=...</code> dengan auto-create user berdasarkan Composite ID <code className="rounded bg-subtle px-1 py-0.5 font-mono text-[11px]">{'{app_slug}:{uid}'}</code>.
+                  Menguji endpoint{' '}
+                  <code className="rounded bg-subtle px-1 py-0.5 font-mono text-[11px]">
+                    /handoff?app=...&amp;uid=...
+                  </code>{' '}
+                  dengan auto-create user berdasarkan Composite ID{' '}
+                  <code className="rounded bg-subtle px-1 py-0.5 font-mono text-[11px]">
+                    {'{app_slug}:{uid}'}
+                  </code>
+                  .
                 </p>
               </div>
 
               <div className="mt-3 divide-y divide-line">
                 {DEMO_ACCOUNTS.map((demo) => {
-                  const app = getApp(demo.appId);
+                  const app = getApp(demo.app);
+                  const compositeKey = `${demo.app}:${demo.uid}`;
                   return (
                     <div
-                      key={demo.compositeKey}
+                      key={compositeKey}
                       className="flex flex-wrap items-center justify-between gap-3 py-2.5 first:pt-1 last:pb-0"
                     >
                       <div className="min-w-0">
@@ -163,12 +162,8 @@ export function LoginPage() {
                           >
                             {app?.prefix}
                           </span>
-                          <span className="text-xs font-semibold text-ink">
-                            {app?.name}
-                          </span>
-                          <span className="font-mono text-[11px] text-ink-muted">
-                            ({demo.compositeKey})
-                          </span>
+                          <span className="text-xs font-semibold text-ink">{app?.name}</span>
+                          <span className="font-mono text-[11px] text-ink-muted">({compositeKey})</span>
                         </div>
                         <p className="mt-0.5 text-xs text-ink-muted">
                           {demo.name} · <span className="text-ink">{demo.role}</span>

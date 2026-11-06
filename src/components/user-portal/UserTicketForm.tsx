@@ -7,12 +7,12 @@ import {
   PRIORITY_ORDER,
 } from '../../config/vpsAppsConfig';
 import type { CrmUser, TicketCategory, TicketPriority } from '../../types/crm';
-import type { CreateTicketInput } from '../../services/ticketCrmService';
+import type { NewTicketInput } from '../../services/ticketCrmService';
 import { ScreenshotUploader } from '../common/ScreenshotUploader';
 
 interface Props {
   user: CrmUser;
-  onSubmit: (input: CreateTicketInput) => Promise<void>;
+  onSubmit: (input: NewTicketInput) => void;
   onCancel: () => void;
 }
 
@@ -37,7 +37,7 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!subject.trim()) {
       setError('Judul laporan wajib diisi.');
@@ -50,27 +50,15 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
 
     setError(null);
     setSubmitting(true);
-    try {
-      await onSubmit({
-        appId: user.appId,
-        requesterId: user.id,
-        requesterName: user.name,
-        requesterUid: user.externalUid,
-        requesterRole: user.appRole,
-        subject: subject.trim(),
-        description: description.trim(),
-        category,
-        priority,
-        sourcePageUrl: sourcePageUrl.trim() || undefined,
-        attachments,
-      });
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Gagal mengirim tiket laporan.',
-      );
-    } finally {
-      setSubmitting(false);
-    }
+    onSubmit({
+      subject: subject.trim(),
+      description: description.trim(),
+      category,
+      priority,
+      sourcePageUrl: sourcePageUrl.trim() || undefined,
+      attachments,
+    });
+    setSubmitting(false);
   };
 
   return (
@@ -244,7 +232,7 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
         <ScreenshotUploader
           attachments={attachments}
           onChange={setAttachments}
-          enableGlobalPaste
+         
         />
       </div>
 

@@ -1,43 +1,38 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { AlertTriangle, ArrowLeft } from 'lucide-react';
-import { validateHandoffQuery } from '../services/authHandoffService';
+import { VPS_APPS } from '../config/vpsAppsConfig';
+import { parseHandoff } from '../services/crmLogic';
 import { useCrm } from '../context/CrmContext';
 
 export function HandoffRedirectPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { processHandoff } = useCrm();
+  const { handoff } = useCrm();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
-    const validation = validateHandoffQuery(searchParams);
-    if (!validation.ok) {
-      setError(validation.error);
+    const result = parseHandoff(searchParams, VPS_APPS.map((a) => a.id));
+    if (!result.ok) {
+      setError(result.error);
       return;
     }
 
     const openNewForm = searchParams.get('new') === '1';
 
-    processHandoff(validation.params)
+    handoff(result.params)
       .then(() => {
         if (!active) return;
         navigate(openNewForm ? '/portal/new' : '/portal', { replace: true });
       })
       .catch((err) => {
         if (!active) return;
-        setError(
-          err instanceof Error
-            ? err.message
-            : 'Gagal memproses sesi handoff aplikasi.',
-        );
+        setError(err instanceof Error ? err.message : 'Gagal memproses sesi handoff aplikasi.');
       });
 
-    return () => {
-      active = false;
-    };
-  }, [searchParams, processHandoff, navigate]);
+    return () => { active = false; };
+  }, []); // Run once on mount
 
   if (error) {
     return (

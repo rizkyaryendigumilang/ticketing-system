@@ -150,7 +150,7 @@ export function CustomerProfileCard({
                   <span className="font-mono text-xs font-semibold text-ink">
                     {t.ticketNumber}
                   </span>
-                  <StatusBadge status={t.status} size="sm" />
+                  <StatusBadge status={t.status} />
                 </div>
                 <p className="mt-1 line-clamp-1 text-xs text-ink-muted">
                   {t.subject}

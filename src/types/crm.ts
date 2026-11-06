@@ -13,7 +13,7 @@ export interface AppSource {
 }
 
 export interface CrmUser {
-  id: string;              // Internal ID (15 char, PocketBase-compatible)
+  id: string;              // Internal ID: 15 char, diturunkan dari compositeKey (lihat userIdFor)
   compositeKey: string;    // Unique: '{appId}:{externalUid}' contoh: 'snackloop:staff1'
   appId: string;           // Relasi ke AppSource.id
   externalUid: string;     // Username/Email dari aplikasi asal ('staff1')
@@ -65,16 +65,6 @@ export interface CannedResponse {
   title: string;
   content: string;
   category?: string;
-}
-
-export interface DemoAccount {
-  compositeKey: string;
-  appId: string;
-  uid: string;
-  name: string;
-  role: string;
-  label: string;
-  fromUrl: string;
 }
 
 export interface HandoffParams {
