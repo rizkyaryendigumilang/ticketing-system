@@ -16,15 +16,20 @@
 
 @layer components {
   .field {
-    @apply w-full rounded-md border border-line bg-panel px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none;
+    @apply w-full rounded border border-line bg-panel px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none;
   }
   .btn {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-md border border-line bg-panel px-3 py-1.5 text-sm font-medium text-ink hover:border-line-strong hover:bg-subtle disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-1.5 rounded border border-line bg-panel px-3 py-1.5 text-sm font-medium text-ink hover:border-line-strong hover:bg-subtle disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-md bg-ink px-3 py-1.5 text-sm font-semibold text-white hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-1.5 rounded bg-ink px-3 py-1.5 text-sm font-semibold text-white hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50;
   }
   .panel {
-    @apply rounded-lg border border-line bg-panel;
+    @apply rounded border border-line bg-panel;
   }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }

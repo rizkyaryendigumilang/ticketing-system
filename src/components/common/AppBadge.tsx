@@ -4,7 +4,7 @@ import { getApp } from '../../config/vpsAppsConfig';
 export function AppBadge({ appId, withName = true }: { appId: string; withName?: boolean }) {
   const app = getApp(appId);
   return (
-    <span className="inline-flex min-w-0 items-center gap-2 text-sm text-ink">
+    <span className="inline-flex min-w-0 items-center gap-1.5 text-xs text-ink">
       <span
         className="inline-flex h-5 shrink-0 items-center rounded px-1.5 font-mono text-[11px] font-semibold text-white"
         style={{ backgroundColor: app?.color ?? '#5B6672' }}

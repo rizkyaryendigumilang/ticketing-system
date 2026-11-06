@@ -20,11 +20,11 @@ export function AdminDashboardPage() {
 
   return (
     <div className="space-y-6 p-5 sm:p-6">
-      {/* Header */}
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-4">
+      {/* Page Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-ink">
-            Peta Kesehatan 7 Aplikasi & Antrean Utama
+          <h1 className="text-lg font-semibold tracking-tight text-ink">
+            Peta Kesehatan 7 Aplikasi
           </h1>
           <p className="mt-0.5 text-xs text-ink-muted">
             Pantau aplikasi mana yang sedang memiliki kendala aktif dan selesaikan laporan yang baru masuk.
