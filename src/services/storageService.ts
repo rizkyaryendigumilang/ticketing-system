@@ -26,8 +26,8 @@ export interface OutboxOp {
   asAdmin: boolean; // needs a PocketBase superuser session to be accepted
 }
 
-const DATA_KEY = 'vps-crm:data:v3';
-const OUTBOX_KEY = 'vps-crm:outbox:v3';
+const DATA_KEY = 'vps-crm:data:v4';
+const OUTBOX_KEY = 'vps-crm:outbox:v4';
 
 function hasLocalStorage(): boolean {
   try {
