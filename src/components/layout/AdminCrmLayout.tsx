@@ -161,7 +161,7 @@ export function AdminCrmLayout() {
               <button
                 type="button"
                 onClick={() => setAppsExpanded((v) => !v)}
-                className="flex w-full items-center justify-between px-3.5 py-2.5 text-[11px] font-semibold uppercase tracking-widest text-neutral-500 hover:text-neutral-400"
+                className="flex w-full items-center justify-between px-3.5 py-2.5 text-[11px] font-medium text-neutral-400 hover:text-neutral-300"
               >
                 <span>Ekosistem (7)</span>
                 <ChevronDown

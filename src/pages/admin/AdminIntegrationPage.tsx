@@ -217,7 +217,7 @@ function openHelpdeskCRM(currentUser) {
 
         {/* Live Button Preview Card */}
         <div className="mt-4 rounded-lg border border-line bg-canvas p-4">
-          <span className="text-[11px] font-semibold text-ink-muted uppercase tracking-wider">
+          <span className="text-[11px] font-medium text-ink-muted">
             Live Preview Tombol Bantuan ({selectedApp.name})
           </span>
           <div className="mt-2.5 flex items-center gap-3">

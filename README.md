@@ -45,3 +45,42 @@ Setiap aplikasi cukup mengarahkan user ke rute:
 
 - **Anti-Bentrok Username (`Composite Identity`):** Sistem membuat kunci unik `compositeKey = "{app_slug}:{external_user_id}"` (contoh: `snackloop:admin_kiky`, `wedding:admin@wedding.local`).
 - **Auto-Create User (JIT Provisioning):** Jika `compositeKey` belum terdaftar di `crm_users`, akun otomatis dibuat dan langsung login ke `/portal` aplikasi asalnya.
+
+## Deployment VPS & Konfigurasi Caddy v2
+
+Aplikasi ini di-deploy di VPS (`43.156.236.102`) menggunakan **Caddy v2** sebagai web server & reverse proxy:
+
+- **Helpdesk CRM Live:** `https://43.156.236.102/helpdesk/`
+- **Handoff Endpoint:** `https://43.156.236.102/helpdesk/handoff?app={app_slug}&uid={uid}&name={name}&role={role}`
+- **Admin Login:** `admin@crm.local` / `Admin@CRM123!`
+- **Direktori Live Web:** `/srv/www/helpdesk`
+
+### Blok Caddyfile (`/etc/caddy/Caddyfile`)
+
+```caddy
+# HELPDESK_STATIC_ROUTE (Ticketing System & CRM)
+@helpdesk_root path /helpdesk
+redir @helpdesk_root /helpdesk/ 308
+handle_path /helpdesk/* {
+    @assets path /assets/*
+    header @assets Cache-Control "public, max-age=31536000, immutable"
+    @html path / /index.html
+    header @html Cache-Control "no-cache, must-revalidate"
+    root * /srv/www/helpdesk
+    try_files {path} {path}/ /index.html
+    file_server
+}
+```
+
+### GitHub Actions CI/CD Secrets
+
+Tambahkan 4 secret berikut di **GitHub Repository → Settings → Secrets and variables → Actions** untuk mengaktifkan auto-deploy saat push ke branch `main`:
+
+| Secret Name | Value Contoh | Deskripsi |
+|---|---|---|
+| `VPS_HOST` | `43.156.236.102` | IP publik server VPS |
+| `VPS_USERNAME` | `ubuntu` | User deploy di VPS |
+| `VPS_SSH_KEY` | `-----BEGIN OPENSSH PRIVATE KEY----- ...` | Private key SSH untuk autentikasi |
+| `VPS_SSH_KNOWN_HOSTS` | `43.156.236.102 ssh-ed25519 ...` | Host key fingerprint VPS |
+| *(Opsional)* `VPS_SSH_PORT` | `2222` | Port SSH VPS jika non-standar |
+

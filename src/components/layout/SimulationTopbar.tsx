@@ -130,7 +130,7 @@ export function SimulationTopbar() {
           {open && (
             <div className="absolute left-0 top-full z-50 mt-1.5 w-80 overflow-hidden rounded-lg border border-neutral-700/80 bg-[#14181F] shadow-2xl backdrop-blur-md">
               <div className="flex items-center justify-between border-b border-neutral-800 bg-neutral-900/60 px-3 py-2 text-[11px]">
-                <span className="font-semibold uppercase tracking-wider text-neutral-400">
+                <span className="font-medium text-neutral-400">
                   Simulasi Klik Tombol Help (SSO)
                 </span>
                 <span className="font-mono text-[10px] text-neutral-500">
