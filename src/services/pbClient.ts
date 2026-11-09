@@ -2,8 +2,8 @@
 // Writes land in the local store + outbox first; when PocketBase answers, the outbox is sent,
 // fresh data is pulled, and realtime events keep the store current.
 import PocketBase, { ClientResponseError, type RecordModel } from 'pocketbase';
-import { fromPbRecord, toPbRecord, type CollectionName } from '../config/pbSchema';
-import { nextTicketNumber } from './crmLogic';
+import { fromPbRecord, toPbRecord, type CollectionName } from '../config/pbSchema.ts';
+import { nextTicketNumber } from './crmLogic.ts';
 import {
   enqueue,
   getOutbox,
@@ -13,11 +13,11 @@ import {
   upsertLocal,
   type Collection,
   type OutboxOp,
-} from './storageService';
+} from './storageService.ts';
 import type { AppSource, CrmUser, Ticket, TicketMessage } from '../types/crm';
 
 function resolvePbUrl(): string {
-  const raw = import.meta.env.VITE_PB_URL?.trim();
+  const raw = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_PB_URL)?.trim();
   if (raw) {
     if (raw.startsWith('/') && typeof window !== 'undefined') {
       return `${window.location.origin}${raw}`;
@@ -41,6 +41,16 @@ pb.autoCancellation(false);
 export type Connection = 'checking' | 'online' | 'offline';
 let connection: Connection = 'checking';
 const connectionListeners = new Set<() => void>();
+
+export type SyncErrorHandler = (message: string, op: OutboxOp) => void;
+const syncErrorListeners = new Set<SyncErrorHandler>();
+
+export function onSyncError(fn: SyncErrorHandler) {
+  syncErrorListeners.add(fn);
+  return () => {
+    syncErrorListeners.delete(fn);
+  };
+}
 
 export const getConnection = () => connection;
 export function subscribeConnection(fn: () => void) {
@@ -131,6 +141,18 @@ async function runFlush() {
         return;
       }
       console.warn('PocketBase menolak perubahan ini, dilewati:', op, e);
+      // Revert newly created phantom item from local store to prevent ghost records
+      if (!op.patch) {
+        removeLocal(op.collection, op.item.id);
+      }
+      const rawMsg =
+        e instanceof ClientResponseError
+          ? e.message || 'Perubahan ditolak server'
+          : e instanceof Error
+            ? e.message
+            : 'Perubahan ditolak oleh server.';
+      const errMsg = `Sinkronisasi gagal (${op.collection}): ${rawMsg}`;
+      syncErrorListeners.forEach((fn) => fn(errMsg, op));
     }
   }
   setOutbox([...kept, ...getOutbox().slice(ops.length)]);
@@ -203,7 +225,7 @@ export function startSync(): Promise<void> {
   if (ready) return ready;
   ready = check();
   setInterval(check, 10_000);
-  window.addEventListener('online', check);
+  if (typeof window !== 'undefined') window.addEventListener('online', check);
   pb.authStore.onChange(() => {
     if (connection === 'online') void resync();
   });

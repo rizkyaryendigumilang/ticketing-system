@@ -7,7 +7,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "pb:init": "node scripts/init-pocketbase.mjs",
-    "test": "node --test src/services/crmLogic.test.ts"
+    "test": "node --test src/services/crmLogic.test.ts src/services/ticketCrmService.test.ts"
   },
   "dependencies": {
     "lucide-react": "^0.460.0",

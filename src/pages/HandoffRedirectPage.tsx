@@ -32,7 +32,7 @@ export function HandoffRedirectPage() {
       });
 
     return () => { active = false; };
-  }, []); // Run once on mount
+  }, [searchParams, handoff, navigate]);
 
   if (error) {
     return (

@@ -1,5 +1,5 @@
 import type { AppSource, CannedResponse, HandoffParams, TicketCategory, TicketPriority, TicketStatus } from '../types/crm';
-import { SEED_APPS } from './seedData';
+import { SEED_APPS } from './seedData.ts';
 
 export const VPS_APPS: AppSource[] = SEED_APPS;
 

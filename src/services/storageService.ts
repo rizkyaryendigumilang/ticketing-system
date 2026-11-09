@@ -1,5 +1,5 @@
 // Local store: the UI always reads from here. PocketBase sync lives in pbClient.ts.
-import { buildSeed, SEED_APPS } from '../config/seedData';
+import { buildSeed, SEED_APPS } from '../config/seedData.ts';
 import type { AppSource, CrmUser, Ticket, TicketMessage } from '../types/crm';
 
 export interface CrmData {
@@ -29,9 +29,17 @@ export interface OutboxOp {
 const DATA_KEY = 'vps-crm:data:v3';
 const OUTBOX_KEY = 'vps-crm:outbox:v3';
 
+function hasLocalStorage(): boolean {
+  try {
+    return typeof localStorage !== 'undefined' && typeof localStorage.getItem === 'function';
+  } catch {
+    return false;
+  }
+}
+
 function read<T>(key: string, fallback: () => T): T {
   try {
-    const raw = localStorage.getItem(key);
+    const raw = hasLocalStorage() ? localStorage.getItem(key) : null;
     return raw ? (JSON.parse(raw) as T) : fallback();
   } catch {
     return fallback();
@@ -40,7 +48,9 @@ function read<T>(key: string, fallback: () => T): T {
 
 function write(key: string, value: unknown) {
   try {
-    localStorage.setItem(key, JSON.stringify(value));
+    if (hasLocalStorage()) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
   } catch (e) {
     // shortcut: screenshots are base64 in localStorage (~5 MB quota); past it, changes live in memory until reload.
     console.warn('Penyimpanan browser penuh, perubahan hanya ada di memori sampai PocketBase aktif.', e);

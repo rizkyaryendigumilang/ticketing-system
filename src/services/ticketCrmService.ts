@@ -1,8 +1,8 @@
 // Ticket actions. Each one writes to the local store immediately and queues the change for PocketBase.
-import { getApp, STATUS_LABEL } from '../config/vpsAppsConfig';
-import { describeDevice, newId, nextTicketNumber, safeHttpUrl, statusAfterRequesterReply } from './crmLogic';
-import { saveRecord } from './pbClient';
-import { getData } from './storageService';
+import { getApp, STATUS_LABEL } from '../config/vpsAppsConfig.ts';
+import { describeDevice, newId, nextTicketNumber, safeHttpUrl, statusAfterRequesterReply } from './crmLogic.ts';
+import { saveRecord } from './pbClient.ts';
+import { getData } from './storageService.ts';
 import type { CrmUser, Ticket, TicketCategory, TicketMessage, TicketPriority, TicketStatus } from '../types/crm';
 
 /** Who performs an action. Admin actions need a PocketBase superuser session to sync. */

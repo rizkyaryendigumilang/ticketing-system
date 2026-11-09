@@ -1,7 +1,7 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCrm } from '../../context/CrmContext';
-import { visibleMessages } from '../../services/crmLogic';
+import { sortQueue, visibleMessages } from '../../services/crmLogic';
 import { changeTicket, replyToTicket, solveTicket } from '../../services/ticketCrmService';
 import type { TicketStatus } from '../../types/crm';
 import { TicketWorkspace3Col } from '../../components/crm-admin/TicketWorkspace3Col';
@@ -46,9 +46,10 @@ export function AdminTicketDetailPage() {
       (t.appId === ticket.appId && t.requesterUid === ticket.requesterUid),
   );
 
-  const currentIdx = data.tickets.findIndex((t) => t.id === ticket.id);
-  const prevTicket = currentIdx > 0 ? data.tickets[currentIdx - 1] : null;
-  const nextTicket = currentIdx >= 0 && currentIdx < data.tickets.length - 1 ? data.tickets[currentIdx + 1] : null;
+  const queue = sortQueue(data.tickets);
+  const currentIdx = queue.findIndex((t) => t.id === ticket.id);
+  const prevTicket = currentIdx > 0 ? queue[currentIdx - 1] : null;
+  const nextTicket = currentIdx >= 0 && currentIdx < queue.length - 1 ? queue[currentIdx + 1] : null;
 
   const handleStatusChange = (status: TicketStatus) => changeTicket(ticket, { status }, adminActor);
   const handlePriorityChange = (priority: typeof ticket.priority) => changeTicket(ticket, { priority }, adminActor);

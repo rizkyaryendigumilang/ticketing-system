@@ -24,6 +24,8 @@ export function AdminIntegrationPage() {
     typeof window !== 'undefined'
       ? window.location.origin
       : 'http://localhost:5173';
+  const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+  const handoffBaseUrl = `${origin}${basePath}/handoff`;
 
   const sampleAccounts = DEMO_ACCOUNTS.filter(
     (d) => d.app === selectedApp.id,
@@ -36,7 +38,7 @@ export function AdminIntegrationPage() {
     fromUrl: selectedApp.appUrl,
   };
 
-  const handoffUrlExample = `${origin}/handoff?app=${encodeURIComponent(
+  const handoffUrlExample = `${handoffBaseUrl}?app=${encodeURIComponent(
     selectedApp.id,
   )}&uid=${encodeURIComponent(sample.uid)}&name=${encodeURIComponent(
     sample.name,
@@ -46,7 +48,7 @@ export function AdminIntegrationPage() {
 
   const htmlSnippet = `<!-- Tombol Help ${selectedApp.name} (${selectedApp.prefix}) -->
 <a
-  href="${origin}/handoff?app=${selectedApp.id}&uid=${sample.uid}&name=${encodeURIComponent(
+  href="${handoffBaseUrl}?app=${selectedApp.id}&uid=${sample.uid}&name=${encodeURIComponent(
     sample.name,
   )}&role=${encodeURIComponent(sample.role)}&from_url=${encodeURIComponent(
     selectedApp.appUrl,
@@ -69,7 +71,7 @@ function openHelpdeskCRM(currentUser) {
     role: currentUser.role,           // contoh: '${sample.role}'
     from_url: window.location.href,
   });
-  window.open('${origin}/handoff?' + params.toString(), '_blank', 'noopener');
+  window.open('${handoffBaseUrl}?' + params.toString(), '_blank', 'noopener');
 }`;
 
   const copyText = (key: string, value: string, label: string) => {
@@ -114,7 +116,7 @@ function openHelpdeskCRM(currentUser) {
         <p className="mt-1 text-xs text-ink-muted">
           Pasang 1 tombol di setiap aplikasi eksternal. Saat diklik, rute{' '}
           <code className="rounded bg-subtle px-1 py-0.5 font-mono text-[11px] font-semibold text-ink">
-            /handoff
+            {basePath}/handoff
           </code>{' '}
           otomatis mengecek <code className="rounded bg-subtle px-1 py-0.5 font-mono text-[11px] font-semibold text-ink">compositeId = &quot;{'{app_slug}:{uid}'}&quot;</code>, membuatkan akun baru jika belum ada (Just-In-Time Provisioning), dan mengarahkan user ke Portal Bantuan aplikasinya.
         </p>

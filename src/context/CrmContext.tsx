@@ -9,8 +9,9 @@ import {
   logoutRequester as runLogoutRequester,
   type AdminSession,
 } from '../services/authHandoffService';
-import { getConnection, startSync, subscribeConnection, type Connection } from '../services/pbClient';
+import { getConnection, onSyncError, startSync, subscribeConnection, type Connection } from '../services/pbClient';
 import { getData, getOutbox, resetToSeed, subscribeStore, type CrmData } from '../services/storageService';
+import { useToast } from './ToastContext';
 const ADMIN_SENDER_ID = 'system:admin';
 import type { Actor } from '../services/ticketCrmService';
 import type { CrmUser, HandoffParams } from '../types/crm';
@@ -44,14 +45,20 @@ export function CrmProvider({ children }: { children: React.ReactNode }) {
   const connection = useSyncExternalStore(subscribeConnection, getConnection);
   const [admin, setAdmin] = useState(getAdminSession);
   const [requesterId, setRequesterId] = useState(getRequesterId);
-  const [toast, setToast] = useState<string | null>(null);
+  const toast = useToast();
 
-  const notify = useCallback((message: string) => setToast(message), []);
+  const notify = useCallback(
+    (message: string) => {
+      toast.info(message);
+    },
+    [toast],
+  );
 
+  // Hook sync errors from PocketBase client into toast notifications
   useEffect(() => {
-    if (!toast) return;
-    const timer = setTimeout(() => setToast(null), 6000);
-    return () => clearTimeout(timer);
+    return onSyncError((errMsg) => {
+      toast.error(errMsg);
+    });
   }, [toast]);
 
   // Tell the Superadmin when a ticket arrives that was not in the store before (realtime or another tab).
@@ -99,14 +106,6 @@ export function CrmProvider({ children }: { children: React.ReactNode }) {
   return (
     <CrmContext.Provider value={value}>
       {children}
-      {toast && (
-        <div
-          role="status"
-          className="fixed bottom-4 right-4 z-50 max-w-sm rounded-md border border-line bg-ink px-4 py-3 text-sm text-white shadow-lg"
-        >
-          {toast}
-        </div>
-      )}
     </CrmContext.Provider>
   );
 }

@@ -9,11 +9,11 @@ import { ToastProvider } from './context/ToastContext.tsx'
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter basename={import.meta.env.BASE_URL}>
-      <CrmProvider>
-        <ToastProvider>
+      <ToastProvider>
+        <CrmProvider>
           <App />
-        </ToastProvider>
-      </CrmProvider>
+        </CrmProvider>
+      </ToastProvider>
     </BrowserRouter>
   </StrictMode>,
 )
