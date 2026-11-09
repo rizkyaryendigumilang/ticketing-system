@@ -5,11 +5,20 @@ import { useCrm } from '../../context/CrmContext';
 import { SimulationTopbar } from './SimulationTopbar';
 
 export function UserPortalLayout() {
-  const { requester, logoutRequester } = useCrm();
+  const { data, requester, logoutRequester } = useCrm();
   const navigate = useNavigate();
 
   const app = getApp(requester?.appId);
   const returnUrl = requester?.lastSeenUrl ?? app?.appUrl;
+
+  const userTickets = data.tickets.filter(
+    (t) =>
+      t.requesterId === requester?.id ||
+      (t.appId === requester?.appId && t.requesterUid === requester?.externalUid),
+  );
+  const activeCount = userTickets.filter(
+    (t) => t.status === 'open' || t.status === 'in_progress' || t.status === 'waiting_on_user',
+  ).length;
 
   const handleLogout = () => {
     logoutRequester();
@@ -20,14 +29,16 @@ export function UserPortalLayout() {
     <div className="min-h-screen bg-canvas text-ink">
       <SimulationTopbar />
 
-      <header className="border-b border-line bg-panel">
+      <header className="border-b border-line bg-panel shadow-sm">
+        {/* App identity color stripe */}
         <div className="h-1 w-full" style={{ backgroundColor: app?.color ?? '#141413' }} />
+
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
           <div className="flex items-center gap-3">
             <span
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded border font-mono text-xs font-bold"
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border font-mono text-xs font-bold shadow-sm"
               style={{
-                backgroundColor: `${app?.color ?? '#141413'}12`,
+                backgroundColor: `${app?.color ?? '#141413'}14`,
                 borderColor: `${app?.color ?? '#141413'}35`,
                 color: app?.color ?? '#141413',
               }}
@@ -36,14 +47,19 @@ export function UserPortalLayout() {
             </span>
             <div>
               <div className="flex items-center gap-2">
-                <Link to="/portal" className="text-base font-semibold tracking-tight text-ink hover:underline">
+                <Link to="/portal" className="text-base font-bold tracking-tight text-ink hover:underline">
                   Pusat Bantuan {app?.name ?? 'Aplikasi'}
                 </Link>
+                {activeCount > 0 && (
+                  <span className="rounded-full bg-red-100 text-red-700 font-mono text-[10px] font-bold px-2 py-0.5 shadow-sm">
+                    {activeCount} aktif
+                  </span>
+                )}
               </div>
               <p className="text-xs text-ink-muted">
-                Masuk sebagai <span className="font-medium text-ink">{requester?.name}</span>{' '}
+                Pelapor: <span className="font-semibold text-ink">{requester?.name}</span>{' '}
                 (<span className="font-mono text-[11px]">{requester?.externalUid}</span> ·{' '}
-                {requester?.appRole})
+                <span className="text-ink">{requester?.appRole}</span>)
               </p>
             </div>
           </div>
@@ -54,7 +70,7 @@ export function UserPortalLayout() {
                 href={returnUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded border border-line bg-subtle px-3 py-1.5 text-xs font-medium text-ink hover:border-line-strong"
+                className="inline-flex items-center gap-1.5 rounded-md border border-line bg-subtle px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:border-line-strong hover:bg-line/40"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 Kembali ke {app?.name ?? 'Aplikasi'}
@@ -65,7 +81,7 @@ export function UserPortalLayout() {
             <button
               type="button"
               onClick={() => navigate('/portal/new')}
-              className="inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+              className="inline-flex items-center gap-1.5 rounded-md px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-95"
               style={{ backgroundColor: app?.color ?? '#141413' }}
             >
               <Plus className="h-3.5 w-3.5" />
@@ -75,8 +91,8 @@ export function UserPortalLayout() {
             <button
               type="button"
               onClick={handleLogout}
-              title="Ganti akun"
-              className="inline-flex items-center gap-1 rounded border border-line px-2.5 py-1.5 text-xs text-ink-muted hover:border-line-strong hover:text-ink"
+              title="Ganti akun / Keluar sesi user"
+              className="inline-flex items-center gap-1 rounded-md border border-line px-2.5 py-1.5 text-xs text-ink-muted transition-colors hover:border-line-strong hover:text-ink hover:bg-subtle"
             >
               <LogOut className="h-3.5 w-3.5" />
             </button>

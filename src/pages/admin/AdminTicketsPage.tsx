@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Columns3, Table2 } from 'lucide-react';
-import { VPS_APPS } from '../../config/vpsAppsConfig';
+import { STATUS_LABEL, VPS_APPS } from '../../config/vpsAppsConfig';
 import { filterTickets, sortQueue } from '../../services/crmLogic';
 import { changeTicket } from '../../services/ticketCrmService';
 import { useCrm } from '../../context/CrmContext';
+import { useToast } from '../../context/ToastContext';
 import type { TicketPriority, TicketStatus } from '../../types/crm';
 import { TicketInboxTable } from '../../components/crm-admin/TicketInboxTable';
 import { TicketKanbanBoard } from '../../components/crm-admin/TicketKanbanBoard';
 
 export function AdminTicketsPage() {
   const { data, adminActor } = useCrm();
+  const toast = useToast();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -39,7 +41,10 @@ export function AdminTicketsPage() {
 
   const handleStatusChange = (ticketId: string, status: TicketStatus) => {
     const ticket = data.tickets.find((t) => t.id === ticketId);
-    if (ticket) changeTicket(ticket, { status }, adminActor);
+    if (ticket) {
+      changeTicket(ticket, { status }, adminActor);
+      toast.success(`Tiket #${ticket.ticketNumber} diubah ke: ${STATUS_LABEL[status]}`);
+    }
   };
 
   const kanbanTickets = sortQueue(

@@ -51,10 +51,10 @@ export function AdminDashboardPage() {
 
       {/* Operational Summary Strip */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        <div className="rounded border border-red-200 bg-panel p-3.5">
+        <div className="rounded-lg border border-red-200 bg-panel p-4 shadow-sm">
           <div className="flex items-center justify-between text-xs text-ink-muted">
-            <span>Baru Masuk (Open)</span>
-            <AlertCircle className="h-3.5 w-3.5 text-red-600" />
+            <span className="font-medium">Baru Masuk (Open)</span>
+            <AlertCircle className="h-4 w-4 text-red-600" />
           </div>
           <div className="mt-1.5 text-2xl font-bold text-red-600 tabular-nums">{stats.open}</div>
           <div className="mt-0.5 text-[11px] text-ink-muted">
@@ -62,21 +62,21 @@ export function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="rounded border border-line bg-panel p-3.5">
+        <div className="rounded-lg border border-line bg-panel p-4 shadow-sm">
           <div className="flex items-center justify-between text-xs text-ink-muted">
-            <span>Sedang Dikerjakan</span>
-            <Clock className="h-3.5 w-3.5 text-amber-600" />
+            <span className="font-medium">Sedang Dikerjakan</span>
+            <Clock className="h-4 w-4 text-amber-600" />
           </div>
           <div className="mt-1.5 text-2xl font-bold text-ink tabular-nums">{stats.inProgress}</div>
           <div className="mt-0.5 text-[11px] text-ink-muted">
-            +{stats.waiting} menunggu konfirmasi user
+            +{stats.waiting} menunggu respons user
           </div>
         </div>
 
-        <div className="rounded border border-line bg-panel p-3.5">
+        <div className="rounded-lg border border-line bg-panel p-4 shadow-sm">
           <div className="flex items-center justify-between text-xs text-ink-muted">
-            <span>Selesai Minggu Ini</span>
-            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-700" />
+            <span className="font-medium">Selesai Minggu Ini</span>
+            <CheckCircle2 className="h-4 w-4 text-emerald-700" />
           </div>
           <div className="mt-1.5 text-2xl font-bold text-emerald-800 tabular-nums">
             {stats.solvedThisWeek}
@@ -86,16 +86,16 @@ export function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="rounded border border-line bg-panel p-3.5">
-          <div className="text-xs text-ink-muted">Rata-rata Penyelesaian</div>
+        <div className="rounded-lg border border-line bg-panel p-4 shadow-sm">
+          <div className="text-xs font-medium text-ink-muted">Rata-rata Penyelesaian</div>
           <div className="mt-1.5 text-2xl font-bold text-ink tabular-nums">
             {stats.avgResolutionMs > 0 ? formatDuration(stats.avgResolutionMs) : '—'}
           </div>
           <div className="mt-0.5 text-[11px] text-ink-muted">Dari tiket masuk hingga Solved</div>
         </div>
 
-        <div className="col-span-2 rounded border border-line bg-panel p-3.5 sm:col-span-1">
-          <div className="text-xs text-ink-muted">Pelapor Terdaftar</div>
+        <div className="col-span-2 rounded-lg border border-line bg-panel p-4 shadow-sm sm:col-span-1">
+          <div className="text-xs font-medium text-ink-muted">Pelapor Terdaftar</div>
           <div className="mt-1.5 text-2xl font-bold text-ink tabular-nums">{contacts.length}</div>
           <div className="mt-0.5 text-[11px] text-ink-muted">Terkumpul otomatis via Handoff</div>
         </div>
@@ -119,8 +119,8 @@ export function AdminDashboardPage() {
       </section>
 
       {/* Priority Open Queue */}
-      <section className="rounded border border-line bg-panel">
-        <div className="flex items-center justify-between border-b border-line px-4 py-3">
+      <section className="rounded-lg border border-line bg-panel shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between border-b border-line px-4 py-3 bg-subtle/40">
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-red-600" />
             <h2 className="text-base font-semibold text-ink">

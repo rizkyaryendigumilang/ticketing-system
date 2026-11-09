@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import {
+  AlertTriangle,
   CheckCircle2,
+  Clock,
   ExternalLink,
   Lock,
   MessageSquare,
   Monitor,
   Send,
+  Sparkles,
 } from 'lucide-react';
 import {
   CATEGORY_LABEL,
@@ -30,6 +33,7 @@ import { ScreenshotUploader } from '../common/ScreenshotUploader';
 import { StatusBadge } from '../common/StatusBadge';
 import { CannedResponsePicker } from './CannedResponsePicker';
 import { CustomerProfileCard } from './CustomerProfileCard';
+import { useToast } from '../../context/ToastContext';
 
 interface Props {
   ticket: Ticket;
@@ -62,6 +66,7 @@ export function TicketWorkspace3Col({
   onSendMessage,
   onSolveTicket,
 }: Props) {
+  const toast = useToast();
   const [composerMode, setComposerMode] = useState<'public' | 'internal'>('public');
   const [body, setBody] = useState('');
   const [attachments, setAttachments] = useState<string[]>([]);
@@ -72,10 +77,26 @@ export function TicketWorkspace3Col({
 
   const handleInsertCanned = (text: string) => {
     setBody((prev) => (prev.trim() ? `${prev}\n\n${text}` : text));
+    toast.info('Template balasan cepat dimasukkan ke kolom teks.');
   };
 
-  const handleReplySubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleStatusSelect = (st: TicketStatus) => {
+    onStatusChange(st);
+    toast.success(`Status tiket diubah menjadi: ${STATUS_LABEL[st]}`);
+  };
+
+  const handlePrioritySelect = (pr: TicketPriority) => {
+    onPriorityChange(pr);
+    toast.info(`Prioritas tiket diubah menjadi: ${PRIORITY_LABEL[pr]}`);
+  };
+
+  const handleCategorySelect = (cat: TicketCategory) => {
+    onCategoryChange(cat);
+    toast.info(`Kategori masalah diubah menjadi: ${CATEGORY_LABEL[cat]}`);
+  };
+
+  const handleReplySubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!body.trim() && attachments.length === 0) return;
     setSubmitting(true);
     try {
@@ -83,6 +104,11 @@ export function TicketWorkspace3Col({
       const nextStatus: TicketStatus | undefined =
         !isInternal && ticket.status === 'open' ? 'waiting_on_user' : undefined;
       onSendMessage(body, isInternal, attachments, nextStatus);
+      toast.success(
+        isInternal
+          ? 'Catatan internal rahasia berhasil disimpan.'
+          : 'Balasan terkirim ke pelapor!',
+      );
       setBody('');
       setAttachments([]);
     } finally {
@@ -90,13 +116,21 @@ export function TicketWorkspace3Col({
     }
   };
 
-  const handleSolveClick = async () => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      handleReplySubmit();
+    }
+  };
+
+  const handleSolveClick = () => {
     const resolution =
       body.trim() ||
-      'Kendala telah diperbaiki oleh Superadmin. Silakan muat ulang halaman aplikasi dan coba kembali.';
+      'Kendala telah diperiksa dan diperbaiki oleh Superadmin. Silakan muat ulang halaman aplikasi dan coba kembali.';
     setSubmitting(true);
     try {
       onSolveTicket(resolution, attachments);
+      toast.success(`Tiket #${ticket.ticketNumber} berhasil ditandai Solved!`);
       setBody('');
       setAttachments([]);
     } finally {
@@ -106,12 +140,12 @@ export function TicketWorkspace3Col({
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-      {/* LEFT COLUMN: Ticket Properties */}
+      {/* ═══ LEFT COLUMN: Ticket Properties ═══ */}
       <div className="space-y-4 lg:col-span-3">
-        <div className="rounded border border-line bg-panel p-4">
+        <div className="rounded-lg border border-line bg-panel p-4 shadow-sm">
           <div className="flex items-center justify-between border-b border-line pb-3">
             <div>
-              <span className="text-[11px] text-ink-muted">Nomor Tiket</span>
+              <span className="text-[11px] font-medium text-ink-muted">Nomor Tiket</span>
               <div className="font-mono text-base font-bold text-ink">
                 {ticket.ticketNumber}
               </div>
@@ -119,7 +153,21 @@ export function TicketWorkspace3Col({
             <StatusBadge status={ticket.status} />
           </div>
 
-          <div className="mt-3 space-y-3 text-xs">
+          {/* Quick Action Button for Open Ticket */}
+          {ticket.status === 'open' && (
+            <div className="mt-3">
+              <button
+                type="button"
+                onClick={() => handleStatusSelect('in_progress')}
+                className="inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-amber-500/15 border border-amber-400/40 px-3 py-1.5 text-xs font-semibold text-amber-900 transition-colors hover:bg-amber-500/25"
+              >
+                <Clock className="h-3.5 w-3.5 text-amber-700" />
+                Mulai Kerjakan (In Progress)
+              </button>
+            </div>
+          )}
+
+          <div className="mt-3.5 space-y-3.5 text-xs">
             <div>
               <label className="block text-[11px] font-medium text-ink-muted">
                 Aplikasi Asal
@@ -139,7 +187,7 @@ export function TicketWorkspace3Col({
               <select
                 id="ticket-status"
                 value={ticket.status}
-                onChange={(e) => onStatusChange(e.target.value as TicketStatus)}
+                onChange={(e) => handleStatusSelect(e.target.value as TicketStatus)}
                 className="mt-1 w-full rounded border border-line bg-canvas px-2.5 py-1.5 text-xs font-medium text-ink focus:border-ink focus:outline-none"
               >
                 {STATUS_ORDER.map((st) => (
@@ -161,7 +209,7 @@ export function TicketWorkspace3Col({
                 id="ticket-priority"
                 value={ticket.priority}
                 onChange={(e) =>
-                  onPriorityChange(e.target.value as TicketPriority)
+                  handlePrioritySelect(e.target.value as TicketPriority)
                 }
                 className="mt-1 w-full rounded border border-line bg-canvas px-2.5 py-1.5 text-xs font-medium text-ink focus:border-ink focus:outline-none"
               >
@@ -184,7 +232,7 @@ export function TicketWorkspace3Col({
                 id="ticket-category"
                 value={ticket.category}
                 onChange={(e) =>
-                  onCategoryChange(e.target.value as TicketCategory)
+                  handleCategorySelect(e.target.value as TicketCategory)
                 }
                 className="mt-1 w-full rounded border border-line bg-canvas px-2.5 py-1.5 text-xs font-medium text-ink focus:border-ink focus:outline-none"
               >
@@ -221,23 +269,24 @@ export function TicketWorkspace3Col({
           </div>
         </div>
 
+        {/* Solved Summary Card */}
         {ticket.resolutionSummary && (
-          <div className="rounded border border-emerald-200 bg-emerald-50/70 p-3.5 text-xs">
+          <div className="rounded-lg border border-emerald-300 bg-emerald-50/80 p-3.5 text-xs shadow-sm">
             <div className="flex items-center gap-1.5 font-semibold text-emerald-900">
               <CheckCircle2 className="h-4 w-4 text-emerald-700" />
               Catatan Penyelesaian (Solved)
             </div>
-            <p className="mt-1.5 whitespace-pre-wrap text-emerald-900/90 leading-relaxed">
+            <p className="mt-1.5 whitespace-pre-wrap text-emerald-950 leading-relaxed font-sans">
               {ticket.resolutionSummary}
             </p>
           </div>
         )}
       </div>
 
-      {/* CENTER COLUMN: Complaint, Attachments, Conversation & Solve Composer */}
+      {/* ═══ CENTER COLUMN: Complaint, Messages & Composer ═══ */}
       <div className="space-y-4 lg:col-span-6">
-        {/* Initial Report */}
-        <div className="rounded border border-line bg-panel p-4">
+        {/* Initial Report Card */}
+        <div className="rounded-lg border border-line bg-panel p-4 sm:p-5 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <h2 className="text-base font-semibold text-ink">
               {ticket.subject}
@@ -245,15 +294,15 @@ export function TicketWorkspace3Col({
             <PriorityBadge priority={ticket.priority} />
           </div>
 
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-ink-muted">
-            <span className="font-medium text-ink">{ticket.requesterName}</span>
+          <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-ink-muted">
+            <span className="font-semibold text-ink">{ticket.requesterName}</span>
             <span>·</span>
             <span className="font-mono text-[11px]">{ticket.requesterUid}</span>
             <span>·</span>
-            <span>{ticket.requesterRole}</span>
+            <span className="rounded bg-subtle px-1.5 py-0.5 text-[10px]">{ticket.requesterRole}</span>
           </div>
 
-          <div className="mt-3 rounded border border-line bg-canvas p-3.5 text-sm leading-relaxed text-ink whitespace-pre-wrap">
+          <div className="mt-3.5 rounded border border-line bg-canvas p-3.5 text-xs leading-relaxed text-ink whitespace-pre-wrap font-sans">
             {ticket.description}
           </div>
 
@@ -290,7 +339,7 @@ export function TicketWorkspace3Col({
                     key={idx}
                     type="button"
                     onClick={() => setLightboxImg(src)}
-                    className="overflow-hidden rounded border border-line bg-subtle hover:border-ink"
+                    className="overflow-hidden rounded border border-line bg-subtle hover:border-ink transition-colors"
                   >
                     <img
                       src={src}
@@ -305,15 +354,18 @@ export function TicketWorkspace3Col({
         </div>
 
         {/* Conversation Thread */}
-        <div className="rounded border border-line bg-panel">
-          <div className="border-b border-line bg-subtle/60 px-4 py-2.5 text-xs font-semibold text-ink">
-            Riwayat Percakapan & Catatan Internal ({messages.length})
+        <div className="rounded-lg border border-line bg-panel shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between border-b border-line bg-subtle/60 px-4 py-2.5 text-xs font-semibold text-ink">
+            <span>Riwayat Percakapan & Catatan Internal</span>
+            <span className="rounded-full bg-subtle px-2 py-0.5 font-mono text-[11px] text-ink-muted">
+              {messages.length} pesan
+            </span>
           </div>
 
           <div className="divide-y divide-line">
             {messages.length === 0 ? (
-              <div className="px-4 py-8 text-center text-xs text-ink-muted">
-                Belum ada balasan pada tiket ini. Gunakan form di bawah untuk membalas pelapor atau menulis catatan internal.
+              <div className="px-4 py-10 text-center text-xs text-ink-muted">
+                Belum ada pesan balasan pada tiket ini. Tulis balasan atau catatan internal menggunakan form di bawah.
               </div>
             ) : (
               messages.map((m) => {
@@ -321,7 +373,7 @@ export function TicketWorkspace3Col({
                   return (
                     <div
                       key={m.id}
-                      className="bg-subtle/40 px-4 py-2 font-mono text-[11px] text-ink-muted"
+                      className="bg-subtle/40 px-4 py-2 text-center font-mono text-[11px] text-ink-muted"
                     >
                       {m.body} · {timeAgo(m.createdAt)}
                     </div>
@@ -334,9 +386,9 @@ export function TicketWorkspace3Col({
                 return (
                   <div
                     key={m.id}
-                    className={`p-4 ${
+                    className={`p-4 transition-colors ${
                       isInternal
-                        ? 'bg-amber-50/70'
+                        ? 'bg-amber-50/70 border-l-4 border-l-amber-500'
                         : isAdminMsg
                           ? 'bg-panel'
                           : 'bg-canvas/50'
@@ -344,13 +396,27 @@ export function TicketWorkspace3Col({
                   >
                     <div className="flex items-center justify-between gap-2 text-xs">
                       <div className="flex items-center gap-2">
+                        {/* Avatar initials */}
+                        <span
+                          className={`flex h-6 w-6 items-center justify-center rounded-full font-mono text-[10px] font-bold ${
+                            isInternal
+                              ? 'bg-amber-200 text-amber-900'
+                              : isAdminMsg
+                                ? 'bg-ink text-white'
+                                : 'bg-neutral-200 text-neutral-800'
+                          }`}
+                        >
+                          {m.senderName.slice(0, 2).toUpperCase()}
+                        </span>
+
                         <span className="font-semibold text-ink">
                           {m.senderName}
                         </span>
+
                         {isInternal ? (
                           <span className="inline-flex items-center gap-1 rounded border border-amber-300 bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-900">
                             <Lock className="h-2.5 w-2.5" />
-                            Internal Admin Note
+                            Internal Admin Note (Rahasia)
                           </span>
                         ) : isAdminMsg ? (
                           <span className="rounded border border-line bg-subtle px-1.5 py-0.5 text-[10px] font-medium text-ink-muted">
@@ -358,7 +424,7 @@ export function TicketWorkspace3Col({
                           </span>
                         ) : (
                           <span className="rounded border border-line bg-subtle px-1.5 py-0.5 text-[10px] font-medium text-ink-muted">
-                            Pelapor
+                            Pelapor ({ticket.requesterRole})
                           </span>
                         )}
                       </div>
@@ -367,22 +433,22 @@ export function TicketWorkspace3Col({
                       </span>
                     </div>
 
-                    <p className="mt-2 whitespace-pre-wrap text-xs leading-relaxed text-ink">
+                    <p className="mt-2.5 whitespace-pre-wrap text-xs leading-relaxed text-ink pl-8">
                       {m.body}
                     </p>
 
                     {m.attachments && m.attachments.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-2">
+                      <div className="mt-2.5 pl-8 flex flex-wrap gap-2">
                         {m.attachments.map((src, i) => (
                           <button
                             key={i}
                             type="button"
                             onClick={() => setLightboxImg(src)}
-                            className="overflow-hidden rounded border border-line"
+                            className="overflow-hidden rounded border border-line hover:border-ink transition-colors"
                           >
                             <img
                               src={src}
-                              alt={`Lampiran pesan ${i + 1}`}
+                              alt={`Lampiran ${i + 1}`}
                               className="h-16 w-24 object-cover"
                             />
                           </button>
@@ -399,18 +465,19 @@ export function TicketWorkspace3Col({
         {/* Reply & Solve Composer */}
         <form
           onSubmit={handleReplySubmit}
-          className={`rounded border p-4 ${
+          className={`rounded-lg border p-4 shadow-sm transition-all ${
             composerMode === 'internal'
-              ? 'border-amber-300 bg-amber-50/40'
+              ? 'border-amber-300/80 bg-amber-50/40'
               : 'border-line bg-panel'
           }`}
         >
+          {/* Composer Mode Tabs & Canned Picker */}
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-2.5">
             <div className="flex items-center gap-1">
               <button
                 type="button"
                 onClick={() => setComposerMode('public')}
-                className={`inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-medium ${
+                className={`inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-semibold transition-colors ${
                   composerMode === 'public'
                     ? 'bg-ink text-white'
                     : 'text-ink-muted hover:bg-subtle'
@@ -422,7 +489,7 @@ export function TicketWorkspace3Col({
               <button
                 type="button"
                 onClick={() => setComposerMode('internal')}
-                className={`inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-medium ${
+                className={`inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-semibold transition-colors ${
                   composerMode === 'internal'
                     ? 'bg-amber-600 text-white'
                     : 'text-ink-muted hover:bg-subtle'
@@ -436,14 +503,26 @@ export function TicketWorkspace3Col({
             <CannedResponsePicker onSelect={handleInsertCanned} />
           </div>
 
+          {/* Internal Note Banner Warning */}
+          {composerMode === 'internal' && (
+            <div className="mt-2.5 flex items-center gap-2 rounded bg-amber-100/80 border border-amber-300/80 px-3 py-1.5 text-[11px] text-amber-900">
+              <Lock className="h-3.5 w-3.5 shrink-0 text-amber-800" />
+              <span>
+                <strong>Catatan Rahasia:</strong> Hanya disimpan di CRM internal Superadmin, <strong>tidak akan</strong> terlihat oleh user pelapor.
+              </span>
+            </div>
+          )}
+
+          {/* Text Area */}
           <textarea
             rows={4}
             value={body}
             onChange={(e) => setBody(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder={
               composerMode === 'internal'
-                ? 'Tulis catatan teknis rahasia (hanya terlihat oleh Superadmin di CRM)...'
-                : 'Tulis balasan atau penjelasan solusi untuk pelapor...'
+                ? 'Tulis catatan teknis rahasia (hanya terlihat oleh Superadmin di CRM)... Tekan Ctrl+Enter untuk menyimpan.'
+                : 'Tulis balasan atau instruksi untuk pelapor... Tekan Ctrl+Enter untuk mengirim.'
             }
             className="mt-3 w-full rounded border border-line bg-canvas p-3 text-xs leading-relaxed text-ink placeholder:text-ink-faint focus:border-ink focus:bg-panel focus:outline-none"
           />
@@ -452,27 +531,31 @@ export function TicketWorkspace3Col({
             <ScreenshotUploader
               attachments={attachments}
               onChange={setAttachments}
-             
             />
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 pt-1">
-            <button
-              type="submit"
-              disabled={submitting || (!body.trim() && attachments.length === 0)}
-              className="inline-flex items-center gap-1.5 rounded border border-line-strong bg-subtle px-3.5 py-2 text-xs font-semibold text-ink hover:bg-line disabled:opacity-40"
-            >
-              <Send className="h-3.5 w-3.5" />
-              {composerMode === 'internal'
-                ? 'Simpan Catatan Internal'
-                : 'Kirim Balasan'}
-            </button>
+          <div className="mt-3.5 flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-line/60">
+            <div className="flex items-center gap-2">
+              <button
+                type="submit"
+                disabled={submitting || (!body.trim() && attachments.length === 0)}
+                className="inline-flex items-center gap-1.5 rounded border border-line-strong bg-subtle px-3.5 py-2 text-xs font-semibold text-ink hover:bg-line disabled:opacity-40"
+              >
+                <Send className="h-3.5 w-3.5" />
+                {composerMode === 'internal'
+                  ? 'Simpan Catatan Internal'
+                  : 'Kirim Balasan'}
+              </button>
+              <span className="hidden font-mono text-[10px] text-ink-faint sm:inline">
+                (Ctrl+Enter)
+              </span>
+            </div>
 
             <button
               type="button"
               onClick={handleSolveClick}
               disabled={submitting}
-              className="inline-flex items-center gap-1.5 rounded bg-emerald-700 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-800 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded bg-emerald-700 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-800 shadow-sm disabled:opacity-50"
             >
               <CheckCircle2 className="h-4 w-4" />
               ✅ Kirim Solusi & Tandai Solved
@@ -481,7 +564,7 @@ export function TicketWorkspace3Col({
         </form>
       </div>
 
-      {/* RIGHT COLUMN: Customer CRM Card */}
+      {/* ═══ RIGHT COLUMN: Customer CRM Card ═══ */}
       <div className="lg:col-span-3">
         <CustomerProfileCard
           user={requester}
@@ -491,15 +574,16 @@ export function TicketWorkspace3Col({
         />
       </div>
 
+      {/* Lightbox Modal */}
       {lightboxImg && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
           onClick={() => setLightboxImg(null)}
         >
           <img
             src={lightboxImg}
             alt="Lampiran diperbesar"
-            className="max-h-[88vh] max-w-full rounded border border-white/20 object-contain"
+            className="max-h-[88vh] max-w-full rounded border border-white/20 object-contain shadow-2xl"
           />
         </div>
       )}

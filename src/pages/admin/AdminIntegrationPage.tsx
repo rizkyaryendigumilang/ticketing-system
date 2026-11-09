@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, Copy, Play, Sparkles, Terminal } from 'lucide-react';
+import { Check, Copy, ExternalLink, HelpCircle, Play, Sparkles, Terminal } from 'lucide-react';
 import { DEMO_ACCOUNTS, VPS_APPS, getApp } from '../../config/vpsAppsConfig';
+import { useToast } from '../../context/ToastContext';
 
 export function AdminIntegrationPage() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [selectedAppId, setSelectedAppId] = useState<string>(VPS_APPS[1].id); // default snackloop
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
@@ -70,9 +72,10 @@ function openHelpdeskCRM(currentUser) {
   window.open('${origin}/handoff?' + params.toString(), '_blank', 'noopener');
 }`;
 
-  const copyText = (key: string, value: string) => {
+  const copyText = (key: string, value: string, label: string) => {
     navigator.clipboard.writeText(value);
     setCopiedKey(key);
+    toast.success(`${label} berhasil disalin ke clipboard!`);
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
@@ -84,6 +87,7 @@ function openHelpdeskCRM(currentUser) {
       role: demo.role,
       from_url: demo.fromUrl ?? '',
     });
+    toast.info(`Menjalankan simulasi SSO handoff sebagai: ${demo.name}`);
     navigate(`/handoff?${qs.toString()}`);
   };
 
@@ -96,6 +100,7 @@ function openHelpdeskCRM(currentUser) {
       role: customRole.trim(),
       from_url: customUrl.trim(),
     });
+    toast.info(`Mencoba JIT Provisioning untuk ${customApp}:${customUid.trim()}`);
     navigate(`/handoff?${qs.toString()}`);
   };
 
@@ -103,20 +108,20 @@ function openHelpdeskCRM(currentUser) {
     <div className="space-y-6 p-5 sm:p-6">
       {/* Header */}
       <div className="border-b border-line pb-4">
-        <h1 className="text-xl font-bold tracking-tight text-ink">
+        <h1 className="text-lg font-bold tracking-tight text-ink sm:text-xl">
           Generator Kode Tombol &ldquo;Help&rdquo; &amp; Simulator SSO Handoff (7 Aplikasi)
         </h1>
         <p className="mt-1 text-xs text-ink-muted">
           Pasang 1 tombol di setiap aplikasi eksternal. Saat diklik, rute{' '}
-          <code className="rounded bg-subtle px-1 py-0.5 font-mono text-[11px]">
+          <code className="rounded bg-subtle px-1 py-0.5 font-mono text-[11px] font-semibold text-ink">
             /handoff
           </code>{' '}
-          otomatis mengecek <code className="rounded bg-subtle px-1 py-0.5 font-mono text-[11px]">compositeId = &quot;{'{app_slug}:{uid}'}&quot;</code>, membuatkan akun baru jika belum ada (Just-In-Time Provisioning), dan mengarahkan user ke Portal Bantuan aplikasinya.
+          otomatis mengecek <code className="rounded bg-subtle px-1 py-0.5 font-mono text-[11px] font-semibold text-ink">compositeId = &quot;{'{app_slug}:{uid}'}&quot;</code>, membuatkan akun baru jika belum ada (Just-In-Time Provisioning), dan mengarahkan user ke Portal Bantuan aplikasinya.
         </p>
       </div>
 
       {/* 1-Click Simulator Grid for All 7 Apps */}
-      <section className="rounded border border-line bg-panel p-5">
+      <section className="rounded-lg border border-line bg-panel p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-3">
           <div>
             <h2 className="text-sm font-semibold text-ink">
@@ -134,7 +139,7 @@ function openHelpdeskCRM(currentUser) {
             return (
               <div
                 key={`${demo.app}:${demo.uid}`}
-                className="flex flex-col justify-between rounded border border-line bg-canvas p-3.5"
+                className="flex flex-col justify-between rounded-lg border border-line bg-canvas p-3.5 transition-shadow hover:shadow-sm"
               >
                 <div>
                   <div className="flex items-center justify-between gap-2">
@@ -165,10 +170,10 @@ function openHelpdeskCRM(currentUser) {
                 <button
                   type="button"
                   onClick={() => handleSimulateDemo(demo)}
-                  className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded border border-line-strong bg-panel px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:bg-ink hover:text-white"
+                  className="mt-3.5 inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-line-strong bg-panel px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:bg-ink hover:text-white"
                 >
                   <Play className="h-3 w-3" />
-                  Simulasi Klik Help sebagai {demo.uid} dari {app?.name}
+                  Simulasi Klik Help ({demo.uid})
                 </button>
               </div>
             );
@@ -177,14 +182,14 @@ function openHelpdeskCRM(currentUser) {
       </section>
 
       {/* Code Snippet Generator per App */}
-      <section className="rounded border border-line bg-panel p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
+      <section className="rounded-lg border border-line bg-panel p-5 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3.5">
           <div>
             <h2 className="text-sm font-semibold text-ink">
               Potongan Kode HTML &amp; JavaScript Siap Copy-Paste
             </h2>
             <p className="text-xs text-ink-muted">
-              Pilih aplikasi target untuk menyalin kode integrasi tombol Help-nya.
+              Pilih aplikasi target untuk melihat live preview tombol dan menyalin kode integrasinya.
             </p>
           </div>
 
@@ -194,15 +199,40 @@ function openHelpdeskCRM(currentUser) {
                 key={app.id}
                 type="button"
                 onClick={() => setSelectedAppId(app.id)}
-                className={`rounded border px-2.5 py-1 text-xs font-medium ${
+                className={`inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-medium transition-colors ${
                   selectedAppId === app.id
-                    ? 'border-ink bg-ink text-white'
-                    : 'border-line bg-canvas text-ink-muted hover:text-ink'
+                    ? 'border border-ink bg-ink text-white font-semibold'
+                    : 'border border-line bg-canvas text-ink-muted hover:text-ink'
                 }`}
               >
-                [{app.prefix}] {app.name}
+                <span
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: app.color }}
+                />
+                <span>[{app.prefix}] {app.name}</span>
               </button>
             ))}
+          </div>
+        </div>
+
+        {/* Live Button Preview Card */}
+        <div className="mt-4 rounded-lg border border-line bg-canvas p-4">
+          <span className="text-[11px] font-semibold text-ink-muted uppercase tracking-wider">
+            Live Preview Tombol Bantuan ({selectedApp.name})
+          </span>
+          <div className="mt-2.5 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => handleSimulateDemo(sample as (typeof DEMO_ACCOUNTS)[number])}
+              style={{ backgroundColor: selectedApp.color }}
+              className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-xs font-bold text-white shadow transition-transform hover:scale-105 active:scale-95"
+            >
+              <HelpCircle className="h-4 w-4" />
+              <span>Butuh Bantuan / Lapor Kendala</span>
+            </button>
+            <span className="text-xs text-ink-muted">
+              &larr; Klik untuk tes langsung membuka portal bantuan
+            </span>
           </div>
         </div>
 
@@ -215,7 +245,7 @@ function openHelpdeskCRM(currentUser) {
               </span>
               <button
                 type="button"
-                onClick={() => copyText('url', handoffUrlExample)}
+                onClick={() => copyText('url', handoffUrlExample, 'Endpoint URL')}
                 className="inline-flex items-center gap-1 text-xs font-medium text-ink hover:underline"
               >
                 {copiedKey === 'url' ? (
@@ -242,7 +272,7 @@ function openHelpdeskCRM(currentUser) {
               </span>
               <button
                 type="button"
-                onClick={() => copyText('html', htmlSnippet)}
+                onClick={() => copyText('html', htmlSnippet, 'Kode HTML')}
                 className="inline-flex items-center gap-1 text-xs font-medium text-ink hover:underline"
               >
                 {copiedKey === 'html' ? (
@@ -269,7 +299,7 @@ function openHelpdeskCRM(currentUser) {
               </span>
               <button
                 type="button"
-                onClick={() => copyText('js', jsSnippet)}
+                onClick={() => copyText('js', jsSnippet, 'Fungsi JavaScript')}
                 className="inline-flex items-center gap-1 text-xs font-medium text-ink hover:underline"
               >
                 {copiedKey === 'js' ? (
@@ -291,7 +321,7 @@ function openHelpdeskCRM(currentUser) {
       </section>
 
       {/* Custom JIT User Provisioning Tester */}
-      <section className="rounded border border-line bg-panel p-5">
+      <section className="rounded-lg border border-line bg-panel p-5 shadow-sm">
         <div className="flex items-center gap-2 border-b border-line pb-3">
           <Sparkles className="h-4 w-4 text-ink" />
           <div>
@@ -319,7 +349,7 @@ function openHelpdeskCRM(currentUser) {
                 setCustomApp(e.target.value);
                 if (nextApp) setCustomUrl(nextApp.appUrl);
               }}
-              className="mt-1 w-full rounded border border-line bg-canvas px-2.5 py-1.5 text-xs text-ink"
+              className="mt-1 w-full rounded border border-line bg-canvas px-2.5 py-1.5 text-xs text-ink focus:border-ink focus:outline-none"
             >
               {VPS_APPS.map((a) => (
                 <option key={a.id} value={a.id}>
@@ -338,7 +368,7 @@ function openHelpdeskCRM(currentUser) {
               required
               value={customUid}
               onChange={(e) => setCustomUid(e.target.value)}
-              className="mt-1 w-full rounded border border-line bg-canvas px-2.5 py-1.5 font-mono text-xs text-ink"
+              className="mt-1 w-full rounded border border-line bg-canvas px-2.5 py-1.5 font-mono text-xs text-ink focus:border-ink focus:outline-none"
             />
           </div>
 
@@ -351,7 +381,7 @@ function openHelpdeskCRM(currentUser) {
               required
               value={customName}
               onChange={(e) => setCustomName(e.target.value)}
-              className="mt-1 w-full rounded border border-line bg-canvas px-2.5 py-1.5 text-xs text-ink"
+              className="mt-1 w-full rounded border border-line bg-canvas px-2.5 py-1.5 text-xs text-ink focus:border-ink focus:outline-none"
             />
           </div>
 
@@ -364,17 +394,17 @@ function openHelpdeskCRM(currentUser) {
               required
               value={customRole}
               onChange={(e) => setCustomRole(e.target.value)}
-              className="mt-1 w-full rounded border border-line bg-canvas px-2.5 py-1.5 text-xs text-ink"
+              className="mt-1 w-full rounded border border-line bg-canvas px-2.5 py-1.5 text-xs text-ink focus:border-ink focus:outline-none"
             />
           </div>
 
           <div className="flex flex-col justify-end">
             <button
               type="submit"
-              className="inline-flex items-center justify-center gap-1.5 rounded bg-ink px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
+              className="inline-flex items-center justify-center gap-1.5 rounded bg-ink px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 shadow-sm transition-opacity"
             >
               <Terminal className="h-3.5 w-3.5" />
-              Jalankan Handoff ({customApp}:{customUid})
+              Jalankan Handoff
             </button>
           </div>
         </form>

@@ -25,10 +25,10 @@ export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
         return (
           <div
             key={app.id}
-            className={`group flex flex-col justify-between rounded border bg-panel transition-colors ${
+            className={`group flex flex-col justify-between rounded-lg border bg-panel shadow-sm transition-all ${
               hasOpen
-                ? 'border-red-300 ring-1 ring-red-500/20'
-                : 'border-line hover:border-line-strong'
+                ? 'border-red-300 ring-1 ring-red-500/20 shadow-red-500/5'
+                : 'border-line hover:border-line-strong hover:shadow'
             }`}
           >
             <div>
@@ -37,7 +37,7 @@ export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <span
-                      className="inline-flex rounded px-1.5 py-0.5 font-mono text-[11px] font-semibold"
+                      className="inline-flex rounded px-1.5 py-0.5 font-mono text-[11px] font-bold"
                       style={{
                         backgroundColor: `${app.color}15`,
                         color: app.color,
@@ -60,8 +60,8 @@ export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
 
                 {/* Health status indicator */}
                 {hasOpen ? (
-                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded bg-red-600 px-2 py-0.5 text-xs font-semibold text-white tabular-nums">
-                    <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded bg-red-600 px-2 py-0.5 text-xs font-semibold text-white tabular-nums shadow-sm">
+                    <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
                     {counts.open} Open
                   </span>
                 ) : (
