@@ -176,8 +176,13 @@ jobs:
           rsync -a --delete "$stage/" "$live/"
           chmod -R u=rwX,go=rX "$live"
 
-          # Post-deployment sanity verification
+          # Post-deployment sanity & live endpoint verification
           test -s "$live/index.html" || { echo "Live deployment missing index.html"; exit 1; }
+          grep -q '/helpdesk/assets/' "$live/index.html" || { echo "Live index.html missing /helpdesk/assets/ prefix"; exit 1; }
+          curl -fsS http://127.0.0.1:8094/api/health >/dev/null || { echo "Helpdesk PocketBase (127.0.0.1:8094) is not healthy"; exit 1; }
+          curl -fsS -k --resolve 43.156.236.102:443:127.0.0.1 https://43.156.236.102/helpdesk/ >/dev/null || { echo "Caddy /helpdesk/ route verification failed"; exit 1; }
+          curl -fsS -k --resolve 43.156.236.102:443:127.0.0.1 https://43.156.236.102/helpdesk-pb/api/health >/dev/null || { echo "Caddy /helpdesk-pb/ route verification failed"; exit 1; }
+          echo "✓ Live HTTPS endpoints (/helpdesk/ & /helpdesk-pb/api/health) verified."
 
           # Housekeeping: prune old backups keeping only latest 5
           mapfile -t old_backups < <(ls -dt "$parent"/backup-*.tar.gz 2>/dev/null | tail -n +6 || true)
