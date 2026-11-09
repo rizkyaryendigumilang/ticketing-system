@@ -16,7 +16,25 @@ import {
 } from './storageService';
 import type { AppSource, CrmUser, Ticket, TicketMessage } from '../types/crm';
 
-export const PB_URL = import.meta.env.VITE_PB_URL?.trim() || 'http://127.0.0.1:8090';
+function resolvePbUrl(): string {
+  const raw = import.meta.env.VITE_PB_URL?.trim();
+  if (raw) {
+    if (raw.startsWith('/') && typeof window !== 'undefined') {
+      return `${window.location.origin}${raw}`;
+    }
+    return raw;
+  }
+  if (
+    typeof window !== 'undefined' &&
+    window.location.hostname !== 'localhost' &&
+    window.location.hostname !== '127.0.0.1'
+  ) {
+    return `${window.location.origin}/helpdesk-pb`;
+  }
+  return 'http://127.0.0.1:8090';
+}
+
+export const PB_URL = resolvePbUrl();
 export const pb = new PocketBase(PB_URL);
 pb.autoCancellation(false);
 

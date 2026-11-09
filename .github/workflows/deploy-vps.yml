@@ -53,6 +53,7 @@ jobs:
       - name: Build production web bundle for /helpdesk/
         env:
           CI: true
+          VITE_PB_URL: /helpdesk-pb
         run: |
           set -euo pipefail
           echo "Building Helpdesk Ticketing System with base path /helpdesk/..."

@@ -51,6 +51,7 @@ Setiap aplikasi cukup mengarahkan user ke rute:
 Aplikasi ini di-deploy di VPS (`43.156.236.102`) menggunakan **Caddy v2** sebagai web server & reverse proxy:
 
 - **Helpdesk CRM Live:** `https://43.156.236.102/helpdesk/`
+- **PocketBase Admin DB:** `https://43.156.236.102/helpdesk-pb/_/` (`helpdesk-pocketbase.service` di `127.0.0.1:8094`)
 - **Handoff Endpoint:** `https://43.156.236.102/helpdesk/handoff?app={app_slug}&uid={uid}&name={name}&role={role}`
 - **Admin Login:** `admin@crm.local` / `Admin@CRM123!`
 - **Direktori Live Web:** `/srv/www/helpdesk`
@@ -58,6 +59,16 @@ Aplikasi ini di-deploy di VPS (`43.156.236.102`) menggunakan **Caddy v2** sebaga
 ### Blok Caddyfile (`/etc/caddy/Caddyfile`)
 
 ```caddy
+# HELPDESK_PB_ROUTE (PocketBase Backend for Ticketing System & CRM)
+@helpdesk_pb_root path /helpdesk-pb
+redir @helpdesk_pb_root /helpdesk-pb/ 308
+
+@helpdesk_pb path /helpdesk-pb/*
+handle @helpdesk_pb {
+    uri strip_prefix /helpdesk-pb
+    reverse_proxy 127.0.0.1:8094
+}
+
 # HELPDESK_STATIC_ROUTE (Ticketing System & CRM)
 @helpdesk_root path /helpdesk
 redir @helpdesk_root /helpdesk/ 308
