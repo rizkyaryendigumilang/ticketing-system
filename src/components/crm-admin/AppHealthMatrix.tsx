@@ -27,7 +27,7 @@ export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
             key={app.id}
             className={`group flex flex-col justify-between rounded-lg border bg-panel shadow-sm transition-all ${
               hasOpen
-                ? 'border-red-300 ring-1 ring-red-500/20 shadow-red-500/5'
+                ? 'border-red-300 ring-1 ring-red-500/20'
                 : 'border-line hover:border-line-strong hover:shadow'
             }`}
           >
@@ -61,7 +61,7 @@ export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
                 {/* Health status indicator */}
                 {hasOpen ? (
                   <span className="inline-flex shrink-0 items-center gap-1.5 rounded bg-red-600 px-2 py-0.5 text-xs font-semibold text-white tabular-nums shadow-sm">
-                    <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-white" />
                     {counts.open} Open
                   </span>
                 ) : (

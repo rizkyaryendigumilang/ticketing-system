@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ChevronDown, Crown, LogOut, RotateCcw, ShieldCheck, UserCheck, Users } from 'lucide-react';
+import { ChevronDown, Crown, LogOut, RotateCcw, Settings, ShieldCheck, UserCheck, Users } from 'lucide-react';
 import { DEMO_ACCOUNTS, getApp } from '../../config/vpsAppsConfig';
 import { useCrm } from '../../context/CrmContext';
 import { compositeKeyOf } from '../../services/crmLogic';
@@ -46,13 +46,13 @@ export function SimulationTopbar() {
 
   const handleReset = () => {
     resetDemo();
-    toast.success('Data seed tiket & user berhasil di-reset ke kondisi awal!');
+    toast.success('Data seed tiket dan user berhasil dikembalikan ke kondisi awal');
   };
 
   const handleLogoutUser = () => {
     setOpen(false);
     logoutRequester();
-    toast.info('Sesi user telah ditutup.');
+    toast.info('Sesi user telah ditutup');
     navigate('/login');
   };
 
@@ -221,9 +221,10 @@ export function SimulationTopbar() {
                     setOpen(false);
                     navigate('/admin/integrations');
                   }}
-                  className="w-full rounded py-1 text-center font-mono text-[11px] text-neutral-400 hover:text-white"
+                  className="inline-flex w-full items-center justify-center gap-1.5 rounded py-1 text-center font-mono text-[11px] text-neutral-400 hover:text-white"
                 >
-                  ⚙️ Buka Generator Tombol Help & Simulator JIT →
+                  <Settings className="h-3 w-3 text-neutral-400" />
+                  <span>Buka Generator Tombol Help & Simulator JIT →</span>
                 </button>
               </div>
             </div>
@@ -243,7 +244,7 @@ export function SimulationTopbar() {
         >
           <span
             className={`h-2 w-2 rounded-full ${
-              pbOnline ? 'bg-emerald-400 shadow-[0_0_8px_#34D399]' : 'bg-amber-400'
+              pbOnline ? 'bg-emerald-400' : 'bg-amber-400'
             }`}
           />
           <span className="hidden text-neutral-400 sm:inline">

@@ -58,8 +58,8 @@ export function PortalTicketViewPage() {
       replyToTicket(ticket, requesterActor, replyBody, { attachments });
       toast.success(
         isSolved
-          ? 'Pesan terkirim! Tiket Anda telah dibuka kembali.'
-          : 'Pesan balasan Anda telah terkirim ke Superadmin.',
+          ? 'Pesan terkirim, tiket Anda telah dibuka kembali'
+          : 'Pesan balasan Anda telah terkirim ke Superadmin',
       );
       setReplyBody('');
       setAttachments([]);
@@ -78,7 +78,7 @@ export function PortalTicketViewPage() {
   const handleMarkSolved = () => {
     if (!requesterActor) return;
     markSolvedByRequester(ticket, requesterActor);
-    toast.success('Terima kasih! Tiket telah Anda tandai sebagai Selesai.');
+    toast.success('Terima kasih, tiket telah Anda tandai sebagai selesai');
   };
 
   return (
@@ -148,7 +148,7 @@ export function PortalTicketViewPage() {
                       {STATUS_LABEL[step]}
                     </span>
                     {isCurrent && (
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
                     )}
                   </div>
                 </div>

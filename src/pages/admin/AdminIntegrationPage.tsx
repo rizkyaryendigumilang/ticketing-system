@@ -75,7 +75,7 @@ function openHelpdeskCRM(currentUser) {
   const copyText = (key: string, value: string, label: string) => {
     navigator.clipboard.writeText(value);
     setCopiedKey(key);
-    toast.success(`${label} berhasil disalin ke clipboard!`);
+    toast.success(`${label} berhasil disalin ke clipboard`);
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
@@ -225,7 +225,7 @@ function openHelpdeskCRM(currentUser) {
               type="button"
               onClick={() => handleSimulateDemo(sample as (typeof DEMO_ACCOUNTS)[number])}
               style={{ backgroundColor: selectedApp.color }}
-              className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-xs font-bold text-white shadow transition-transform hover:scale-105 active:scale-95"
+              className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-xs font-bold text-white shadow-sm transition-all hover:brightness-110 active:brightness-95"
             >
               <HelpCircle className="h-4 w-4" />
               <span>Butuh Bantuan / Lapor Kendala</span>

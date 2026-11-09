@@ -77,7 +77,7 @@ export function TicketWorkspace3Col({
 
   const handleInsertCanned = (text: string) => {
     setBody((prev) => (prev.trim() ? `${prev}\n\n${text}` : text));
-    toast.info('Template balasan cepat dimasukkan ke kolom teks.');
+    toast.info('Template balasan cepat dimasukkan ke kolom teks');
   };
 
   const handleStatusSelect = (st: TicketStatus) => {
@@ -106,8 +106,8 @@ export function TicketWorkspace3Col({
       onSendMessage(body, isInternal, attachments, nextStatus);
       toast.success(
         isInternal
-          ? 'Catatan internal rahasia berhasil disimpan.'
-          : 'Balasan terkirim ke pelapor!',
+          ? 'Catatan internal rahasia berhasil disimpan'
+          : 'Balasan terkirim ke pelapor',
       );
       setBody('');
       setAttachments([]);
@@ -130,7 +130,7 @@ export function TicketWorkspace3Col({
     setSubmitting(true);
     try {
       onSolveTicket(resolution, attachments);
-      toast.success(`Tiket #${ticket.ticketNumber} berhasil ditandai Solved!`);
+      toast.success(`Tiket #${ticket.ticketNumber} berhasil ditandai Solved`);
       setBody('');
       setAttachments([]);
     } finally {
@@ -558,7 +558,7 @@ export function TicketWorkspace3Col({
               className="inline-flex items-center gap-1.5 rounded bg-emerald-700 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-800 shadow-sm disabled:opacity-50"
             >
               <CheckCircle2 className="h-4 w-4" />
-              ✅ Kirim Solusi & Tandai Solved
+              Kirim Solusi & Tandai Solved
             </button>
           </div>
         </form>
