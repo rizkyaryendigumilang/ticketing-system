@@ -34,7 +34,14 @@ export function newId(): string {
 export function safeHttpUrl(raw: string | null | undefined): string | undefined {
   if (!raw) return undefined;
   try {
-    const url = new URL(raw.trim());
+    const trimmed = raw.trim();
+    // Block backslash bypasses (prevent open redirect via backslash bypass)
+    if (trimmed.includes('\\')) return undefined;
+    // Bound URL length to prevent memory consumption
+    if (trimmed.length > 2048) return undefined;
+    const url = new URL(trimmed);
+    // Block embedded credentials (e.g. http://user:pass@evil.com)
+    if (url.username || url.password) return undefined;
     return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : undefined;
   } catch {
     return undefined;
@@ -52,13 +59,22 @@ export function parseHandoff(search: URLSearchParams, knownAppIds: string[]): Ha
   }
   if (!uid) return { ok: false, error: 'Link bantuan tidak menyertakan parameter uid (username atau email di aplikasi asal).' };
   if (uid.length > 200) return { ok: false, error: 'Parameter uid terlalu panjang (maksimal 200 karakter).' };
+
+  // Sanitize strings: strip control characters (\0..\x1F, \x7F)
+  const sanitize = (s: string) => s.replace(/[\x00-\x1F\x7F]/g, '').trim();
+  const cleanUid = sanitize(uid);
+  if (!cleanUid) return { ok: false, error: 'Parameter uid tidak valid.' };
+
+  const rawName = sanitize(search.get('name') ?? '');
+  const rawRole = sanitize(search.get('role') ?? '');
+
   return {
     ok: true,
     params: {
       app,
-      uid,
-      name: (search.get('name') ?? '').trim().slice(0, 120) || uid,
-      role: (search.get('role') ?? '').trim().slice(0, 120) || 'User',
+      uid: cleanUid,
+      name: rawName.slice(0, 120) || cleanUid,
+      role: rawRole.slice(0, 120) || 'User',
       fromUrl: safeHttpUrl(search.get('from_url')),
     },
   };

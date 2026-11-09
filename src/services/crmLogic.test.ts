@@ -41,13 +41,26 @@ test('handoff rejects unknown app and missing uid, defaults name and role', () =
   assert.ok(r.ok && r.params.name === 'admin' && r.params.role === 'User');
 });
 
-test('only http(s) URLs survive', () => {
+test('only http(s) URLs survive and enforce strict security boundaries', () => {
   assert.equal(safeHttpUrl('javascript:alert(1)'), undefined);
   assert.equal(safeHttpUrl('data:text/html,hi'), undefined);
   assert.equal(safeHttpUrl('not a url'), undefined);
+  assert.equal(safeHttpUrl('https://example.com\\evil.com'), undefined);
+  assert.equal(safeHttpUrl('https://admin:secret@example.com/login'), undefined);
+  assert.equal(safeHttpUrl('https://example.com/' + 'a'.repeat(2100)), undefined);
   assert.equal(safeHttpUrl('https://a.b/c?d=1'), 'https://a.b/c?d=1');
   const r = parseHandoff(new URLSearchParams('app=wedding&uid=a&from_url=javascript:alert(1)'), APPS);
   assert.ok(r.ok && r.params.fromUrl === undefined);
+
+  // Test control character stripping in handoff params
+  const sanitized = parseHandoff(
+    new URLSearchParams('app=wedding&uid=staff1\x00&name=Kiky\x07&role=Staff\r\n'),
+    APPS,
+  );
+  assert.ok(sanitized.ok);
+  assert.equal(sanitized.params.uid, 'staff1');
+  assert.equal(sanitized.params.name, 'Kiky');
+  assert.equal(sanitized.params.role, 'Staff');
 });
 
 test('ticket numbers continue after the highest number per prefix', () => {
