@@ -128,7 +128,7 @@ export function SimulationTopbar() {
 
           {/* Dropdown Menu */}
           {open && (
-            <div className="absolute left-0 top-full z-50 mt-1.5 w-80 overflow-hidden rounded-lg border border-neutral-700/80 bg-[#14181F] shadow-2xl backdrop-blur-md">
+            <div className="absolute left-0 top-full z-50 mt-1.5 w-80 origin-top-left overflow-hidden rounded-lg border border-neutral-700 bg-[#14181F] shadow-lg animate-in fade-in-50 zoom-in-95 duration-150">
               <div className="flex items-center justify-between border-b border-neutral-800 bg-neutral-900/60 px-3 py-2 text-[11px]">
                 <span className="font-medium text-neutral-400">
                   Simulasi Klik Tombol Help (SSO)

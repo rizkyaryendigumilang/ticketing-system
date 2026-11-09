@@ -51,12 +51,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {toasts.map((t) => (
           <div
             key={t.id}
-            className={`pointer-events-auto flex items-start gap-2.5 rounded-lg border p-3 shadow-xl backdrop-blur-sm transition-all animate-in fade-in slide-in-from-bottom-2 ${
+            className={`pointer-events-auto flex items-start gap-2.5 rounded-lg border p-3 shadow-lg transition-all animate-in fade-in slide-in-from-bottom-2 duration-150 ${
               t.type === 'success'
-                ? 'border-emerald-700/40 bg-[#0F291E]/95 text-emerald-100'
+                ? 'border-emerald-700/50 bg-[#0F291E] text-emerald-100'
                 : t.type === 'error'
-                  ? 'border-red-700/40 bg-[#2D1214]/95 text-red-100'
-                  : 'border-neutral-700/60 bg-[#161B22]/95 text-neutral-100'
+                  ? 'border-red-700/50 bg-[#2D1214] text-red-100'
+                  : 'border-neutral-700 bg-[#161B22] text-neutral-100'
             }`}
           >
             <span className="mt-0.5 shrink-0">
@@ -68,7 +68,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             <button
               type="button"
               onClick={() => removeToast(t.id)}
-              className="shrink-0 rounded p-0.5 text-neutral-400 hover:text-white"
+              className="shrink-0 rounded p-0.5 text-neutral-400 hover:text-white active:scale-95 transition-transform"
               aria-label="Tutup notifikasi"
             >
               <X className="h-3.5 w-3.5" />

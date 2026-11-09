@@ -23,7 +23,7 @@ export function AdminDashboardPage() {
       {/* Page Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
         <div>
-          <h1 className="text-lg font-semibold tracking-tight text-ink">
+          <h1 className="text-xl font-semibold tracking-tight text-ink sm:text-2xl">
             Peta Kesehatan 7 Aplikasi
           </h1>
           <p className="mt-0.5 text-xs text-ink-muted">
@@ -34,14 +34,14 @@ export function AdminDashboardPage() {
         <div className="flex items-center gap-2">
           <Link
             to="/admin/integrations"
-            className="inline-flex items-center gap-1.5 rounded border border-line bg-panel px-3 py-1.5 text-xs font-medium text-ink hover:border-line-strong"
+            className="inline-flex items-center gap-1.5 rounded border border-line bg-panel px-3 py-1.5 text-xs font-medium text-ink hover:border-line-strong active:scale-95 transition-[border-color,transform] duration-100"
           >
             <TerminalSquare className="h-3.5 w-3.5 text-ink-muted" />
             Generator Tombol Help
           </Link>
           <Link
             to="/admin/tickets"
-            className="inline-flex items-center gap-1.5 rounded bg-ink px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
+            className="inline-flex items-center gap-1.5 rounded bg-ink px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 active:scale-95 transition-[opacity,transform] duration-100"
           >
             <Inbox className="h-3.5 w-3.5" />
             Buka Unified Inbox ({stats.open} Open)

@@ -42,7 +42,7 @@ export function CustomerProfileCard({
       <div className="rounded-lg border border-line bg-panel p-4 shadow-sm">
         <div className="flex items-start gap-3">
           <div
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border font-mono text-sm font-bold shadow-sm"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border text-sm font-bold shadow-sm"
             style={{
               backgroundColor: `${app?.color ?? '#141413'}15`,
               borderColor: `${app?.color ?? '#141413'}35`,
@@ -56,7 +56,7 @@ export function CustomerProfileCard({
               {displayName}
             </h3>
             <p className="truncate font-mono text-xs text-ink-muted">{uid}</p>
-            <span className="mt-1 inline-block rounded bg-subtle px-1.5 py-0.5 font-mono text-[10px] text-ink-muted">
+            <span className="mt-1 inline-block rounded bg-subtle px-1.5 py-0.5 text-[10px] font-medium tracking-wide text-ink-muted">
               {role}
             </span>
           </div>

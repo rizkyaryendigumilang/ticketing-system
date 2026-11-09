@@ -388,7 +388,7 @@ export function TicketWorkspace3Col({
                     key={m.id}
                     className={`p-4 transition-colors ${
                       isInternal
-                        ? 'bg-amber-50/70 border-l-4 border-l-amber-500'
+                        ? 'bg-amber-50/60 border-l-2 border-l-amber-500'
                         : isAdminMsg
                           ? 'bg-panel'
                           : 'bg-canvas/50'
@@ -398,7 +398,7 @@ export function TicketWorkspace3Col({
                       <div className="flex items-center gap-2">
                         {/* Avatar initials */}
                         <span
-                          className={`flex h-6 w-6 items-center justify-center rounded-full font-mono text-[10px] font-bold ${
+                          className={`flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold ${
                             isInternal
                               ? 'bg-amber-200 text-amber-900'
                               : isAdminMsg
@@ -583,7 +583,7 @@ export function TicketWorkspace3Col({
           <img
             src={lightboxImg}
             alt="Lampiran diperbesar"
-            className="max-h-[88vh] max-w-full rounded border border-white/20 object-contain shadow-2xl"
+            className="max-h-[88vh] max-w-full rounded border border-white/20 object-contain shadow-xl"
           />
         </div>
       )}

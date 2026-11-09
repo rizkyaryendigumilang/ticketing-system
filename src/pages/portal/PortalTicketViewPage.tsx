@@ -115,7 +115,7 @@ export function PortalTicketViewPage() {
             <PriorityBadge priority={ticket.priority} />
             <span className="text-xs text-ink-muted">· {CATEGORY_LABEL[ticket.category]}</span>
           </div>
-          <span className="font-mono text-xs text-ink-muted">Dilaporkan {timeAgo(ticket.createdAt)}</span>
+          <span className="text-xs text-ink-muted">Dilaporkan {timeAgo(ticket.createdAt)}</span>
         </div>
 
         {/* 4-Step Lifecycle Indicator with Progress Nodes */}
@@ -243,11 +243,11 @@ export function PortalTicketViewPage() {
               }
               const isFromAdmin = m.senderRole === 'admin';
               return (
-                <div key={m.id} className={`p-4 transition-colors ${isFromAdmin ? 'bg-sky-50/40 border-l-4 border-l-sky-500' : 'bg-panel'}`}>
+                <div key={m.id} className={`p-4 transition-colors ${isFromAdmin ? 'bg-sky-50/40 border-l-2 border-l-sky-500' : 'bg-panel'}`}>
                   <div className="flex items-center justify-between gap-2 text-xs">
                     <div className="flex items-center gap-2">
                       <span
-                        className={`flex h-6 w-6 items-center justify-center rounded-full font-mono text-[10px] font-bold ${
+                        className={`flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold ${
                           isFromAdmin ? 'bg-sky-700 text-white' : 'bg-neutral-800 text-white'
                         }`}
                       >
@@ -264,7 +264,7 @@ export function PortalTicketViewPage() {
                         {isFromAdmin ? 'Superadmin Support' : requester.appRole}
                       </span>
                     </div>
-                    <span className="font-mono text-[11px] text-ink-faint">{timeAgo(m.createdAt)}</span>
+                    <span className="text-[11px] text-ink-faint">{timeAgo(m.createdAt)}</span>
                   </div>
                   <p className="mt-2.5 pl-8 whitespace-pre-wrap text-xs leading-relaxed text-ink font-sans">{m.body}</p>
                   {m.attachments && m.attachments.length > 0 && (
@@ -335,7 +335,7 @@ export function PortalTicketViewPage() {
           <img
             src={lightboxImg}
             alt="Lampiran diperbesar"
-            className="max-h-[88vh] max-w-full rounded border border-white/20 object-contain shadow-2xl"
+            className="max-h-[88vh] max-w-full rounded border border-white/20 object-contain shadow-xl"
           />
         </div>
       )}

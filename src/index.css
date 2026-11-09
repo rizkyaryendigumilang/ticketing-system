@@ -12,17 +12,32 @@
     outline: 2px solid #16202b;
     outline-offset: 2px;
   }
+
+  /* Optical typography scaling (WWDC 2020) */
+  h1, h2, h3 {
+    letter-spacing: -0.015em;
+  }
+
+  /* Accessibility: Prefers Reduced Motion (Apple Design §14) */
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer components {
   .field {
-    @apply w-full rounded border border-line bg-panel px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none;
+    @apply w-full rounded border border-line bg-panel px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none transition-colors duration-150;
   }
   .btn {
-    @apply inline-flex items-center justify-center gap-1.5 rounded border border-line bg-panel px-3 py-1.5 text-sm font-medium text-ink hover:border-line-strong hover:bg-subtle disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-1.5 rounded border border-line bg-panel px-3 py-1.5 text-sm font-medium text-ink hover:border-line-strong hover:bg-subtle active:scale-[0.98] transition-[background-color,border-color,transform] duration-100 ease-out disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100;
   }
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-1.5 rounded bg-ink px-3 py-1.5 text-sm font-semibold text-white hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-1.5 rounded bg-ink px-3 py-1.5 text-sm font-semibold text-white hover:bg-ink/90 active:scale-[0.98] transition-[background-color,transform] duration-100 ease-out disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100;
   }
   .panel {
     @apply rounded border border-line bg-panel;
