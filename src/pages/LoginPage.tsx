@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Crown, ExternalLink, Lock, ShieldCheck } from 'lucide-react';
 import { DEMO_ACCOUNTS, DEMO_ADMIN, getApp } from '../config/vpsAppsConfig';
 import { useCrm } from '../context/CrmContext';
-import { SimulationTopbar } from '../components/layout/SimulationTopbar';
 
 export function LoginPage() {
   const { loginAdmin } = useCrm();
@@ -41,8 +40,6 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen bg-canvas text-ink">
-      <SimulationTopbar />
-
       <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
         <div className="mb-8 border-b border-line pb-5">
           <div className="inline-flex items-center gap-2 rounded border border-line bg-panel px-2.5 py-1 font-mono text-xs text-ink-muted">

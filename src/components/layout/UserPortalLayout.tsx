@@ -2,7 +2,6 @@ import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ExternalLink, LogOut, Plus } from 'lucide-react';
 import { getApp } from '../../config/vpsAppsConfig';
 import { useCrm } from '../../context/CrmContext';
-import { SimulationTopbar } from './SimulationTopbar';
 
 export function UserPortalLayout() {
   const { data, requester, logoutRequester } = useCrm();
@@ -27,8 +26,6 @@ export function UserPortalLayout() {
 
   return (
     <div className="min-h-screen bg-canvas text-ink">
-      <SimulationTopbar />
-
       <header className="border-b border-line bg-panel shadow-sm">
         {/* App identity color stripe */}
         <div className="h-1 w-full" style={{ backgroundColor: app?.color ?? '#141413' }} />

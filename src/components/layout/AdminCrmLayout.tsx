@@ -13,7 +13,6 @@ import {
 import { VPS_APPS } from '../../config/vpsAppsConfig';
 import { useCrm } from '../../context/CrmContext';
 import { computeStats, countByApp } from '../../services/crmLogic';
-import { SimulationTopbar } from './SimulationTopbar';
 
 type NavItem = {
   to: string;
@@ -32,7 +31,7 @@ const NAV: NavItem[] = [
 ];
 
 export function AdminCrmLayout() {
-  const { data, admin, logoutAdmin, pendingAdminChanges } = useCrm();
+  const { data, admin, logoutAdmin, pendingAdminChanges, connection } = useCrm();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [appsExpanded, setAppsExpanded] = useState(true);
@@ -56,12 +55,9 @@ export function AdminCrmLayout() {
     .toUpperCase() || 'SA';
 
   return (
-    <div className="flex min-h-screen flex-col bg-canvas text-ink">
-      <SimulationTopbar />
-
-      <div className="flex flex-1 overflow-hidden">
-        {/* ═══ PRIMARY ICON RAIL (always visible, ~48px wide) ═══ */}
-        <aside className="flex w-12 shrink-0 flex-col items-center border-r border-rail-line bg-rail py-3 gap-1">
+    <div className="flex min-h-screen bg-canvas text-ink">
+      {/* ═══ PRIMARY ICON RAIL (always visible, ~48px wide) ═══ */}
+      <aside className="flex w-12 shrink-0 flex-col items-center border-r border-rail-line bg-rail py-3 gap-1">
           {/* Logo tile */}
           <div
             title="VPS Helpdesk CRM"
@@ -212,9 +208,17 @@ export function AdminCrmLayout() {
               )}
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="truncate text-xs font-medium text-white">
-                    {admin?.name ?? 'Superadmin VPS'}
-                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="truncate text-xs font-medium text-white">
+                      {admin?.name ?? 'Superadmin VPS'}
+                    </p>
+                    <span
+                      className={`inline-block h-1.5 w-1.5 rounded-full ${
+                        connection === 'online' ? 'bg-emerald-400' : 'bg-red-400'
+                      }`}
+                      title={`Koneksi PocketBase: ${connection}`}
+                    />
+                  </div>
                   <p className="truncate font-mono text-[11px] text-neutral-500">
                     {admin?.email ?? 'admin@crm.local'}
                   </p>
@@ -236,7 +240,6 @@ export function AdminCrmLayout() {
         <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>
-      </div>
     </div>
   );
 }
