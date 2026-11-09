@@ -108,45 +108,30 @@ jobs:
           [ -n "${VPS_HOST:-}" ] || missing="$missing VPS_HOST"
           [ -n "${VPS_USER:-}" ] || missing="$missing VPS_USERNAME"
           [ -n "${VPS_KEY:-}" ] || missing="$missing VPS_SSH_KEY"
+          [ -n "${VPS_SSH_KNOWN_HOSTS:-}" ] || missing="$missing VPS_SSH_KNOWN_HOSTS"
 
           if [ -n "$missing" ]; then
             echo "::error::Deployment cannot proceed. Missing required secret(s):$missing. Configure them in repository Settings > Secrets and variables > Actions."
             exit 1
           fi
 
-          # 2. Configure SSH key and known_hosts
+          # 2. Configure SSH key and known_hosts strictly (matches wedding-planner, zero extra SYN probes)
           install -d -m 700 "$HOME/.ssh"
-          printf '%s\n' "$VPS_KEY" | tr -d '\r' > "$HOME/.ssh/id_deploy"
-          chmod 600 "$HOME/.ssh/id_deploy"
+          printf '%s\n' "$VPS_KEY" | tr -d '\r' > "$HOME/.ssh/deploy_key"
+          chmod 600 "$HOME/.ssh/deploy_key"
 
-          if [ -n "${VPS_SSH_KNOWN_HOSTS:-}" ]; then
-            printf '%s\n' "$VPS_SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
-          fi
-          ssh-keyscan -p "$VPS_PORT" "$VPS_HOST" >> "$HOME/.ssh/known_hosts" 2>/dev/null || true
+          printf '%s\n' "$VPS_SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           chmod 600 "$HOME/.ssh/known_hosts"
 
-          # 3. Detect active SSH port
-          TARGET_PORT="$VPS_PORT"
-          for test_port in "$VPS_PORT" 2222 22; do
-            if nc -z -w 3 "$VPS_HOST" "$test_port" 2>/dev/null; then
-              TARGET_PORT="$test_port"
-              echo "Active SSH port detected: $TARGET_PORT"
-              break
-            fi
-          done
-
-          # 4. Upload bundle and deploy in aligned staged swap
+          # 3. Upload bundle and deploy in aligned staged swap
           RELEASE_ID="${GITHUB_SHA}-${GITHUB_RUN_ID}"
           ARCHIVE_NAME="web-dist-${RELEASE_ID}.tar.gz"
 
           echo "Uploading release bundle $ARCHIVE_NAME to $VPS_USER@$VPS_HOST ..."
-          scp -o BatchMode=yes -o ConnectTimeout=30 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -P "$TARGET_PORT" -i "$HOME/.ssh/id_deploy" ./artifact/web-dist.tar.gz "$VPS_USER@$VPS_HOST:$ARCHIVE_NAME"
-
-          echo "Bundle uploaded successfully. Pausing 3s before triggering atomic swap..."
-          sleep 3
+          scp -o BatchMode=yes -o ConnectTimeout=30 -o StrictHostKeyChecking=yes -i "$HOME/.ssh/deploy_key" -P "$VPS_PORT" ./artifact/web-dist.tar.gz "$VPS_USER@$VPS_HOST:$ARCHIVE_NAME"
 
           echo "Applying release on VPS with atomic staging and verified rollback..."
-          ssh -o BatchMode=yes -o ConnectTimeout=30 -o ServerAliveInterval=10 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$TARGET_PORT" -i "$HOME/.ssh/id_deploy" "$VPS_USER@$VPS_HOST" "bash -s -- '$VPS_ROOT' 'helpdesk' '$RELEASE_ID' '$ARCHIVE_NAME'" <<'REMOTE'
+          ssh -o BatchMode=yes -o ConnectTimeout=30 -o ServerAliveInterval=10 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=yes -i "$HOME/.ssh/deploy_key" -p "$VPS_PORT" "$VPS_USER@$VPS_HOST" "bash -s -- '$VPS_ROOT' 'helpdesk' '$RELEASE_ID' '$ARCHIVE_NAME'" <<'REMOTE'
           set -Eeuo pipefail
 
           live="$1"
