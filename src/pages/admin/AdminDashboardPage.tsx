@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { AlertCircle, ArrowRight, CheckCircle2, Clock, Inbox, TerminalSquare } from 'lucide-react';
+import { AlertCircle, ArrowRight, CheckCircle2, Clock, Inbox, Star, TerminalSquare } from 'lucide-react';
 import { CATEGORY_LABEL, VPS_APPS } from '../../config/vpsAppsConfig';
 import { useCrm } from '../../context/CrmContext';
 import { computeStats, countByApp, formatDuration, timeAgo } from '../../services/crmLogic';
@@ -50,7 +50,7 @@ export function AdminDashboardPage() {
       </div>
 
       {/* Operational Summary Strip */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <div className="rounded-lg border border-red-200 bg-panel p-4 shadow-sm">
           <div className="flex items-center justify-between text-xs text-ink-muted">
             <span className="font-medium">Baru Masuk (Open)</span>
@@ -92,6 +92,19 @@ export function AdminDashboardPage() {
             {stats.avgResolutionMs > 0 ? formatDuration(stats.avgResolutionMs) : '—'}
           </div>
           <div className="mt-0.5 text-[11px] text-ink-muted">Dari tiket masuk hingga Solved</div>
+        </div>
+
+        <div className="rounded-lg border border-line bg-panel p-4 shadow-sm">
+          <div className="flex items-center justify-between text-xs text-ink-muted">
+            <span className="font-medium">Kepuasan (CSAT)</span>
+            <Star className="h-4 w-4 text-amber-500 fill-amber-400" />
+          </div>
+          <div className="mt-1.5 text-2xl font-bold text-ink tabular-nums">
+            {stats.avgCsat > 0 ? `${stats.avgCsat} / 5` : '—'}
+          </div>
+          <div className="mt-0.5 text-[11px] text-ink-muted">
+            {stats.totalRated > 0 ? `Dari ${stats.totalRated} ulasan` : 'Belum ada penilaian'}
+          </div>
         </div>
 
         <div className="col-span-2 rounded-lg border border-line bg-panel p-4 shadow-sm sm:col-span-1">

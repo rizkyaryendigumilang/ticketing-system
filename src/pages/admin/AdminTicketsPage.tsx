@@ -48,7 +48,12 @@ export function AdminTicketsPage() {
   };
 
   const kanbanTickets = sortQueue(
-    filterTickets(data.tickets, { appId: selectedApp, priority: selectedPriority, search: searchQuery }),
+    filterTickets(data.tickets, {
+      appId: selectedApp,
+      priority: selectedPriority,
+      search: searchQuery,
+      messages: data.messages,
+    }),
   );
 
   return (
@@ -89,6 +94,7 @@ export function AdminTicketsPage() {
       {viewMode === 'table' ? (
         <TicketInboxTable
           tickets={data.tickets}
+          messages={data.messages}
           selectedApp={selectedApp}
           selectedStatus={selectedStatus}
           selectedPriority={selectedPriority}

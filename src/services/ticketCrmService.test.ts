@@ -7,6 +7,7 @@ import {
   markSolvedByRequester,
   replyToTicket,
   solveTicket,
+  submitSatisfactionFeedback,
   type Actor,
   type NewTicketInput,
 } from './ticketCrmService.ts';
@@ -133,4 +134,19 @@ test('markSolvedByRequester allows requester to close completed issue', () => {
   const closed = getData().tickets.find((t) => t.id === ticket.id);
   assert.equal(closed?.status, 'solved');
   assert.ok(closed?.solvedAt);
+});
+
+test('submitSatisfactionFeedback stores 1-5 star rating and comment', () => {
+  const ticket = getData().tickets[0];
+
+  submitSatisfactionFeedback(ticket, requesterActor, 5, 'Pelayanan sangat cepat dan solutif!');
+
+  const rated = getData().tickets.find((t) => t.id === ticket.id);
+  assert.equal(rated?.satisfactionRating, 5);
+  assert.equal(rated?.satisfactionComment, 'Pelayanan sangat cepat dan solutif!');
+
+  const auditMsg = getData().messages.find(
+    (m) => m.ticketId === ticket.id && m.body.includes('5/5 bintang'),
+  );
+  assert.ok(auditMsg);
 });

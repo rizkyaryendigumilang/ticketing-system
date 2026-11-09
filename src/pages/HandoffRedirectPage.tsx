@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { AlertTriangle, ArrowLeft } from 'lucide-react';
 import { VPS_APPS } from '../config/vpsAppsConfig';
-import { parseHandoff } from '../services/crmLogic';
+import { parseHandoff, verifyHandoffSignature } from '../services/crmLogic';
 import { useCrm } from '../context/CrmContext';
 
 export function HandoffRedirectPage() {
@@ -21,15 +21,33 @@ export function HandoffRedirectPage() {
 
     const openNewForm = searchParams.get('new') === '1';
 
-    handoff(result.params)
-      .then(() => {
+    const proceedHandoff = () => {
+      handoff(result.params)
+        .then(() => {
+          if (!active) return;
+          navigate(openNewForm ? '/portal/new' : '/portal', { replace: true });
+        })
+        .catch((err) => {
+          if (!active) return;
+          setError(err instanceof Error ? err.message : 'Gagal memproses sesi handoff aplikasi.');
+        });
+    };
+
+    const sig = searchParams.get('sig');
+    if (sig) {
+      const secret = import.meta.env.VITE_HANDOFF_SECRET || 'vps-helpdesk-secret-key';
+      verifyHandoffSignature(searchParams, secret).then((check) => {
         if (!active) return;
-        navigate(openNewForm ? '/portal/new' : '/portal', { replace: true });
-      })
-      .catch((err) => {
-        if (!active) return;
-        setError(err instanceof Error ? err.message : 'Gagal memproses sesi handoff aplikasi.');
+        if (!check.valid) {
+          setError(check.reason || 'Tanda tangan keamanan link bantuan tidak valid atau kedaluwarsa.');
+          return;
+        }
+        proceedHandoff();
       });
+      return;
+    }
+
+    proceedHandoff();
 
     return () => { active = false; };
   }, [searchParams, handoff, navigate]);

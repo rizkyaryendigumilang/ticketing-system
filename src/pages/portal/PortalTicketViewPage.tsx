@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, ExternalLink, MessageSquare, Send, Sparkles } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, ExternalLink, MessageSquare, Send, Sparkles, Star } from 'lucide-react';
 import { CATEGORY_LABEL, STATUS_LABEL } from '../../config/vpsAppsConfig';
 import { useCrm } from '../../context/CrmContext';
 import { timeAgo, visibleMessages } from '../../services/crmLogic';
-import { markSolvedByRequester, replyToTicket } from '../../services/ticketCrmService';
+import { markSolvedByRequester, replyToTicket, submitSatisfactionFeedback } from '../../services/ticketCrmService';
 import type { TicketStatus } from '../../types/crm';
 import { PriorityBadge } from '../../components/common/PriorityBadge';
 import { ScreenshotUploader } from '../../components/common/ScreenshotUploader';
@@ -22,6 +22,8 @@ export function PortalTicketViewPage() {
   const [attachments, setAttachments] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
+  const [csatRating, setCsatRating] = useState<number>(0);
+  const [csatComment, setCsatComment] = useState<string>('');
 
   const ticket = data.tickets.find((t) => t.id === id) ?? null;
 
@@ -79,6 +81,17 @@ export function PortalTicketViewPage() {
     if (!requesterActor) return;
     markSolvedByRequester(ticket, requesterActor);
     toast.success('Terima kasih, tiket telah Anda tandai sebagai selesai');
+  };
+
+  const handleSubmitCsat = () => {
+    if (!requesterActor || csatRating === 0) return;
+    setSubmitting(true);
+    try {
+      submitSatisfactionFeedback(ticket, requesterActor, csatRating, csatComment);
+      toast.success('Terima kasih banyak atas penilaian kepuasan Anda!');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -172,6 +185,75 @@ export function PortalTicketViewPage() {
             <Sparkles className="h-3 w-3" />
             <span>Jika kendala masih terjadi, silakan kirim balasan di bawah untuk membuka kembali tiket ini secara otomatis.</span>
           </div>
+        </div>
+      )}
+
+      {/* CSAT Satisfaction Feedback Card */}
+      {isSolved && (
+        <div className="rounded-lg border border-line bg-panel p-4 sm:p-5 shadow-sm">
+          <div className="flex items-center justify-between gap-2 border-b border-line pb-3">
+            <span className="flex items-center gap-1.5 text-xs font-bold text-ink">
+              <Star className="h-4 w-4 fill-amber-400 text-amber-500" />
+              Penilaian Layanan &amp; Kepuasan Solusi (CSAT)
+            </span>
+            {ticket.satisfactionRating ? (
+              <span className="rounded bg-amber-50 px-2 py-0.5 font-mono text-xs font-bold text-amber-800 border border-amber-200">
+                ⭐ {ticket.satisfactionRating} / 5 Bintang
+              </span>
+            ) : null}
+          </div>
+
+          {ticket.satisfactionRating ? (
+            <div className="mt-3 text-xs text-ink-muted">
+              <p>Terima kasih atas penilaian Anda terhadap penanganan tiket ini.</p>
+              {ticket.satisfactionComment && (
+                <p className="mt-1 italic text-ink">&ldquo;{ticket.satisfactionComment}&rdquo;</p>
+              )}
+            </div>
+          ) : (
+            <div className="mt-3 space-y-3">
+              <p className="text-xs text-ink-muted">
+                Bagaimana penilaian Anda terhadap kecepatan dan kejelasan solusi yang diberikan oleh Superadmin?
+              </p>
+              <div className="flex items-center gap-1.5">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setCsatRating(star)}
+                    className="p-1 text-ink transition-transform hover:scale-110 active:scale-95"
+                    aria-label={`Beri ${star} bintang`}
+                  >
+                    <Star
+                      className={`h-6 w-6 ${
+                        star <= (csatRating || 0)
+                          ? 'fill-amber-400 text-amber-500'
+                          : 'text-line-strong hover:text-amber-400'
+                      }`}
+                    />
+                  </button>
+                ))}
+                <span className="ml-2 font-mono text-xs font-bold text-ink">
+                  {csatRating > 0 ? `${csatRating}/5 Bintang` : 'Pilih bintang'}
+                </span>
+              </div>
+              <input
+                type="text"
+                value={csatComment}
+                onChange={(e) => setCsatComment(e.target.value)}
+                placeholder="Tuliskan komentar tambahan (opsional)..."
+                className="w-full rounded border border-line bg-canvas px-3 py-1.5 text-xs text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none"
+              />
+              <button
+                type="button"
+                disabled={csatRating === 0 || submitting}
+                onClick={handleSubmitCsat}
+                className="inline-flex items-center gap-1.5 rounded bg-ink px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90 active:scale-95 disabled:opacity-40 transition-[opacity,transform]"
+              >
+                Kirim Penilaian
+              </button>
+            </div>
+          )}
         </div>
       )}
 

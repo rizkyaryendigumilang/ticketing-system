@@ -31,6 +31,7 @@ interface CrmContextValue {
   logoutRequester: () => void;
   resetDemo: () => void;
   notify: (message: string) => void;
+  requestDesktopNotification: () => Promise<NotificationPermission | null>;
 }
 
 const CrmContext = createContext<CrmContextValue | null>(null);
@@ -67,10 +68,35 @@ export function CrmProvider({ children }: { children: React.ReactNode }) {
     const ids = new Set(data.tickets.map((t) => t.id));
     if (knownTickets.current && admin) {
       const fresh = data.tickets.find((t) => !knownTickets.current!.has(t.id) && t.status === 'open');
-      if (fresh) notify(`Tiket baru ${fresh.ticketNumber} dari ${getApp(fresh.appId)?.name ?? fresh.appId}: ${fresh.subject}`);
+      if (fresh) {
+        const appName = getApp(fresh.appId)?.name ?? fresh.appId;
+        notify(`Tiket baru ${fresh.ticketNumber} dari ${appName}: ${fresh.subject}`);
+        if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+          try {
+            new Notification(`Tiket Baru ${fresh.ticketNumber} [${appName}]`, {
+              body: `${fresh.subject}\nPrioritas: ${fresh.priority.toUpperCase()}`,
+            });
+          } catch {
+            // Notification failed or blocked in non-secure context
+          }
+        }
+      }
     }
     knownTickets.current = ids;
   }, [data.tickets, admin, notify]);
+
+  const requestDesktopNotification = useCallback(async (): Promise<NotificationPermission | null> => {
+    if (typeof window === 'undefined' || !('Notification' in window)) return null;
+    try {
+      const perm = await Notification.requestPermission();
+      if (perm === 'granted') {
+        toast.success('Notifikasi desktop aktif untuk tiket baru.');
+      }
+      return perm;
+    } catch {
+      return null;
+    }
+  }, [toast]);
 
   const requester = data.users.find((u) => u.id === requesterId) ?? null;
 
@@ -82,7 +108,13 @@ export function CrmProvider({ children }: { children: React.ReactNode }) {
     adminActor: { id: ADMIN_SENDER_ID, name: admin?.name ?? 'Superadmin', role: 'admin' },
     requester,
     requesterActor: requester ? { id: requester.id, name: requester.name, role: 'requester' } : null,
-    loginAdmin: async (email, password) => setAdmin(await runLoginAdmin(email, password)),
+    loginAdmin: async (email, password) => {
+      const s = await runLoginAdmin(email, password);
+      setAdmin(s);
+      if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
+        void Notification.requestPermission();
+      }
+    },
     logoutAdmin: () => {
       runLogoutAdmin();
       setAdmin(null);
@@ -101,6 +133,7 @@ export function CrmProvider({ children }: { children: React.ReactNode }) {
       notify('Data demo dikembalikan ke seed awal.');
     },
     notify,
+    requestDesktopNotification,
   };
 
   return (

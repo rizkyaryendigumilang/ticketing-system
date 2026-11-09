@@ -121,6 +121,7 @@ export interface TicketFilter {
   status?: TicketStatus | 'active' | 'all';
   priority?: TicketPriority | 'all';
   search?: string;
+  messages?: TicketMessage[];
 }
 
 export function filterTickets(tickets: Ticket[], f: TicketFilter): Ticket[] {
@@ -130,7 +131,11 @@ export function filterTickets(tickets: Ticket[], f: TicketFilter): Ticket[] {
       (!f.appId || f.appId === 'all' || t.appId === f.appId) &&
       (!f.status || f.status === 'all' || (f.status === 'active' ? ACTIVE_STATUSES.includes(t.status) : t.status === f.status)) &&
       (!f.priority || f.priority === 'all' || t.priority === f.priority) &&
-      (!q || [t.ticketNumber, t.subject, t.requesterName, t.requesterUid].some((v) => v.toLowerCase().includes(q))),
+      (!q ||
+        [t.ticketNumber, t.subject, t.description, t.requesterName, t.requesterUid].some((v) =>
+          (v ?? '').toLowerCase().includes(q),
+        ) ||
+        Boolean(f.messages?.some((m) => m.ticketId === t.id && m.body.toLowerCase().includes(q)))),
   );
 }
 
@@ -147,6 +152,11 @@ export function computeStats(tickets: Ticket[], now = Date.now()) {
   const count = (s: TicketStatus) => tickets.filter((t) => t.status === s).length;
   const solved = tickets.filter((t) => t.solvedAt);
   const weekAgo = now - 7 * 86_400_000;
+  const rated = tickets.filter((t) => typeof t.satisfactionRating === 'number' && t.satisfactionRating > 0);
+  const avgCsat = rated.length
+    ? Number((rated.reduce((sum, t) => sum + (t.satisfactionRating ?? 0), 0) / rated.length).toFixed(1))
+    : 0;
+
   return {
     open: count('open'),
     inProgress: count('in_progress'),
@@ -155,7 +165,127 @@ export function computeStats(tickets: Ticket[], now = Date.now()) {
     avgResolutionMs: solved.length
       ? solved.reduce((sum, t) => sum + (Date.parse(t.solvedAt!) - Date.parse(t.createdAt)), 0) / solved.length
       : 0,
+    avgCsat,
+    totalRated: rated.length,
   };
+}
+
+/** Converts a list of tickets into a formatted RFC-4180 CSV string. */
+export function formatTicketsCsv(tickets: Ticket[]): string {
+  const headers = [
+    'Nomor Tiket',
+    'Aplikasi',
+    'Pelapor',
+    'Role Pelapor',
+    'Subjek',
+    'Kategori',
+    'Prioritas',
+    'Status',
+    'Tanggal Masuk',
+    'Tanggal Solved',
+    'Rating CSAT',
+    'Ringkasan Solusi',
+  ];
+
+  const escapeCell = (val: unknown): string => {
+    if (val === null || val === undefined) return '""';
+    const s = String(val).replace(/"/g, '""');
+    return `"${s}"`;
+  };
+
+  const rows = tickets.map((t) => [
+    escapeCell(t.ticketNumber),
+    escapeCell(t.appId),
+    escapeCell(t.requesterName),
+    escapeCell(t.requesterRole),
+    escapeCell(t.subject),
+    escapeCell(t.category),
+    escapeCell(t.priority),
+    escapeCell(t.status),
+    escapeCell(t.createdAt),
+    escapeCell(t.solvedAt || ''),
+    escapeCell(t.satisfactionRating ? `${t.satisfactionRating}/5` : ''),
+    escapeCell(t.resolutionSummary || ''),
+  ]);
+
+  return [headers.join(','), ...rows.map((r) => r.join(','))].join('\r\n');
+}
+
+/** Triggers a browser file download of tickets in CSV format. */
+export function downloadTicketsCsv(tickets: Ticket[], filename = `helpdesk-tickets-${new Date().toISOString().slice(0, 10)}.csv`) {
+  const csvContent = formatTicketsCsv(tickets);
+  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' }); // BOM for Excel UTF-8 support
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Computes an HMAC-SHA256 signature for SSO Handoff parameters.
+ * Signature payload format: "${app}:${uid}:${timestamp}"
+ */
+export async function createHandoffSignature(app: string, uid: string, timestamp: number, secret: string): Promise<string> {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  const payload = `${app.trim()}:${uid.trim()}:${timestamp}`;
+  const sigBuffer = await crypto.subtle.sign('HMAC', key, enc.encode(payload));
+  return Array.from(new Uint8Array(sigBuffer), (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+export interface VerifySignatureResult {
+  valid: boolean;
+  reason?: string;
+}
+
+/**
+ * Verifies an HMAC-SHA256 signature for SSO Handoff parameters.
+ * Validates timestamp age (max 15 minutes) and matches signature.
+ */
+export async function verifyHandoffSignature(
+  search: URLSearchParams,
+  secret: string,
+  now = Math.floor(Date.now() / 1000),
+  maxAgeSeconds = 900,
+): Promise<VerifySignatureResult> {
+  const sig = search.get('sig')?.trim();
+  const tsRaw = search.get('ts')?.trim();
+  const app = search.get('app')?.trim();
+  const uid = search.get('uid')?.trim();
+
+  if (!sig || !tsRaw) {
+    return { valid: false, reason: 'Parameter sig atau ts tidak ada.' };
+  }
+  if (!app || !uid) {
+    return { valid: false, reason: 'Parameter app atau uid tidak ada.' };
+  }
+
+  const ts = Number(tsRaw);
+  if (isNaN(ts) || ts <= 0) {
+    return { valid: false, reason: 'Timestamp ts tidak valid.' };
+  }
+
+  if (Math.abs(now - ts) > maxAgeSeconds) {
+    return { valid: false, reason: 'Tautan handoff sudah kedaluwarsa (> 15 menit).' };
+  }
+
+  const expectedSig = await createHandoffSignature(app, uid, ts, secret);
+  if (sig.toLowerCase() !== expectedSig.toLowerCase()) {
+    return { valid: false, reason: 'Tanda tangan digital sig tidak valid (mismatch).' };
+  }
+
+  return { valid: true };
 }
 
 /** A requester reply reopens a ticket that was waiting on them or already solved. */

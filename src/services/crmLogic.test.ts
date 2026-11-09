@@ -3,13 +3,16 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   compositeKeyOf,
+  createHandoffSignature,
   filterTickets,
+  formatTicketsCsv,
   newId,
   nextTicketNumber,
   parseHandoff,
   safeHttpUrl,
   sortQueue,
   statusAfterRequesterReply,
+  verifyHandoffSignature,
   visibleMessages,
 } from './crmLogic.ts';
 import type { Ticket, TicketMessage } from '../types/crm';
@@ -108,4 +111,89 @@ test('requester reply reopens waiting and solved tickets only', () => {
 
 test('ids match the PocketBase id format', () => {
   assert.match(newId(), /^[a-z0-9]{15}$/);
+});
+
+test('deep search finds tickets matching content inside reply messages', () => {
+  const tickets = [
+    t('TKT-01', 'open', 'low', '2026-11-04', { subject: 'Pertanyaan akun' }),
+    t('TKT-02', 'in_progress', 'high', '2026-11-04', { subject: 'Laporan bug umum' }),
+  ];
+  const messages: TicketMessage[] = [
+    {
+      id: 'msg01',
+      ticketId: 'TKT-02',
+      senderId: 'user1',
+      senderName: 'Budi',
+      senderRole: 'requester',
+      body: 'Error 500 terjadi pada saat export PDF tagihan #INV-9923',
+      attachments: [],
+      isInternalNote: false,
+      createdAt: '2026-11-04',
+    },
+  ];
+
+  // Searching by standard subject doesn't match TKT-01
+  const normalSearch = filterTickets(tickets, { search: 'INV-9923' });
+  assert.equal(normalSearch.length, 0);
+
+  // Deep search with messages matches TKT-02
+  const deepSearch = filterTickets(tickets, { search: 'INV-9923', messages });
+  assert.equal(deepSearch.length, 1);
+  assert.equal(deepSearch[0].id, 'TKT-02');
+});
+
+test('formatTicketsCsv produces properly escaped and formatted CSV', () => {
+  const list = [
+    t('SNK-101', 'solved', 'urgent', '2026-11-04', {
+      subject: 'Rekap, "Khusus" Harian',
+      requesterName: 'Rina (Kasir)',
+      requesterRole: 'Staff',
+      satisfactionRating: 5,
+      resolutionSummary: 'Bug printer sudah fixed.',
+    }),
+  ];
+  const csv = formatTicketsCsv(list);
+  assert.ok(csv.includes('Nomor Tiket,Aplikasi,Pelapor,Role Pelapor'));
+  assert.ok(csv.includes('"SNK-101"'));
+  assert.ok(csv.includes('"Rekap, ""Khusus"" Harian"'));
+  assert.ok(csv.includes('"5/5"'));
+});
+
+test('createHandoffSignature and verifyHandoffSignature enforce cryptographic authenticity and expiration', async () => {
+  const secret = 'vps-super-secret-key-123';
+  const now = 1731140000;
+  const sig = await createHandoffSignature('snackloop', 'staff1', now, secret);
+  assert.ok(sig && sig.length === 64);
+
+  // Valid signature and timestamp
+  const validParams = new URLSearchParams({
+    app: 'snackloop',
+    uid: 'staff1',
+    ts: String(now),
+    sig,
+  });
+  const validRes = await verifyHandoffSignature(validParams, secret, now);
+  assert.equal(validRes.valid, true);
+
+  // Tampered uid
+  const tamperedParams = new URLSearchParams({
+    app: 'snackloop',
+    uid: 'hacker_admin',
+    ts: String(now),
+    sig,
+  });
+  const tamperedRes = await verifyHandoffSignature(tamperedParams, secret, now);
+  assert.equal(tamperedRes.valid, false);
+  assert.ok(tamperedRes.reason?.includes('mismatch'));
+
+  // Expired timestamp (> 15 minutes)
+  const expiredParams = new URLSearchParams({
+    app: 'snackloop',
+    uid: 'staff1',
+    ts: String(now - 1200), // 20 minutes ago
+    sig: await createHandoffSignature('snackloop', 'staff1', now - 1200, secret),
+  });
+  const expiredRes = await verifyHandoffSignature(expiredParams, secret, now);
+  assert.equal(expiredRes.valid, false);
+  assert.ok(expiredRes.reason?.includes('kedaluwarsa'));
 });

@@ -74,6 +74,26 @@ function openHelpdeskCRM(currentUser) {
   window.open('${handoffBaseUrl}?' + params.toString(), '_blank', 'noopener');
 }`;
 
+  const hmacSnippet = `// Backend (Node.js / Express) pembuatan link bertanda tangan HMAC-SHA256 (Kedaluwarsa 15 menit):
+import crypto from 'node:crypto';
+
+function generateSecureHandoffUrl(appId, uid, name, role, fromUrl, secret = process.env.HANDOFF_SECRET) {
+  const ts = Math.floor(Date.now() / 1000);
+  const payload = \`\${appId}:\${uid}:\${ts}\`;
+  const sig = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+
+  const params = new URLSearchParams({
+    app: appId,
+    uid,
+    name,
+    role,
+    from_url: fromUrl,
+    ts: String(ts),
+    sig,
+  });
+  return \`${handoffBaseUrl}?\${params.toString()}\`;
+}`;
+
   const copyText = (key: string, value: string, label: string) => {
     navigator.clipboard.writeText(value);
     setCopiedKey(key);
@@ -317,6 +337,33 @@ function openHelpdeskCRM(currentUser) {
             </div>
             <pre className="mt-1.5 overflow-x-auto rounded border border-rail-line bg-rail p-3.5 font-mono text-[11px] leading-relaxed text-neutral-200">
               {jsSnippet}
+            </pre>
+          </div>
+
+          {/* Secure Signed Handoff Code Snippet */}
+          <div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-ink">
+                3. Keamanan Tambahan: HMAC-SHA256 Signed Link (Backend Node.js / Anti-Spoofing &amp; 15m Expiration)
+              </span>
+              <button
+                type="button"
+                onClick={() => copyText('hmac', hmacSnippet, 'Kode HMAC')}
+                className="inline-flex items-center gap-1 text-xs font-medium text-ink hover:underline"
+              >
+                {copiedKey === 'hmac' ? (
+                  <>
+                    <Check className="h-3.5 w-3.5 text-emerald-700" /> Disalin
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-3.5 w-3.5" /> Salin Kode HMAC
+                  </>
+                )}
+              </button>
+            </div>
+            <pre className="mt-1.5 overflow-x-auto rounded border border-rail-line bg-rail p-3.5 font-mono text-[11px] leading-relaxed text-neutral-200">
+              {hmacSnippet}
             </pre>
           </div>
         </div>

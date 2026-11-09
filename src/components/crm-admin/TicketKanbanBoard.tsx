@@ -10,7 +10,8 @@ const COLUMNS: { status: TicketStatus; accent: string; next?: TicketStatus }[] =
   { status: 'open', accent: 'border-t-red-600', next: 'in_progress' },
   { status: 'in_progress', accent: 'border-t-amber-500', next: 'waiting_on_user' },
   { status: 'waiting_on_user', accent: 'border-t-purple-600', next: 'solved' },
-  { status: 'solved', accent: 'border-t-emerald-600' },
+  { status: 'solved', accent: 'border-t-emerald-600', next: 'closed' },
+  { status: 'closed', accent: 'border-t-slate-500' },
 ];
 
 interface Props {
@@ -40,7 +41,7 @@ export function TicketKanbanBoard({
   };
 
   return (
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
       {COLUMNS.map((col) => {
         const items = tickets.filter((t) => t.status === col.status);
         const isOver = dragOverCol === col.status;
@@ -116,6 +117,11 @@ export function TicketKanbanBoard({
                             <>
                               <CheckCircle2 className="h-3 w-3 text-emerald-700" />
                               Set Solved
+                            </>
+                          ) : col.next === 'closed' ? (
+                            <>
+                              Set Closed
+                              <ArrowRight className="h-2.5 w-2.5" />
                             </>
                           ) : (
                             <>

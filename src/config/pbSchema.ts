@@ -19,7 +19,8 @@ export const FIELD_MAP: Record<CollectionName, Record<string, string>> = {
     requesterName: 'requester_name', requesterUid: 'requester_uid', requesterRole: 'requester_role',
     subject: 'subject', description: 'description', category: 'category', priority: 'priority', status: 'status',
     sourcePageUrl: 'source_page_url', deviceInfo: 'device_info', attachments: 'attachments',
-    resolutionSummary: 'resolution_summary', createdAt: 'created_at', updatedAt: 'updated_at', solvedAt: 'solved_at',
+    resolutionSummary: 'resolution_summary', satisfactionRating: 'satisfaction_rating', satisfactionComment: 'satisfaction_comment',
+    createdAt: 'created_at', updatedAt: 'updated_at', solvedAt: 'solved_at',
   },
   ticket_messages: {
     id: 'id', ticketId: 'ticket_id', senderId: 'sender_id', senderName: 'sender_name', senderRole: 'sender_role',
@@ -135,7 +136,7 @@ export const COLLECTIONS = [
     type: 'base',
     listRule: '', viewRule: '', createRule: '@request.body.status = "open"',
     updateRule:
-      '(@request.body.status = "open" || @request.body.status = "solved") && ' +
+      '(@request.body.status = "open" || @request.body.status = "solved" || @request.body.satisfaction_rating:isset = true) && ' +
       '@request.body.priority:isset = false && @request.body.category:isset = false && ' +
       '@request.body.requester_id:isset = false && @request.body.app_id:isset = false && ' +
       '@request.body.ticket_number:isset = false',
@@ -156,6 +157,8 @@ export const COLLECTIONS = [
       { name: 'device_info', type: 'text', max: 300 },
       { name: 'attachments', ...IMAGE_FILE },
       { name: 'resolution_summary', type: 'text', max: 20000 },
+      { name: 'satisfaction_rating', type: 'number' },
+      { name: 'satisfaction_comment', type: 'text', max: 2000 },
       { name: 'created_at', type: 'date', required: true },
       { name: 'updated_at', type: 'date' },
       { name: 'solved_at', type: 'date' },

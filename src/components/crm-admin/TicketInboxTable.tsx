@@ -1,4 +1,4 @@
-import { Search, SlidersHorizontal, X } from 'lucide-react';
+import { FileDown, Search, SlidersHorizontal, X } from 'lucide-react';
 import {
   CATEGORY_LABEL,
   PRIORITY_LABEL,
@@ -7,14 +7,15 @@ import {
   STATUS_ORDER,
   VPS_APPS,
 } from '../../config/vpsAppsConfig';
-import { filterTickets, sortQueue, timeAgo } from '../../services/crmLogic';
-import type { Ticket, TicketPriority, TicketStatus } from '../../types/crm';
+import { downloadTicketsCsv, filterTickets, sortQueue, timeAgo } from '../../services/crmLogic';
+import type { Ticket, TicketMessage, TicketPriority, TicketStatus } from '../../types/crm';
 import { AppBadge } from '../common/AppBadge';
 import { PriorityBadge } from '../common/PriorityBadge';
 import { StatusBadge } from '../common/StatusBadge';
 
 interface Props {
   tickets: Ticket[];
+  messages?: TicketMessage[];
   selectedApp: string;
   selectedStatus: TicketStatus | 'active' | 'all';
   selectedPriority: TicketPriority | 'all';
@@ -29,6 +30,7 @@ interface Props {
 
 export function TicketInboxTable({
   tickets,
+  messages,
   selectedApp,
   selectedStatus,
   selectedPriority,
@@ -46,6 +48,7 @@ export function TicketInboxTable({
       status: selectedStatus,
       priority: selectedPriority,
       search: searchQuery,
+      messages,
     }),
   );
 
@@ -140,8 +143,20 @@ export function TicketInboxTable({
           </div>
         </div>
 
-        <div className="font-mono text-xs text-ink-muted tabular-nums">
-          {filtered.length} dari {tickets.length} tiket
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => downloadTicketsCsv(filtered)}
+            disabled={filtered.length === 0}
+            className="inline-flex items-center gap-1.5 rounded border border-line bg-subtle px-2.5 py-1 text-xs font-medium text-ink hover:border-line-strong active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-[border-color,transform]"
+            title="Download hasil filter antrean tiket sebagai file CSV"
+          >
+            <FileDown className="h-3.5 w-3.5 text-ink-muted" />
+            Export CSV
+          </button>
+          <div className="font-mono text-xs text-ink-muted tabular-nums">
+            {filtered.length} dari {tickets.length} tiket
+          </div>
         </div>
       </div>
 

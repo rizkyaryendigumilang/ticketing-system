@@ -109,3 +109,21 @@ export function markSolvedByRequester(ticket: Ticket, actor: Actor) {
   patchTicket(ticket, { status: 'solved', solvedAt: now() }, actor);
   postMessage(ticket.id, 'system', `${actor.name} menandai masalah sudah selesai.`);
 }
+
+export function submitSatisfactionFeedback(ticket: Ticket, actor: Actor, rating: number, comment?: string) {
+  const boundedRating = Math.max(1, Math.min(5, Math.round(rating)));
+  const cleanComment = comment?.trim();
+  patchTicket(
+    ticket,
+    {
+      satisfactionRating: boundedRating,
+      satisfactionComment: cleanComment || undefined,
+    },
+    actor,
+  );
+  postMessage(
+    ticket.id,
+    'system',
+    `${actor.name} memberikan rating kepuasan: ${boundedRating}/5 bintang${cleanComment ? ` ("${cleanComment}")` : ''}.`,
+  );
+}
