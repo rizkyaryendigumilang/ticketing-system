@@ -127,7 +127,7 @@ export function PortalTicketViewPage() {
               return (
                 <div key={step} className="space-y-1.5">
                   <div
-                    className={`h-2 w-full rounded-full transition-all ${
+                    className={`h-2 w-full rounded-full transition-colors ${
                       reached
                         ? step === 'solved' || isSolved
                           ? 'bg-emerald-600'

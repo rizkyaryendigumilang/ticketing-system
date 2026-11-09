@@ -465,7 +465,7 @@ export function TicketWorkspace3Col({
         {/* Reply & Solve Composer */}
         <form
           onSubmit={handleReplySubmit}
-          className={`rounded-lg border p-4 shadow-sm transition-all ${
+          className={`rounded-lg border p-4 shadow-sm transition-colors ${
             composerMode === 'internal'
               ? 'border-amber-300/80 bg-amber-50/40'
               : 'border-line bg-panel'

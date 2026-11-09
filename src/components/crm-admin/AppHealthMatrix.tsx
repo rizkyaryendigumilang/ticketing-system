@@ -25,7 +25,7 @@ export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
         return (
           <div
             key={app.id}
-            className={`group flex flex-col justify-between rounded-lg border bg-panel shadow-sm transition-all ${
+            className={`group flex flex-col justify-between rounded-lg border bg-panel shadow-sm transition-colors ${
               hasOpen
                 ? 'border-red-300 ring-1 ring-red-500/20'
                 : 'border-line hover:border-line-strong hover:shadow'
