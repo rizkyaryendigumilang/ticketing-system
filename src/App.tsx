@@ -8,6 +8,7 @@ import { LoginPage } from './pages/LoginPage';
 import { AdminContactsPage } from './pages/admin/AdminContactsPage';
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage';
 import { AdminIntegrationPage } from './pages/admin/AdminIntegrationPage';
+import { AdminSettingsPage } from './pages/admin/AdminSettingsPage';
 import { AdminTicketDetailPage } from './pages/admin/AdminTicketDetailPage';
 import { AdminTicketsPage } from './pages/admin/AdminTicketsPage';
 import { PortalHomePage } from './pages/portal/PortalHomePage';
@@ -62,6 +63,7 @@ export default function App() {
         <Route path="tickets/:id" element={<AdminTicketDetailPage />} />
         <Route path="contacts" element={<AdminContactsPage />} />
         <Route path="integrations" element={<AdminIntegrationPage />} />
+        <Route path="settings" element={<AdminSettingsPage />} />
       </Route>
 
       {/* Customer Self-Service Portal */}

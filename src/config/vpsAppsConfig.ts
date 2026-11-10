@@ -12,11 +12,11 @@ export function getApp(appId: string | undefined): AppSource | undefined {
 }
 
 export const STATUS_LABEL: Record<TicketStatus, string> = {
-  open: 'Open',
-  in_progress: 'In progress',
-  waiting_on_user: 'Menunggu user',
-  solved: 'Solved',
-  closed: 'Closed',
+  open: 'Baru',
+  in_progress: 'Diproses',
+  waiting_on_user: 'Menunggu Balasan',
+  solved: 'Selesai',
+  closed: 'Ditutup',
 };
 
 export const STATUS_ORDER: TicketStatus[] = ['open', 'in_progress', 'waiting_on_user', 'solved', 'closed'];
@@ -41,18 +41,18 @@ export const CATEGORY_LABEL: Record<TicketCategory, string> = {
 export const CANNED_RESPONSES: CannedResponse[] = [
   {
     id: 'cr-ack',
-    title: 'Sedang dicek',
-    content: 'Halo, terima kasih laporannya. Kendala ini sedang kami cek dan kabarnya akan kami tulis di tiket ini.',
+    title: 'Konfirmasi pemeriksaan',
+    content: 'Halo, terima kasih atas laporannya. Kendala ini sedang kami periksa dan perkembangan terbarunya akan kami sampaikan melalui tiket ini.',
   },
   {
     id: 'cr-shot',
-    title: 'Minta screenshot',
-    content: 'Boleh kirim screenshot layar saat error muncul? Kalau ada pesan error berwarna merah, pastikan ikut terlihat.',
+    title: 'Minta tangkapan layar',
+    content: 'Boleh kirim tangkapan layar (screenshot) saat error muncul? Jika ada pesan error berwarna merah, pastikan ikut terlihat.',
   },
   {
     id: 'cr-steps',
-    title: 'Minta langkah reproduksi',
-    content: 'Supaya bisa kami ulangi, tolong tuliskan langkahnya: menu apa yang dibuka, tombol apa yang ditekan, dan apa yang muncul setelahnya.',
+    title: 'Minta urutan langkah kejadian',
+    content: 'Supaya kendala ini dapat kami telusuri, mohon ceritakan urutan langkahnya: menu yang dibuka, tombol yang ditekan, dan apa yang muncul di layar setelahnya.',
   },
   {
     id: 'cr-cache',

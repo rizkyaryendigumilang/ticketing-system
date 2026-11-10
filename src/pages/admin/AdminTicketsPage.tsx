@@ -125,7 +125,7 @@ export function AdminTicketsPage() {
               </select>
             </div>
             <span className="text-ink-muted">
-              Tarik kartu antar kolom atau klik tombol status di pojok kanan bawah kartu.
+              Tarik kartu antarkolom atau klik tombol status di pojok kanan bawah kartu.
             </span>
           </div>
 

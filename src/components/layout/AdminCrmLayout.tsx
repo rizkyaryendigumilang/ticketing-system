@@ -7,6 +7,7 @@ import {
   LogOut,
   PanelLeftClose,
   PanelLeftOpen,
+  Settings,
   TerminalSquare,
   Users,
 } from 'lucide-react';
@@ -25,9 +26,10 @@ type NavItem = {
 /** Primary nav items — shown as icons in the icon-rail and as full rows in the text sidebar. */
 const NAV: NavItem[] = [
   { to: '/admin', end: true, icon: LayoutGrid, label: 'Peta Kesehatan Aplikasi' },
-  { to: '/admin/tickets', end: false, icon: Inbox, label: 'Unified Inbox & Kanban', badgeKey: 'open' },
-  { to: '/admin/contacts', end: false, icon: Users, label: 'Direktori Kontak User' },
+  { to: '/admin/tickets', end: false, icon: Inbox, label: 'Kotak Masuk & Kanban', badgeKey: 'open' },
+  { to: '/admin/contacts', end: false, icon: Users, label: 'Direktori Kontak Pelapor' },
   { to: '/admin/integrations', end: false, icon: TerminalSquare, label: 'Integrasi Tombol Help' },
+  { to: '/admin/settings', end: false, icon: Settings, label: 'Pengaturan Sistem' },
 ];
 
 export function AdminCrmLayout() {

@@ -102,7 +102,7 @@ export function replyToTicket(
 export function solveTicket(ticket: Ticket, actor: Actor, resolution: string, attachments: string[] = []) {
   postMessage(ticket.id, actor, resolution, { attachments });
   patchTicket(ticket, { status: 'solved', solvedAt: now(), resolutionSummary: resolution.trim() }, actor);
-  postMessage(ticket.id, 'system', `${actor.name} menandai tiket ini Solved.`);
+  postMessage(ticket.id, 'system', `${actor.name} menyelesaikan tiket ini.`);
 }
 
 export function markSolvedByRequester(ticket: Ticket, actor: Actor) {
@@ -124,6 +124,6 @@ export function submitSatisfactionFeedback(ticket: Ticket, actor: Actor, rating:
   postMessage(
     ticket.id,
     'system',
-    `${actor.name} memberikan rating kepuasan: ${boundedRating}/5 bintang${cleanComment ? ` ("${cleanComment}")` : ''}.`,
+    `${actor.name} memberi penilaian kepuasan: ${boundedRating}/5 bintang${cleanComment ? ` ("${cleanComment}")` : ''}.`,
   );
 }

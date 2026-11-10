@@ -10,11 +10,22 @@ import {
   type AdminSession,
 } from '../services/authHandoffService';
 import { getConnection, onSyncError, startSync, subscribeConnection, type Connection } from '../services/pbClient';
-import { getData, getOutbox, resetToSeed, subscribeStore, type CrmData } from '../services/storageService';
+import {
+  getCannedList,
+  getData,
+  getOutbox,
+  getSettings,
+  resetToSeed,
+  saveCannedList,
+  saveSettings,
+  subscribeStore,
+  type CrmData,
+  type SystemSettings,
+} from '../services/storageService';
 import { useToast } from './ToastContext';
 const ADMIN_SENDER_ID = 'system:admin';
 import type { Actor } from '../services/ticketCrmService';
-import type { CrmUser, HandoffParams } from '../types/crm';
+import type { CannedResponse, CrmUser, HandoffParams } from '../types/crm';
 
 interface CrmContextValue {
   data: CrmData;
@@ -25,6 +36,10 @@ interface CrmContextValue {
   adminActor: Actor;
   requester: CrmUser | null;
   requesterActor: Actor | null;
+  settings: SystemSettings;
+  updateSettings: (next: SystemSettings) => void;
+  cannedResponses: CannedResponse[];
+  updateCannedResponses: (next: CannedResponse[]) => void;
   loginAdmin: (email: string, password: string) => Promise<void>;
   logoutAdmin: () => void;
   handoff: (params: HandoffParams) => Promise<CrmUser>;
@@ -44,9 +59,19 @@ export function CrmProvider({ children }: { children: React.ReactNode }) {
   const data = useSyncExternalStore(subscribeStore, getData);
   const outbox = useSyncExternalStore(subscribeStore, getOutbox);
   const connection = useSyncExternalStore(subscribeConnection, getConnection);
+  const settings = useSyncExternalStore(subscribeStore, getSettings);
+  const cannedResponses = useSyncExternalStore(subscribeStore, getCannedList);
   const [admin, setAdmin] = useState(getAdminSession);
   const [requesterId, setRequesterId] = useState(getRequesterId);
   const toast = useToast();
+
+  const updateSettings = useCallback((next: SystemSettings) => {
+    saveSettings(next);
+  }, []);
+
+  const updateCannedResponses = useCallback((next: CannedResponse[]) => {
+    saveCannedList(next);
+  }, []);
 
   const notify = useCallback(
     (message: string) => {
@@ -80,10 +105,28 @@ export function CrmProvider({ children }: { children: React.ReactNode }) {
             // Notification failed or blocked in non-secure context
           }
         }
+
+        // Forward to Telegram if enabled
+        if (settings.telegramEnabled && settings.telegramBotToken && settings.telegramChatId) {
+          const isUrgent = fresh.priority === 'urgent' || fresh.priority === 'high';
+          if (!settings.notifyOnUrgentOnly || isUrgent) {
+            const text = `🚨 <b>TIKET BARU #${fresh.ticketNumber}</b>\n` +
+              `📱 <b>Aplikasi:</b> ${appName}\n` +
+              `👤 <b>Pelapor:</b> ${fresh.requesterName} (${fresh.requesterUid})\n` +
+              `⚡ <b>Prioritas:</b> ${fresh.priority.toUpperCase()}\n` +
+              `📝 <b>Subjek:</b> ${fresh.subject}\n` +
+              `🔗 <a href="https://43.156.236.102/helpdesk/admin/tickets/${fresh.id}">Buka Meja Kerja CRM</a>`;
+            void fetch(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ chat_id: settings.telegramChatId, text, parse_mode: 'HTML' }),
+            }).catch(() => {});
+          }
+        }
       }
     }
     knownTickets.current = ids;
-  }, [data.tickets, admin, notify]);
+  }, [data.tickets, admin, notify, settings]);
 
   const requestDesktopNotification = useCallback(async (): Promise<NotificationPermission | null> => {
     if (typeof window === 'undefined' || !('Notification' in window)) return null;
@@ -108,6 +151,10 @@ export function CrmProvider({ children }: { children: React.ReactNode }) {
     adminActor: { id: ADMIN_SENDER_ID, name: admin?.name ?? 'Superadmin', role: 'admin' },
     requester,
     requesterActor: requester ? { id: requester.id, name: requester.name, role: 'requester' } : null,
+    settings,
+    updateSettings,
+    cannedResponses,
+    updateCannedResponses,
     loginAdmin: async (email, password) => {
       const s = await runLoginAdmin(email, password);
       setAdmin(s);

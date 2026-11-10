@@ -116,11 +116,11 @@ export function TicketKanbanBoard({
                           {col.next === 'solved' ? (
                             <>
                               <CheckCircle2 className="h-3 w-3 text-emerald-700" />
-                              Set Solved
+                              Tandai Selesai
                             </>
                           ) : col.next === 'closed' ? (
                             <>
-                              Set Closed
+                              Tandai Ditutup
                               <ArrowRight className="h-2.5 w-2.5" />
                             </>
                           ) : (

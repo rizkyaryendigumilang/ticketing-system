@@ -69,7 +69,7 @@ export function AdminContactsPage() {
             <code className="rounded bg-subtle px-1.5 py-0.5 font-mono text-[11px] text-ink font-semibold">
               {'{app_slug}:{external_uid}'}
             </code>{' '}
-            agar tidak bentrok antar aplikasi.
+            agar tidak bentrok antaraplikasi.
           </p>
         </div>
       </div>

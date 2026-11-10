@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { MessageSquareQuote, ChevronDown } from 'lucide-react';
-import { CANNED_RESPONSES } from '../../config/vpsAppsConfig';
+import { useCrm } from '../../context/CrmContext';
 
 interface Props {
   onSelect: (content: string) => void;
 }
 
 export function CannedResponsePicker({ onSelect }: Props) {
+  const { cannedResponses } = useCrm();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -39,7 +40,7 @@ export function CannedResponsePicker({ onSelect }: Props) {
             Pilih template jawaban (1 klik)
           </div>
           <div className="max-h-64 divide-y divide-line overflow-y-auto">
-            {CANNED_RESPONSES.map((cr) => (
+            {cannedResponses.map((cr) => (
               <button
                 key={cr.id}
                 type="button"

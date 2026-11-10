@@ -122,7 +122,7 @@ export function UserTicketList({
           <p className="mt-1 text-xs text-ink-muted">
             {search
               ? 'Coba ganti kata kunci atau bersihkan filter pencarian.'
-              : 'Jika Anda mengalami kendala saat menggunakan aplikasi, buat laporan baru dan Superadmin akan segera membantu.'}
+              : 'Ada kendala di aplikasi? Buat laporan tiket baru agar tim support dapat segera mengecek dan membantu penyelesaiannya.'}
           </p>
           {search ? (
             <button

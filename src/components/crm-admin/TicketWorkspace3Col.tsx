@@ -130,7 +130,7 @@ export function TicketWorkspace3Col({
     setSubmitting(true);
     try {
       onSolveTicket(resolution, attachments);
-      toast.success(`Tiket #${ticket.ticketNumber} berhasil ditandai Solved`);
+      toast.success(`Tiket #${ticket.ticketNumber} berhasil diselesaikan`);
       setBody('');
       setAttachments([]);
     } finally {
@@ -162,7 +162,7 @@ export function TicketWorkspace3Col({
                 className="inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-amber-500/15 border border-amber-400/40 px-3 py-1.5 text-xs font-semibold text-amber-900 transition-colors hover:bg-amber-500/25"
               >
                 <Clock className="h-3.5 w-3.5 text-amber-700" />
-                Mulai Kerjakan (In Progress)
+                Mulai Kerjakan
               </button>
             </div>
           )}
@@ -274,7 +274,7 @@ export function TicketWorkspace3Col({
           <div className="rounded-lg border border-emerald-300 bg-emerald-50/80 p-3.5 text-xs shadow-sm">
             <div className="flex items-center gap-1.5 font-semibold text-emerald-900">
               <CheckCircle2 className="h-4 w-4 text-emerald-700" />
-              Catatan Penyelesaian (Solved)
+              Catatan Solusi Penyelesaian
             </div>
             <p className="mt-1.5 whitespace-pre-wrap text-emerald-950 leading-relaxed font-sans">
               {ticket.resolutionSummary}
@@ -484,7 +484,7 @@ export function TicketWorkspace3Col({
                 }`}
               >
                 <MessageSquare className="h-3.5 w-3.5" />
-                Public Reply (Terlihat oleh User)
+                Balasan ke Pelapor
               </button>
               <button
                 type="button"
@@ -496,7 +496,7 @@ export function TicketWorkspace3Col({
                 }`}
               >
                 <Lock className="h-3.5 w-3.5" />
-                Internal Admin Note (Rahasia)
+                Catatan Internal
               </button>
             </div>
 
@@ -508,7 +508,7 @@ export function TicketWorkspace3Col({
             <div className="mt-2.5 flex items-center gap-2 rounded bg-amber-100/80 border border-amber-300/80 px-3 py-1.5 text-[11px] text-amber-900">
               <Lock className="h-3.5 w-3.5 shrink-0 text-amber-800" />
               <span>
-                <strong>Catatan Rahasia:</strong> Hanya disimpan di CRM internal Superadmin, <strong>tidak akan</strong> terlihat oleh user pelapor.
+                <strong>Catatan Internal:</strong> Catatan ini hanya tersimpan di CRM dan <strong>tidak dapat dilihat</strong> oleh pelapor.
               </span>
             </div>
           )}
@@ -558,7 +558,7 @@ export function TicketWorkspace3Col({
               className="inline-flex items-center gap-1.5 rounded bg-emerald-700 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-800 shadow-sm disabled:opacity-50"
             >
               <CheckCircle2 className="h-4 w-4" />
-              Kirim Solusi & Tandai Solved
+              Kirim Solusi & Selesaikan
             </button>
           </div>
         </form>

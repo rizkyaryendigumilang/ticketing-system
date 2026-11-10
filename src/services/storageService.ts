@@ -1,6 +1,35 @@
 // Local store: the UI always reads from here. PocketBase sync lives in pbClient.ts.
 import { buildSeed, SEED_APPS } from '../config/seedData.ts';
-import type { AppSource, CrmUser, Ticket, TicketMessage } from '../types/crm';
+import { CANNED_RESPONSES } from '../config/vpsAppsConfig.ts';
+import type { AppSource, CannedResponse, CrmUser, Ticket, TicketMessage } from '../types/crm';
+
+export interface SystemSettings {
+  handoffSecret: string;
+  handoffExpiryMinutes: number;
+  allowedOrigins: string[];
+  telegramEnabled: boolean;
+  telegramBotToken: string;
+  telegramChatId: string;
+  notifyOnUrgentOnly: boolean;
+  desktopNotificationSound: boolean;
+  outboundWebhookEnabled: boolean;
+  outboundWebhookUrl: string;
+  autoCloseDays: number;
+}
+
+export const DEFAULT_SETTINGS: SystemSettings = {
+  handoffSecret: 'vps-helpdesk-secret-key',
+  handoffExpiryMinutes: 15,
+  allowedOrigins: ['https://43.156.236.102', 'http://localhost:5173'],
+  telegramEnabled: false,
+  telegramBotToken: '',
+  telegramChatId: '',
+  notifyOnUrgentOnly: false,
+  desktopNotificationSound: true,
+  outboundWebhookEnabled: false,
+  outboundWebhookUrl: '',
+  autoCloseDays: 7,
+};
 
 export interface CrmData {
   apps: AppSource[];
@@ -28,6 +57,8 @@ export interface OutboxOp {
 
 const DATA_KEY = 'vps-crm:data:v4';
 const OUTBOX_KEY = 'vps-crm:outbox:v4';
+const SETTINGS_KEY = 'vps-crm:settings:v1';
+const CANNED_KEY = 'vps-crm:canned:v1';
 
 function hasLocalStorage(): boolean {
   try {
@@ -114,4 +145,20 @@ export const enqueue = (op: OutboxOp) => setOutbox([...outbox, op]);
 export function resetToSeed() {
   setOutbox([]);
   commit(seed());
+}
+
+let settings = read<SystemSettings>(SETTINGS_KEY, () => DEFAULT_SETTINGS);
+export const getSettings = () => settings;
+export function saveSettings(next: SystemSettings) {
+  settings = next;
+  write(SETTINGS_KEY, settings);
+  notify();
+}
+
+let cannedList = read<CannedResponse[]>(CANNED_KEY, () => CANNED_RESPONSES);
+export const getCannedList = () => cannedList;
+export function saveCannedList(next: CannedResponse[]) {
+  cannedList = next;
+  write(CANNED_KEY, cannedList);
+  notify();
 }
