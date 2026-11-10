@@ -33,11 +33,11 @@ export function AdminDashboardPage() {
 
         <div className="flex items-center gap-2">
           <Link
-            to="/admin/integrations"
+            to="/admin/settings?tab=integrations"
             className="inline-flex items-center gap-1.5 rounded border border-line bg-panel px-3 py-1.5 text-xs font-medium text-ink hover:border-line-strong active:scale-95 transition-[border-color,transform] duration-100"
           >
             <TerminalSquare className="h-3.5 w-3.5 text-ink-muted" />
-            Generator Tombol Help
+            Generator Tombol Bantuan
           </Link>
           <Link
             to="/admin/tickets"

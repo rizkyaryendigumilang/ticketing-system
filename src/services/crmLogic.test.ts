@@ -32,7 +32,44 @@ test('handoff accepts a complete link', () => {
   );
   assert.deepEqual(r, {
     ok: true,
-    params: { app: 'snackloop', uid: 'staff1', name: 'Rina', role: 'Staff', fromUrl: 'https://43.156.236.102/snackloop/rekap' },
+    params: {
+      app: 'snackloop',
+      uid: 'staff1',
+      name: 'Rina',
+      role: 'Staff',
+      fromUrl: 'https://43.156.236.102/snackloop/rekap',
+      newTicket: false,
+      autoSubmit: false,
+      subject: undefined,
+      description: undefined,
+      category: undefined,
+      priority: undefined,
+    },
+  });
+});
+
+test('handoff parses auto_submit and prefilled problem fields', () => {
+  const r = parseHandoff(
+    new URLSearchParams(
+      'app=snackloop&uid=admin&name=Admin+Snack&role=Owner&new=1&auto_submit=1&subject=Printer+thermal+mati&description=Tidak+bisa+print+struk&category=bug_error&priority=urgent',
+    ),
+    APPS,
+  );
+  assert.deepEqual(r, {
+    ok: true,
+    params: {
+      app: 'snackloop',
+      uid: 'admin',
+      name: 'Admin Snack',
+      role: 'Owner',
+      fromUrl: undefined,
+      newTicket: true,
+      autoSubmit: true,
+      subject: 'Printer thermal mati',
+      description: 'Tidak bisa print struk',
+      category: 'bug_error',
+      priority: 'urgent',
+    },
   });
 });
 

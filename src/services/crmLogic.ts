@@ -68,6 +68,17 @@ export function parseHandoff(search: URLSearchParams, knownAppIds: string[]): Ha
   const rawName = sanitize(search.get('name') ?? '');
   const rawRole = sanitize(search.get('role') ?? '');
 
+  const rawSubject = sanitize(search.get('subject') ?? '').slice(0, 200);
+  const rawDesc = sanitize(search.get('description') ?? '').slice(0, 4000);
+  const rawCat = search.get('category')?.trim();
+  const validCat = (['bug_error', 'account_login', 'data_transaction', 'feature_question', 'other'] as const).includes(rawCat as any)
+    ? (rawCat as any)
+    : undefined;
+  const rawPriority = search.get('priority')?.trim();
+  const validPriority = (['urgent', 'high', 'medium', 'low'] as const).includes(rawPriority as any)
+    ? (rawPriority as any)
+    : undefined;
+
   return {
     ok: true,
     params: {
@@ -76,6 +87,12 @@ export function parseHandoff(search: URLSearchParams, knownAppIds: string[]): Ha
       name: rawName.slice(0, 120) || cleanUid,
       role: rawRole.slice(0, 120) || 'User',
       fromUrl: safeHttpUrl(search.get('from_url')),
+      newTicket: search.get('new') === '1',
+      autoSubmit: search.get('auto_submit') === '1',
+      subject: rawSubject || undefined,
+      description: rawDesc || undefined,
+      category: validCat,
+      priority: validPriority,
     },
   };
 }
@@ -83,7 +100,12 @@ export function parseHandoff(search: URLSearchParams, knownAppIds: string[]): Ha
 export function handoffPath(p: HandoffParams, openForm = false): string {
   const q = new URLSearchParams({ app: p.app, uid: p.uid, name: p.name, role: p.role });
   if (p.fromUrl) q.set('from_url', p.fromUrl);
-  if (openForm) q.set('new', '1');
+  if (openForm || p.newTicket) q.set('new', '1');
+  if (p.autoSubmit) q.set('auto_submit', '1');
+  if (p.subject) q.set('subject', p.subject);
+  if (p.description) q.set('description', p.description);
+  if (p.category) q.set('category', p.category);
+  if (p.priority) q.set('priority', p.priority);
   return `/handoff?${q}`;
 }
 

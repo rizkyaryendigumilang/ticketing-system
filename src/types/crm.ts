@@ -75,4 +75,10 @@ export interface HandoffParams {
   name: string;
   role: string;
   fromUrl?: string;
+  newTicket?: boolean;
+  autoSubmit?: boolean;
+  subject?: string;
+  description?: string;
+  category?: TicketCategory;
+  priority?: TicketPriority;
 }

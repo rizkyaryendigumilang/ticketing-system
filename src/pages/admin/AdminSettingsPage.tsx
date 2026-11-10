@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Bell,
   Check,
@@ -18,6 +19,7 @@ import {
   Send,
   Server,
   ShieldCheck,
+  TerminalSquare,
   Trash2,
   User,
   Volume2,
@@ -27,8 +29,9 @@ import { CANNED_RESPONSES, CATEGORY_LABEL } from '../../config/vpsAppsConfig';
 import { useCrm } from '../../context/CrmContext';
 import { useToast } from '../../context/ToastContext';
 import type { CannedResponse } from '../../types/crm';
+import { IntegrationTabContent } from './AdminIntegrationPage';
 
-type TabKey = 'account' | 'security' | 'notifications' | 'canned' | 'database';
+type TabKey = 'account' | 'integrations' | 'security' | 'notifications' | 'canned' | 'database';
 
 export function AdminSettingsPage() {
   const {
@@ -43,8 +46,21 @@ export function AdminSettingsPage() {
     requestDesktopNotification,
   } = useCrm();
   const toast = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [activeTab, setActiveTab] = useState<TabKey>('account');
+  const tabParam = searchParams.get('tab') as TabKey | null;
+  const [activeTab, setActiveTab] = useState<TabKey>(tabParam || 'account');
+
+  useEffect(() => {
+    if (tabParam && ['account', 'integrations', 'security', 'notifications', 'canned', 'database'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
+
+  const handleTabChange = (tab: TabKey) => {
+    setActiveTab(tab);
+    setSearchParams(tab === 'account' ? {} : { tab });
+  };
 
   // Account Form State
   const [adminName, setAdminName] = useState(admin?.name ?? 'Superadmin VPS');
@@ -297,7 +313,7 @@ export function AdminSettingsPage() {
       <div className="flex overflow-x-auto no-scrollbar border-b border-line gap-2 text-xs font-medium">
         <button
           type="button"
-          onClick={() => setActiveTab('account')}
+          onClick={() => handleTabChange('account')}
           className={`flex items-center gap-2 border-b-2 px-3 py-2.5 transition-colors whitespace-nowrap ${
             activeTab === 'account'
               ? 'border-ink text-ink font-semibold'
@@ -310,7 +326,20 @@ export function AdminSettingsPage() {
 
         <button
           type="button"
-          onClick={() => setActiveTab('security')}
+          onClick={() => handleTabChange('integrations')}
+          className={`flex items-center gap-2 border-b-2 px-3 py-2.5 transition-colors whitespace-nowrap ${
+            activeTab === 'integrations'
+              ? 'border-ink text-ink font-semibold'
+              : 'border-transparent text-ink-muted hover:text-ink'
+          }`}
+        >
+          <TerminalSquare className="h-4 w-4" />
+          Integrasi Tombol Bantuan
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleTabChange('security')}
           className={`flex items-center gap-2 border-b-2 px-3 py-2.5 transition-colors whitespace-nowrap ${
             activeTab === 'security'
               ? 'border-ink text-ink font-semibold'
@@ -323,7 +352,7 @@ export function AdminSettingsPage() {
 
         <button
           type="button"
-          onClick={() => setActiveTab('notifications')}
+          onClick={() => handleTabChange('notifications')}
           className={`flex items-center gap-2 border-b-2 px-3 py-2.5 transition-colors whitespace-nowrap ${
             activeTab === 'notifications'
               ? 'border-ink text-ink font-semibold'
@@ -336,7 +365,7 @@ export function AdminSettingsPage() {
 
         <button
           type="button"
-          onClick={() => setActiveTab('canned')}
+          onClick={() => handleTabChange('canned')}
           className={`flex items-center gap-2 border-b-2 px-3 py-2.5 transition-colors whitespace-nowrap ${
             activeTab === 'canned'
               ? 'border-ink text-ink font-semibold'
@@ -349,7 +378,7 @@ export function AdminSettingsPage() {
 
         <button
           type="button"
-          onClick={() => setActiveTab('database')}
+          onClick={() => handleTabChange('database')}
           className={`flex items-center gap-2 border-b-2 px-3 py-2.5 transition-colors whitespace-nowrap ${
             activeTab === 'database'
               ? 'border-ink text-ink font-semibold'
@@ -462,6 +491,11 @@ export function AdminSettingsPage() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* ═══ TAB: INTEGRASI TOMBOL BANTUAN ═══ */}
+      {activeTab === 'integrations' && (
+        <IntegrationTabContent embedded />
       )}
 
       {/* ═══ TAB 2: KEAMANAN & HANDOFF ═══ */}

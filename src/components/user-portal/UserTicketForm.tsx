@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Lock, Send } from 'lucide-react';
 import {
   CATEGORY_LABEL,
@@ -25,11 +26,21 @@ const CATEGORIES: TicketCategory[] = [
 ];
 
 export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
+  const [searchParams] = useSearchParams();
+  const rawCat = searchParams.get('category') as TicketCategory | null;
+  const rawPriority = searchParams.get('priority') as TicketPriority | null;
+
   const app = getApp(user.appId);
-  const [category, setCategory] = useState<TicketCategory>('bug_error');
-  const [priority, setPriority] = useState<TicketPriority>('medium');
-  const [subject, setSubject] = useState('');
-  const [description, setDescription] = useState('');
+  const [category, setCategory] = useState<TicketCategory>(
+    rawCat && CATEGORIES.includes(rawCat) ? rawCat : 'bug_error',
+  );
+  const [priority, setPriority] = useState<TicketPriority>(
+    rawPriority && (['urgent', 'high', 'medium', 'low'] as const).includes(rawPriority)
+      ? rawPriority
+      : 'medium',
+  );
+  const [subject, setSubject] = useState(searchParams.get('subject') ?? '');
+  const [description, setDescription] = useState(searchParams.get('description') ?? '');
   const [sourcePageUrl, setSourcePageUrl] = useState(
     user.lastSeenUrl ?? app?.appUrl ?? '',
   );

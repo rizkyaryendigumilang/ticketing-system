@@ -4,6 +4,7 @@ import { AlertTriangle, ArrowLeft } from 'lucide-react';
 import { VPS_APPS } from '../config/vpsAppsConfig';
 import { parseHandoff, verifyHandoffSignature } from '../services/crmLogic';
 import { useCrm } from '../context/CrmContext';
+import { createTicket } from '../services/ticketCrmService';
 
 export function HandoffRedirectPage() {
   const [searchParams] = useSearchParams();
@@ -21,16 +22,44 @@ export function HandoffRedirectPage() {
 
     const openNewForm = searchParams.get('new') === '1';
 
-    const proceedHandoff = () => {
-      handoff(result.params)
-        .then(() => {
-          if (!active) return;
-          navigate(openNewForm ? '/portal/new' : '/portal', { replace: true });
-        })
-        .catch((err) => {
-          if (!active) return;
-          setError(err instanceof Error ? err.message : 'Gagal memproses sesi handoff aplikasi.');
-        });
+    const proceedHandoff = async () => {
+      try {
+        const user = await handoff(result.params);
+        if (!active) return;
+
+        // If auto_submit is 1 and problem details are given, create ticket immediately and direct to ticket view!
+        if (result.params.autoSubmit && (result.params.subject || result.params.description)) {
+          const created = createTicket(user, {
+            subject: result.params.subject || `Kendala dari ${result.params.app}`,
+            description:
+              result.params.description ||
+              result.params.subject ||
+              'Tidak ada deskripsi kendala tambahan.',
+            category: result.params.category || 'bug_error',
+            priority: result.params.priority || 'medium',
+            sourcePageUrl: result.params.fromUrl,
+            attachments: [],
+          });
+          navigate(`/portal/ticket/${created.id}`, { replace: true });
+          return;
+        }
+
+        // If new ticket or prefilled fields are present, route to portal/new with prefilled query
+        if (openNewForm || result.params.newTicket || result.params.subject) {
+          const forwardParams = new URLSearchParams();
+          if (result.params.subject) forwardParams.set('subject', result.params.subject);
+          if (result.params.description) forwardParams.set('description', result.params.description);
+          if (result.params.category) forwardParams.set('category', result.params.category);
+          if (result.params.priority) forwardParams.set('priority', result.params.priority);
+          const qs = forwardParams.toString();
+          navigate(`/portal/new${qs ? `?${qs}` : ''}`, { replace: true });
+        } else {
+          navigate('/portal', { replace: true });
+        }
+      } catch (err) {
+        if (!active) return;
+        setError(err instanceof Error ? err.message : 'Gagal memproses sesi handoff aplikasi.');
+      }
     };
 
     const sig = searchParams.get('sig');

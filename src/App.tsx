@@ -62,7 +62,7 @@ export default function App() {
         <Route path="tickets" element={<AdminTicketsPage />} />
         <Route path="tickets/:id" element={<AdminTicketDetailPage />} />
         <Route path="contacts" element={<AdminContactsPage />} />
-        <Route path="integrations" element={<AdminIntegrationPage />} />
+        <Route path="integrations" element={<Navigate to="/admin/settings?tab=integrations" replace />} />
         <Route path="settings" element={<AdminSettingsPage />} />
       </Route>
 

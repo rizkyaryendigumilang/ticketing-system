@@ -4,7 +4,7 @@ import { Check, Copy, ExternalLink, HelpCircle, Play, Sparkles, Terminal } from 
 import { DEMO_ACCOUNTS, VPS_APPS, getApp } from '../../config/vpsAppsConfig';
 import { useToast } from '../../context/ToastContext';
 
-export function AdminIntegrationPage() {
+export function IntegrationTabContent({ embedded = false }: { embedded?: boolean }) {
   const navigate = useNavigate();
   const toast = useToast();
   const [selectedAppId, setSelectedAppId] = useState<string>(VPS_APPS[1].id); // default snackloop
@@ -74,6 +74,23 @@ function openHelpdeskCRM(currentUser) {
   window.open('${handoffBaseUrl}?' + params.toString(), '_blank', 'noopener');
 }`;
 
+  const quickReportSnippet = `// Laporkan langsung dari modal/popup di dalam aplikasi ${selectedApp.name}:
+function submitIssueDirectly(currentUser, { subject, description, category = 'bug_error' }) {
+  const params = new URLSearchParams({
+    app: '${selectedApp.id}',
+    uid: currentUser.usernameOrEmail,
+    name: currentUser.displayName,
+    role: currentUser.role,
+    from_url: window.location.href,
+    new: '1',
+    auto_submit: '1', // Otomatis buat tiket & direct ke ruang percakapan helpdesk
+    subject: subject,
+    description: description,
+    category: category,
+  });
+  window.open('${handoffBaseUrl}?' + params.toString(), '_blank', 'noopener');
+}`;
+
   const hmacSnippet = `// Backend (Node.js / Express) pembuatan link bertanda tangan HMAC-SHA256 (Kedaluwarsa 15 menit):
 import crypto from 'node:crypto';
 
@@ -127,20 +144,21 @@ function generateSecureHandoffUrl(appId, uid, name, role, fromUrl, secret = proc
   };
 
   return (
-    <div className="space-y-6 p-5 sm:p-6">
-      {/* Header */}
-      <div className="border-b border-line pb-4">
-        <h1 className="text-lg font-bold tracking-tight text-ink sm:text-xl">
-          Generator Kode Tombol &ldquo;Help&rdquo; &amp; Simulator SSO Handoff (7 Aplikasi)
-        </h1>
-        <p className="mt-1 text-xs text-ink-muted">
-          Pasang 1 tombol di setiap aplikasi eksternal. Saat diklik, rute{' '}
-          <code className="rounded bg-subtle px-1 py-0.5 font-mono text-[11px] font-semibold text-ink">
-            {basePath}/handoff
-          </code>{' '}
-          otomatis mengecek <code className="rounded bg-subtle px-1 py-0.5 font-mono text-[11px] font-semibold text-ink">compositeId = &quot;{'{app_slug}:{uid}'}&quot;</code>, membuatkan akun baru jika belum ada (Just-In-Time Provisioning), dan mengarahkan user ke Portal Bantuan aplikasinya.
-        </p>
-      </div>
+    <div className={embedded ? 'space-y-6' : 'space-y-6 p-5 sm:p-6'}>
+      {!embedded && (
+        <div className="border-b border-line pb-4">
+          <h1 className="text-lg font-bold tracking-tight text-ink sm:text-xl">
+            Generator Kode Tombol &ldquo;Help&rdquo; &amp; Simulator SSO Handoff (7 Aplikasi)
+          </h1>
+          <p className="mt-1 text-xs text-ink-muted">
+            Pasang 1 tombol di setiap aplikasi eksternal. Saat diklik, rute{' '}
+            <code className="rounded bg-subtle px-1 py-0.5 font-mono text-[11px] font-semibold text-ink">
+              {basePath}/handoff
+            </code>{' '}
+            otomatis mengecek <code className="rounded bg-subtle px-1 py-0.5 font-mono text-[11px] font-semibold text-ink">compositeId = &quot;{'{app_slug}:{uid}'}&quot;</code>, membuatkan akun baru jika belum ada (Just-In-Time Provisioning), dan mengarahkan user ke Portal Bantuan aplikasinya.
+          </p>
+        </div>
+      )}
 
       {/* 1-Click Simulator Grid for All 7 Apps */}
       <section className="rounded-lg border border-line bg-panel p-5 shadow-sm">
@@ -340,11 +358,38 @@ function generateSecureHandoffUrl(appId, uid, name, role, fromUrl, secret = proc
             </pre>
           </div>
 
+          {/* Quick Report Modal Snippet */}
+          <div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-ink">
+                4. Kirim Kendala Langsung dari Modal/Dialog Aplikasi Asal (Auto-Submit Langsung Direct ke Helpdesk)
+              </span>
+              <button
+                type="button"
+                onClick={() => copyText('quick', quickReportSnippet, 'Kode Quick Report')}
+                className="inline-flex items-center gap-1 text-xs font-medium text-ink hover:underline"
+              >
+                {copiedKey === 'quick' ? (
+                  <>
+                    <Check className="h-3.5 w-3.5 text-emerald-700" /> Disalin
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-3.5 w-3.5" /> Salin Kode Quick Report
+                  </>
+                )}
+              </button>
+            </div>
+            <pre className="mt-1.5 overflow-x-auto rounded border border-rail-line bg-rail p-3.5 font-mono text-[11px] leading-relaxed text-neutral-200">
+              {quickReportSnippet}
+            </pre>
+          </div>
+
           {/* Secure Signed Handoff Code Snippet */}
           <div>
             <div className="flex items-center justify-between text-xs">
               <span className="font-semibold text-ink">
-                3. Keamanan Tambahan: HMAC-SHA256 Signed Link (Backend Node.js / Anti-Spoofing &amp; 15m Expiration)
+                5. Keamanan Tambahan: HMAC-SHA256 Signed Link (Backend Node.js / Anti-Spoofing &amp; 15m Expiration)
               </span>
               <button
                 type="button"
@@ -461,3 +506,6 @@ function generateSecureHandoffUrl(appId, uid, name, role, fromUrl, secret = proc
     </div>
   );
 }
+
+export const AdminIntegrationPage = IntegrationTabContent;
+
