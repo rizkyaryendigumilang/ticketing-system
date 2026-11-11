@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { AlertTriangle, ArrowLeft } from 'lucide-react';
 import { VPS_APPS } from '../config/vpsAppsConfig';
@@ -11,21 +11,24 @@ export function HandoffRedirectPage() {
   const navigate = useNavigate();
   const { handoff } = useCrm();
   const [error, setError] = useState<string | null>(null);
+  const processedRef = useRef<string | null>(null);
 
   useEffect(() => {
-    let active = true;
+    const currentKey = searchParams.toString();
+    if (processedRef.current === currentKey) return;
+
     const result = parseHandoff(searchParams, VPS_APPS.map((a) => a.id));
     if (!result.ok) {
       setError(result.error);
       return;
     }
 
+    processedRef.current = currentKey;
     const openNewForm = searchParams.get('new') === '1';
 
     const proceedHandoff = async () => {
       try {
         const user = await handoff(result.params);
-        if (!active) return;
 
         // If auto_submit is 1 and problem details are given, create ticket immediately and direct to ticket view!
         if (result.params.autoSubmit && (result.params.subject || result.params.description)) {
@@ -57,7 +60,6 @@ export function HandoffRedirectPage() {
           navigate('/portal', { replace: true });
         }
       } catch (err) {
-        if (!active) return;
         setError(err instanceof Error ? err.message : 'Gagal memproses sesi handoff aplikasi.');
       }
     };
@@ -66,7 +68,6 @@ export function HandoffRedirectPage() {
     if (sig) {
       const secret = import.meta.env.VITE_HANDOFF_SECRET || 'vps-helpdesk-secret-key';
       verifyHandoffSignature(searchParams, secret).then((check) => {
-        if (!active) return;
         if (!check.valid) {
           setError(check.reason || 'Tanda tangan keamanan link bantuan tidak valid atau kedaluwarsa.');
           return;
@@ -77,8 +78,6 @@ export function HandoffRedirectPage() {
     }
 
     proceedHandoff();
-
-    return () => { active = false; };
   }, [searchParams, handoff, navigate]);
 
   if (error) {

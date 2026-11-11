@@ -1,10 +1,10 @@
 import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ExternalLink, LogOut, Plus } from 'lucide-react';
+import { ArrowLeft, ExternalLink, LogOut, Plus, ShieldCheck } from 'lucide-react';
 import { getApp } from '../../config/vpsAppsConfig';
 import { useCrm } from '../../context/CrmContext';
 
 export function UserPortalLayout() {
-  const { data, requester, logoutRequester } = useCrm();
+  const { data, admin, requester, logoutRequester } = useCrm();
   const navigate = useNavigate();
 
   const app = getApp(requester?.appId);
@@ -62,6 +62,17 @@ export function UserPortalLayout() {
           </div>
 
           <div className="flex items-center gap-2">
+            {admin && (
+              <Link
+                to="/admin"
+                className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition-colors hover:bg-neutral-800"
+                title="Buka Meja Kerja Superadmin CRM"
+              >
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+                Meja Kerja Admin
+              </Link>
+            )}
+
             {returnUrl && (
               <a
                 href={returnUrl}

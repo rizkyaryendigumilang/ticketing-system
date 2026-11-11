@@ -44,7 +44,7 @@ export function AdminContactsPage() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleOpenAsUser = (c: (typeof contacts)[number]) => {
+  const getHandoffUrl = (c: (typeof contacts)[number]) => {
     const qs = new URLSearchParams({
       app: c.appId,
       uid: c.externalUid,
@@ -52,8 +52,8 @@ export function AdminContactsPage() {
       role: c.appRole,
       ...(c.lastSeenUrl ? { from_url: c.lastSeenUrl } : {}),
     });
-    toast.info(`Membuka sesi portal user sebagai: ${c.name}`);
-    navigate(`/handoff?${qs.toString()}`);
+    const base = (import.meta.env.BASE_URL || '/').replace(/\/+$/, '');
+    return `${base}/handoff?${qs.toString()}`;
   };
 
   return (
@@ -250,19 +250,24 @@ export function AdminContactsPage() {
                       <div className="inline-flex items-center gap-1.5">
                         <button
                           type="button"
-                          onClick={() => navigate(`/admin/tickets?app=${c.appId}`)}
+                          onClick={() =>
+                            navigate(
+                              `/admin/tickets?app=${c.appId}&q=${encodeURIComponent(c.externalUid)}`,
+                            )
+                          }
                           className="rounded border border-line bg-canvas px-2.5 py-1 text-[11px] font-medium text-ink hover:border-line-strong transition-colors"
                         >
                           Lihat Tiket
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => handleOpenAsUser(c)}
+                        <a
+                          href={getHandoffUrl(c)}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 rounded border border-line bg-subtle px-2.5 py-1 text-[11px] font-medium text-ink hover:border-ink transition-colors"
                         >
                           Buka Portal
                           <ExternalLink className="h-3 w-3 text-ink-muted" />
-                        </button>
+                        </a>
                       </div>
                     </td>
                   </tr>

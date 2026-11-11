@@ -2,6 +2,7 @@ import { type ComponentType, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   ChevronDown,
+  ExternalLink,
   Inbox,
   LayoutGrid,
   LogOut,
@@ -46,6 +47,8 @@ export function AdminCrmLayout() {
     navigate('/login');
   };
 
+  const portalUrl = `${(import.meta.env.BASE_URL || '/').replace(/\/+$/, '')}/portal`;
+
   // Initials from admin name, e.g. "Super Admin" → "SA"
   const initials = (admin?.name ?? 'Superadmin')
     .split(' ')
@@ -84,6 +87,17 @@ export function AdminCrmLayout() {
               <Icon className="h-4 w-4" />
             </NavLink>
           ))}
+
+          {/* Quick link to Customer Portal */}
+          <a
+            href={portalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Buka Portal Pelapor (Tab Baru)"
+            className="flex h-9 w-9 items-center justify-center rounded text-emerald-400 transition-colors hover:bg-rail-hover hover:text-emerald-300"
+          >
+            <ExternalLink className="h-4 w-4" />
+          </a>
 
           <div className="flex-1" />
 
@@ -150,6 +164,20 @@ export function AdminCrmLayout() {
                   </NavLink>
                 );
               })}
+
+              <a
+                href={portalUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Buka Pusat Bantuan Pelapor di Tab Baru"
+                className="mt-1 flex items-center justify-between rounded border border-rail-line bg-white/5 px-2.5 py-2 text-xs font-medium text-emerald-400 transition-colors hover:bg-white/10 hover:text-emerald-300"
+              >
+                <span className="inline-flex items-center gap-2.5">
+                  <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+                  Buka Portal Pelapor
+                </span>
+                <span className="font-mono text-[10px] opacity-75">↗</span>
+              </a>
             </nav>
 
             {/* 7 Ecosystem Apps — collapsible */}

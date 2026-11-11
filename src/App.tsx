@@ -22,12 +22,24 @@ function AdminGuard({ children }: { children: React.ReactNode }) {
 }
 
 function PortalGuard({ children }: { children: React.ReactNode }) {
-  const { requester } = useCrm();
+  const { data, requester } = useCrm();
   if (!requester) {
-    // Bounce through handoff as default demo user so the portal is never blank
+    // If there is an existing registered contact (e.g. snackloop:admin), bounce to that contact
+    const defaultUser = data.users.find((u) => u.systemRole === 'requester');
+    if (defaultUser) {
+      const qs = new URLSearchParams({
+        app: defaultUser.appId,
+        uid: defaultUser.externalUid,
+        name: defaultUser.name,
+        role: defaultUser.appRole,
+        ...(defaultUser.lastSeenUrl ? { from_url: defaultUser.lastSeenUrl } : {}),
+      });
+      return <Navigate to={`/handoff?${qs.toString()}`} replace />;
+    }
+    // Fallback default
     return (
       <Navigate
-        to="/handoff?app=snackloop&uid=staff1&name=Rina%20(Staff%20Rekap)&role=Staff%20Rekap%20%26%20Transaksi%20Harian&from_url=https%3A%2F%2F43.156.236.102%2Fsnackloop%2Frekap-harian"
+        to="/handoff?app=snackloop&uid=admin&name=admin&role=Owner+%28Super+Admin%29&from_url=https%3A%2F%2F43.156.236.102%2Fsnackloop%2F%23"
         replace
       />
     );

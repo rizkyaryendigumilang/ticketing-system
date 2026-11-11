@@ -155,30 +155,30 @@ export function CrmProvider({ children }: { children: React.ReactNode }) {
     updateSettings,
     cannedResponses,
     updateCannedResponses,
-    loginAdmin: async (email, password) => {
+    loginAdmin: useCallback(async (email: string, password: string) => {
       const s = await runLoginAdmin(email, password);
       setAdmin(s);
       if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
         void Notification.requestPermission();
       }
-    },
-    logoutAdmin: () => {
+    }, []),
+    logoutAdmin: useCallback(() => {
       runLogoutAdmin();
       setAdmin(null);
-    },
-    handoff: async (params) => {
+    }, []),
+    handoff: useCallback(async (params: HandoffParams) => {
       const user = await runHandoff(params);
       setRequesterId(user.id);
       return user;
-    },
-    logoutRequester: () => {
+    }, []),
+    logoutRequester: useCallback(() => {
       runLogoutRequester();
       setRequesterId(null);
-    },
-    resetDemo: () => {
+    }, []),
+    resetDemo: useCallback(() => {
       resetToSeed();
       notify('Data demo dikembalikan ke seed awal.');
-    },
+    }, [notify]),
     notify,
     requestDesktopNotification,
   };

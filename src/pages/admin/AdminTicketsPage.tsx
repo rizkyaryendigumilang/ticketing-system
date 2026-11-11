@@ -24,11 +24,17 @@ export function AdminTicketsPage() {
     (searchParams.get('status') as TicketStatus | 'active' | 'all') ?? 'all',
   );
   const [selectedPriority, setSelectedPriority] = useState<TicketPriority | 'all'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(
+    searchParams.get('q') || searchParams.get('search') || '',
+  );
 
   useEffect(() => {
     const appParam = searchParams.get('app');
     setSelectedApp(appParam ?? 'all');
+    const qParam = searchParams.get('q') || searchParams.get('search');
+    if (qParam !== null) {
+      setSearchQuery(qParam);
+    }
   }, [searchParams]);
 
   const handleAppChange = (appId: string) => {
