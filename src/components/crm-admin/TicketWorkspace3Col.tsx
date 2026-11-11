@@ -73,6 +73,15 @@ export function TicketWorkspace3Col({
   const [submitting, setSubmitting] = useState(false);
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
 
+  React.useEffect(() => {
+    if (!lightboxImg) return;
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxImg(null);
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [lightboxImg]);
+
   const app = getApp(ticket.appId);
 
   const handleInsertCanned = (text: string) => {

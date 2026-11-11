@@ -234,3 +234,24 @@ test('createHandoffSignature and verifyHandoffSignature enforce cryptographic au
   assert.equal(expiredRes.valid, false);
   assert.ok(expiredRes.reason?.includes('kedaluwarsa'));
 });
+
+test('requester ticket ownership isolation prevents cross-tenant access with identical externalUid', () => {
+  const weddingUser = { id: 'usr_wedding_01', appId: 'wedding', externalUid: 'admin' };
+  const snackloopUser = { id: 'usr_snackloop_02', appId: 'snackloop', externalUid: 'admin' };
+  
+  const snackloopTicket = t('SNK-010', 'open', 'high', '2026-11-10', {
+    appId: 'snackloop',
+    requesterId: snackloopUser.id,
+    requesterUid: snackloopUser.externalUid,
+  });
+
+  const checkAccess = (ticket: Ticket, user: { id: string; appId: string; externalUid: string }) =>
+    ticket.requesterId === user.id ||
+    (ticket.appId === user.appId && ticket.requesterUid === user.externalUid);
+
+  // Snackloop user can access snackloop ticket
+  assert.equal(checkAccess(snackloopTicket, snackloopUser), true);
+
+  // Wedding user with identical uid ('admin') CANNOT access snackloop ticket
+  assert.equal(checkAccess(snackloopTicket, weddingUser), false);
+});

@@ -27,8 +27,23 @@ export function PortalTicketViewPage() {
 
   const ticket = data.tickets.find((t) => t.id === id) ?? null;
 
-  // Security check: requester can only view their own ticket
-  if (!ticket || !requester || (ticket.requesterId !== requester.id && ticket.requesterUid !== requester.externalUid)) {
+  // Escape key handler for lightbox
+  React.useEffect(() => {
+    if (!lightboxImg) return;
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxImg(null);
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [lightboxImg]);
+
+  // Security check: requester can only view their own ticket within their respective app
+  const isOwner =
+    Boolean(ticket && requester) &&
+    (ticket!.requesterId === requester!.id ||
+      (ticket!.appId === requester!.appId && ticket!.requesterUid === requester!.externalUid));
+
+  if (!ticket || !requester || !isOwner) {
     return (
       <div className="rounded-lg border border-line bg-panel p-8 text-center shadow-sm">
         <p className="text-base font-semibold text-ink">Tiket tidak ditemukan atau di luar hak akses akun Anda.</p>

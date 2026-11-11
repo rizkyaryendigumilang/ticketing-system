@@ -160,10 +160,10 @@ async function runFlush() {
 
 async function pull() {
   const [apps, users, tickets, messages] = await Promise.all([
-    pb.collection('apps').getFullList(),
-    pb.collection('crm_users').getFullList(),
-    pb.collection('tickets').getFullList(),
-    pb.collection('ticket_messages').getFullList({ sort: 'created_at' }),
+    pb.collection('apps').getFullList({ batch: 200 }),
+    pb.collection('crm_users').getFullList({ batch: 500, sort: '-created_at' }),
+    pb.collection('tickets').getFullList({ batch: 500, sort: '-created_at' }),
+    pb.collection('ticket_messages').getFullList({ batch: 1000, sort: 'created_at' }),
   ]);
   replaceAll({
     apps: apps.map((r) => fromPb<AppSource>('apps', r)),

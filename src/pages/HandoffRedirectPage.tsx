@@ -44,8 +44,8 @@ export function HandoffRedirectPage() {
           return;
         }
 
-        // If new ticket or prefilled fields are present, route to portal/new with prefilled query
-        if (openNewForm || result.params.newTicket || result.params.subject) {
+        // If new ticket, auto_submit fallback, or prefilled fields are present, route to portal/new with prefilled query
+        if (openNewForm || result.params.newTicket || result.params.autoSubmit || result.params.subject) {
           const forwardParams = new URLSearchParams();
           if (result.params.subject) forwardParams.set('subject', result.params.subject);
           if (result.params.description) forwardParams.set('description', result.params.description);

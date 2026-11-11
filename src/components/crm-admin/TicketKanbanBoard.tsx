@@ -82,7 +82,7 @@ export function TicketKanbanBoard({
                     draggable
                     onDragStart={(e) => handleDragStart(e, ticket.id)}
                     onClick={() => onTicketClick(ticket.id)}
-                    className="cursor-grab rounded border border-line bg-panel p-3 transition-shadow hover:border-line-strong hover:shadow-sm active:cursor-grabbing"
+                    className="cursor-grab rounded border border-line bg-panel p-3 transition-[border-color,box-shadow,transform] duration-100 ease-out hover:border-line-strong hover:shadow-sm active:cursor-grabbing active:scale-[0.98]"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-mono text-xs font-semibold text-ink">
