@@ -25,7 +25,7 @@ export const SEED_APPS: AppSource[] = [
     name: 'Wedding Planner Web',
     prefix: 'WED',
     appUrl: 'https://43.156.236.102/wedding/login',
-    adminDbUrl: 'https://43.156.236.102/_/',
+    adminDbUrl: 'https://43.156.236.102/wedding-pb/_/',
     color: '#B4337A',
     description: 'Undangan, daftar tamu, dan jadwal acara',
   },

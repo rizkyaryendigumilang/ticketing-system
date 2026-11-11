@@ -8,7 +8,7 @@ Aplikasi web Helpdesk CRM & Ticketing System terpusat (bergaya Libredesk / Zende
 | --- | --- | --- | --- | --- | --- |
 | **Recruiter Portal** | `recruiter` | `REC` | `https://43.156.236.102/recruiter/login` | `https://43.156.236.102/recruiter-pb/_/` | `employer@demo.com` (Employer UMKM), `kandidat@demo.com` (Candidate) |
 | **Snackloop-ERP** | `snackloop` | `SNK` | `https://43.156.236.102/snackloop/` | — | `admin_kiky` (Super Admin Owner), `staff1` (Staff Rekap & Transaksi Harian) |
-| **Wedding Planner Web** | `wedding` | `WED` | `https://43.156.236.102/wedding/login` | `https://43.156.236.102/_/` | `admin@wedding.local` (Owner Web Acara) |
+| **Wedding Planner Web** | `wedding` | `WED` | `https://43.156.236.102/wedding/login` | `https://43.156.236.102/wedding-pb/_/` | `admin@wedding.local` (Owner Web Acara) |
 | **Life Planner Web** | `life-planner` | `LFP` | `https://43.156.236.102/life-planner/` | `https://43.156.236.102/life-planner-pb/_/` | `kiky@lifeplanner.local` (User / Superadmin) |
 | **AI Endurance Platform** | `ai-endurance` | `AIE` | `https://43.156.236.102:8445/login.html` | — | `kipchoge@berlin.org` (Athlete) |
 | **Kept Password Vault** | `kept` | `KPT` | `https://43.156.236.102/kept/` | — | `user@kept.local` (Vault User) |
