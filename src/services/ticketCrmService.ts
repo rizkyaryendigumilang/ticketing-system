@@ -63,7 +63,7 @@ export function createTicket(user: CrmUser, input: NewTicketInput): Ticket {
     priority: input.priority,
     status: 'open',
     sourcePageUrl: safeHttpUrl(input.sourcePageUrl),
-    deviceInfo: describeDevice(navigator.userAgent),
+    deviceInfo: typeof navigator !== 'undefined' && navigator.userAgent ? describeDevice(navigator.userAgent) : undefined,
     attachments: input.attachments,
     createdAt: ts,
     updatedAt: ts,

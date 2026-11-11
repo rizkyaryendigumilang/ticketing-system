@@ -35,6 +35,13 @@ npm run build
 
 > **Mode Fallback Otomatis:** Jika server PocketBase (`VITE_PB_URL`) belum dinyalakan, `src/services/pbClient.ts` dan `src/services/storageService.ts` otomatis menjalankan penyimpanan lokal dengan 8 tiket seed realistis dan menyinkronkannya ke PocketBase begitu server aktif.
 
+## Dokumentasi Teknis Lengkap
+
+- [Referensi API & Koleksi PocketBase](docs/api-reference.md) — Spesifikasi skema database, aturan API rules, dan parameter SSO JIT Handoff.
+- [Panduan Integrasi Aplikasi](docs/integration-guide.md) — Panduan integrasi tombol "Bantuan" dan modal lapor kendala langsung.
+- [Kamus Domain & Terminologi](GLOSSARY.md) — Definisi resmi entitas, status tiket, dan istilah baku bahasa Indonesia.
+- [Panduan Developer & AI Agent](AGENTS.md) — Aturan arsitektur, isolasi multi-tenant, dan pedoman kontribusi.
+
 ## Skema Integrasi SSO Handoff (Tombol "Help")
 
 Setiap aplikasi cukup mengarahkan user ke rute:
