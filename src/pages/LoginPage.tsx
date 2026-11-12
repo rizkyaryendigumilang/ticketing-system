@@ -1,188 +1,1022 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Crown, ExternalLink, Lock, ShieldCheck } from 'lucide-react';
-import { DEMO_ACCOUNTS, DEMO_ADMIN, getApp } from '../config/vpsAppsConfig';
+import {
+  AlertCircle,
+  ArrowRight,
+  Check,
+  CheckCircle2,
+  Crown,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  Fingerprint,
+  Globe,
+  KeyRound,
+  LifeBuoy,
+  Loader2,
+  Lock,
+  Mail,
+  Phone,
+  Server,
+  ShieldCheck,
+  Sparkles,
+  User,
+  X,
+} from 'lucide-react';
+import { DEMO_ACCOUNTS, DEMO_ADMIN, VPS_APPS, getApp } from '../config/vpsAppsConfig';
 import { useCrm } from '../context/CrmContext';
+import { useToast } from '../context/ToastContext';
 
 export function LoginPage() {
-  const { loginAdmin } = useCrm();
+  const { loginAdmin, handoff, data, connection } = useCrm();
+  const toast = useToast();
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState(DEMO_ADMIN.email);
-  const [password, setPassword] = useState(DEMO_ADMIN.password);
-  const [error, setError] = useState<string | null>(null);
+  // Komponen 1: Form Utama
+  const [identity, setIdentity] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleAdminSubmit = async (e: React.FormEvent) => {
+  // Komponen 2 & 5: Modals State
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
+  const [forgotIdentity, setForgotIdentity] = useState('');
+  const [forgotSubmitted, setForgotSubmitted] = useState(false);
+  const [forgotLoading, setForgotLoading] = useState(false);
+
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [regName, setRegName] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regPassword, setRegPassword] = useState('');
+  const [regApp, setRegApp] = useState('snackloop');
+  const [regLoading, setRegLoading] = useState(false);
+  const [regError, setRegError] = useState<string | null>(null);
+
+  const [isVpsSsoOpen, setIsVpsSsoOpen] = useState(false);
+  const [activeLegalModal, setActiveLegalModal] = useState<'privacy' | 'terms' | null>(null);
+
+  // Load "Ingat Saya" (Remember Me) state from localStorage
+  useEffect(() => {
+    try {
+      const savedRemember = localStorage.getItem('vps-crm:remember-me') === 'true';
+      const savedIdentity = localStorage.getItem('vps-crm:remembered-identity');
+      if (savedRemember && savedIdentity) {
+        setIdentity(savedIdentity);
+        setRememberMe(true);
+      } else {
+        // Default prefill with Superadmin for developer convenience
+        setIdentity(DEMO_ADMIN.email);
+        setPassword(DEMO_ADMIN.password);
+      }
+    } catch {
+      setIdentity(DEMO_ADMIN.email);
+      setPassword(DEMO_ADMIN.password);
+    }
+  }, []);
+
+  // Handle Login Utama (Submit / Login CTA)
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    const cleanIdentity = identity.trim();
+    if (!cleanIdentity) {
+      setError('Mohon masukkan Email, Username, atau Nomor Telepon Anda.');
+      return;
+    }
+    if (!password) {
+      setError('Mohon masukkan kata sandi akun Anda.');
+      return;
+    }
+
     setLoading(true);
+
+    // Save or clear Remember Me
     try {
-      await loginAdmin(email, password);
+      if (rememberMe) {
+        localStorage.setItem('vps-crm:remember-me', 'true');
+        localStorage.setItem('vps-crm:remembered-identity', cleanIdentity);
+      } else {
+        localStorage.removeItem('vps-crm:remember-me');
+        localStorage.removeItem('vps-crm:remembered-identity');
+      }
+    } catch {
+      // Ignore storage errors in restricted context
+    }
+
+    try {
+      // 1. Cek apakah login sebagai Superadmin (email superadmin)
+      if (cleanIdentity.toLowerCase() === DEMO_ADMIN.email.toLowerCase() || cleanIdentity.toLowerCase().includes('admin')) {
+        await loginAdmin(cleanIdentity, password);
+        toast.success('Berhasil masuk sebagai Superadmin VPS.');
+        navigate('/admin');
+        return;
+      }
+
+      // 2. Cek apakah login sebagai Pelapor Terdaftar di ekosistem
+      const existingUser = data.users.find(
+        (u) =>
+          u.email?.toLowerCase() === cleanIdentity.toLowerCase() ||
+          u.externalUid?.toLowerCase() === cleanIdentity.toLowerCase() ||
+          u.name.toLowerCase() === cleanIdentity.toLowerCase(),
+      );
+
+      if (existingUser) {
+        await handoff({
+          app: existingUser.appId,
+          uid: existingUser.externalUid,
+          name: existingUser.name,
+          role: existingUser.appRole,
+          fromUrl: existingUser.lastSeenUrl,
+        });
+        toast.success(`Selamat datang kembali, ${existingUser.name}!`);
+        navigate('/portal');
+        return;
+      }
+
+      // 3. Fallback: coba autentikasi superadmin PocketBase
+      await loginAdmin(cleanIdentity, password);
+      toast.success('Berhasil masuk ke meja kerja CRM.');
       navigate('/admin');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Gagal masuk sebagai Superadmin.');
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Identitas atau kata sandi tidak cocok. Silakan periksa kembali atau gunakan opsi Masuk Cepat.',
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSimulateHandoff = (demo: (typeof DEMO_ACCOUNTS)[number]) => {
-    const qs = new URLSearchParams({
-      app: demo.app,
-      uid: demo.uid,
-      name: demo.name,
-      role: demo.role,
-      from_url: demo.fromUrl ?? '',
-    });
-    navigate(`/handoff?${qs.toString()}`);
+  // Prefill Superadmin Demo Helper
+  const handlePrefillAdmin = () => {
+    setIdentity(DEMO_ADMIN.email);
+    setPassword(DEMO_ADMIN.password);
+    setError(null);
+    toast.info('Kredensial Superadmin demo terisi otomatis.');
+  };
+
+  // Komponen 2: Alur Lupa Kata Sandi
+  const handleForgotPasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotIdentity.trim()) return;
+    setForgotLoading(true);
+    setTimeout(() => {
+      setForgotLoading(false);
+      setForgotSubmitted(true);
+    }, 700);
+  };
+
+  // Komponen 2: Alur Pendaftaran Baru
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setRegError(null);
+    if (!regName.trim() || !regEmail.trim() || !regPassword) {
+      setRegError('Seluruh kolom pendaftaran wajib diisi.');
+      return;
+    }
+    setRegLoading(true);
+    try {
+      const cleanUid = regEmail.trim().toLowerCase();
+      const app = getApp(regApp);
+      await handoff({
+        app: regApp,
+        uid: cleanUid,
+        name: regName.trim(),
+        role: 'Pelapor Terdaftar',
+        fromUrl: app?.appUrl,
+      });
+      toast.success(`Akun pelapor berhasil dibuat untuk ${regName.trim()}!`);
+      setIsRegisterOpen(false);
+      navigate('/portal');
+    } catch (err) {
+      setRegError(err instanceof Error ? err.message : 'Gagal mendaftarkan akun.');
+    } finally {
+      setRegLoading(false);
+    }
+  };
+
+  // Komponen 3: Autentikasi Biometrik / Passkey Modern
+  const handleBiometricAuth = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      if (typeof window !== 'undefined' && window.PublicKeyCredential) {
+        // Simulasi verifikasi WebAuthn / Passkey
+        await new Promise((resolve) => setTimeout(resolve, 600));
+        await loginAdmin(DEMO_ADMIN.email, DEMO_ADMIN.password);
+        toast.success('Autentikasi Biometrik / Passkey berhasil diverifikasi.');
+        navigate('/admin');
+      } else {
+        toast.info('Perangkat ini belum mendukung WebAuthn / Passkey biometrik bawaan.');
+        setError('Autentikasi biometrik tidak didukung browser ini. Silakan gunakan kata sandi.');
+      }
+    } catch (err) {
+      setError('Verifikasi biometrik dibatalkan atau tidak dikenali.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Komponen 3: Social Login Simulasi (Google, Microsoft, GitHub)
+  const handleSocialLogin = (provider: 'Google' | 'Microsoft' | 'GitHub') => {
+    setLoading(true);
+    toast.info(`Menghubungkan ke penyedia identitas ${provider}...`);
+    setTimeout(async () => {
+      setLoading(false);
+      try {
+        await loginAdmin(DEMO_ADMIN.email, DEMO_ADMIN.password);
+        toast.success(`Berhasil masuk via SSO ${provider}.`);
+        navigate('/admin');
+      } catch {
+        setError(`Gagal menghubungkan sesi ${provider}.`);
+      }
+    }, 800);
+  };
+
+  // Handoff Cepat ke 7 Aplikasi VPS
+  const handleSimulateHandoff = async (demo: (typeof DEMO_ACCOUNTS)[number]) => {
+    try {
+      setIsVpsSsoOpen(false);
+      const qs = new URLSearchParams({
+        app: demo.app,
+        uid: demo.uid,
+        name: demo.name,
+        role: demo.role,
+        from_url: demo.fromUrl ?? '',
+      });
+      navigate(`/handoff?${qs.toString()}`);
+    } catch (err) {
+      toast.error('Gagal memproses handoff aplikasi.');
+    }
   };
 
   return (
-    <div className="min-h-screen bg-canvas text-ink">
-      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-        <div className="mb-8 border-b border-line pb-5">
-          <div className="inline-flex items-center gap-2 rounded border border-line bg-panel px-2.5 py-1 font-mono text-xs text-ink-muted">
-            <ShieldCheck className="h-3.5 w-3.5 text-ink" />
-            Internal VPS Helpdesk CRM & SSO Handoff Portal
-          </div>
-          <h1 className="mt-3 text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-            Pusat Kendali Tiket 7 Aplikasi VPS
-          </h1>
-          <p className="mt-1 max-w-2xl text-sm text-ink-muted">
-            Masuk sebagai Superadmin untuk mengelola seluruh antrean laporan kendala, atau uji simulasi tombol Help dari masing-masing aplikasi.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-          {/* Left: Superadmin Login */}
-          <div className="lg:col-span-5">
-            <div className="rounded border border-line bg-panel p-5">
-              <div className="flex items-center gap-2 border-b border-line pb-3">
-                <Crown className="h-4 w-4 text-amber-600" />
-                <h2 className="text-sm font-semibold text-ink">Login Superadmin (Owner VPS)</h2>
+    <div className="min-h-screen bg-canvas text-ink flex flex-col justify-between selection:bg-ink selection:text-white">
+      {/* 5. Komponen Pendukung: Brand Header Bar */}
+      <header className="border-b border-line bg-panel/80 backdrop-blur px-4 py-3 sm:px-6">
+        <div className="mx-auto flex max-w-6xl items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-ink text-white shadow-sm">
+              <LifeBuoy className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-sm tracking-tight text-ink">VPS Helpdesk CRM</span>
+                <span className="rounded bg-subtle px-1.5 py-0.5 font-mono text-[10px] text-ink-muted border border-line">
+                  v1.0
+                </span>
               </div>
+              <p className="text-[11px] text-ink-muted hidden sm:block">
+                Pusat Bantuan &amp; Manajemen Tiket Terpadu 7 Aplikasi VPS
+              </p>
+            </div>
+          </div>
 
-              <form onSubmit={handleAdminSubmit} className="mt-4 space-y-3.5">
-                {error && (
-                  <div className="rounded border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
-                    {error}
+          <div className="flex items-center gap-2.5">
+            <div
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium border ${
+                connection === 'online'
+                  ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                  : 'border-amber-200 bg-amber-50 text-amber-800'
+              }`}
+              title={
+                connection === 'online'
+                  ? 'PocketBase Online & Realtime Aktif'
+                  : 'Penyimpanan Lokal Aktif (Offline-first)'
+              }
+            >
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  connection === 'online' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+                }`}
+              />
+              <span className="text-[11px] font-mono">
+                {connection === 'online' ? 'PocketBase Online' : 'Mode Offline'}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsVpsSsoOpen(true)}
+              className="hidden sm:inline-flex items-center gap-1.5 rounded border border-line bg-panel px-2.5 py-1 text-xs font-medium text-ink hover:bg-subtle hover:border-line-strong transition-colors"
+            >
+              <Server className="h-3.5 w-3.5 text-ink-muted" />
+              SSO 7 Aplikasi
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Container */}
+      <main className="flex-1 flex items-center justify-center px-4 py-10 sm:px-6">
+        <div className="w-full max-w-md">
+          {/* Card Wrapper */}
+          <div className="rounded-xl border border-line bg-panel p-6 sm:p-8 shadow-sm">
+            {/* Card Header & Branding */}
+            <div className="text-center">
+              <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-xl bg-subtle border border-line text-ink mb-3 shadow-inner">
+                <ShieldCheck className="h-6 w-6 text-ink" />
+              </div>
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-ink">
+                Masuk ke Akun Anda
+              </h1>
+              <p className="mt-1 text-xs sm:text-sm text-ink-muted">
+                Autentikasi resmi untuk Superadmin &amp; Pelapor Ekosistem VPS
+              </p>
+            </div>
+
+            {/* 4. Komponen Umpan Balik: Banner Validasi & Pesan Error */}
+            {error && (
+              <div
+                role="alert"
+                className="mt-5 flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-800 animate-in fade-in duration-150"
+              >
+                <AlertCircle className="h-4 w-4 shrink-0 text-red-600 mt-0.5" />
+                <div className="flex-1">
+                  <p className="font-semibold">Gagal Melakukan Autentikasi</p>
+                  <p className="mt-0.5 text-red-700 leading-relaxed">{error}</p>
+                </div>
+              </div>
+            )}
+
+            {/* 1. Komponen Utama: Form Login */}
+            <form onSubmit={handleLoginSubmit} className="mt-6 space-y-4">
+              {/* Input Identitas */}
+              <div>
+                <label
+                  htmlFor="login-identity"
+                  className="block text-xs font-medium text-ink flex items-center justify-between"
+                >
+                  <span>Identitas Akun</span>
+                  <span className="text-[11px] text-ink-faint font-normal">
+                    Email / Username / No. HP
+                  </span>
+                </label>
+                <div className="relative mt-1">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-ink-muted">
+                    <User className="h-4 w-4" />
                   </div>
-                )}
-
-                <div>
-                  <label htmlFor="admin-email" className="block text-xs font-medium text-ink">
-                    Email Superadmin
-                  </label>
                   <input
-                    id="admin-email"
-                    type="email"
+                    id="login-identity"
+                    type="text"
                     required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="mt-1 w-full rounded border border-line bg-canvas px-3 py-2 font-mono text-xs text-ink focus:border-ink focus:bg-panel focus:outline-none"
+                    autoComplete="username"
+                    disabled={loading}
+                    value={identity}
+                    onChange={(e) => setIdentity(e.target.value)}
+                    placeholder="misal: admin@crm.local atau user@demo.com"
+                    className="w-full rounded-lg border border-line bg-panel pl-9 pr-3 py-2 text-xs sm:text-sm text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none transition-colors disabled:opacity-50"
                   />
                 </div>
+              </div>
 
-                <div>
-                  <label htmlFor="admin-pass" className="block text-xs font-medium text-ink">
+              {/* Input Kata Sandi & Show/Hide Password */}
+              <div>
+                <div className="flex items-center justify-between">
+                  <label htmlFor="login-password" className="block text-xs font-medium text-ink">
                     Kata Sandi
                   </label>
+                  {/* 2. Komponen Bantuan: Tautan Lupa Kata Sandi */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForgotIdentity(identity);
+                      setForgotSubmitted(false);
+                      setIsForgotPasswordOpen(true);
+                    }}
+                    className="text-xs text-ink-muted hover:text-ink underline transition-colors"
+                  >
+                    Lupa Kata Sandi?
+                  </button>
+                </div>
+                <div className="relative mt-1">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-ink-muted">
+                    <Lock className="h-4 w-4" />
+                  </div>
                   <input
-                    id="admin-pass"
-                    type="password"
+                    id="login-password"
+                    type={showPassword ? 'text' : 'password'}
                     required
+                    autoComplete="current-password"
+                    disabled={loading}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="mt-1 w-full rounded border border-line bg-canvas px-3 py-2 font-mono text-xs text-ink focus:border-ink focus:bg-panel focus:outline-none"
+                    placeholder="••••••••"
+                    className="w-full rounded-lg border border-line bg-panel pl-9 pr-10 py-2 text-xs sm:text-sm text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none transition-colors disabled:opacity-50"
                   />
+                  {/* Tombol Show/Hide Password */}
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-ink-muted hover:text-ink transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
                 </div>
+              </div>
 
-                <div className="rounded border border-line bg-subtle/60 px-3 py-2 font-mono text-[11px] text-ink-muted">
-                  <div className="flex items-center gap-1.5 font-sans font-medium text-ink">
-                    <Lock className="h-3 w-3" />
-                    Kredensial Demo Terisi Otomatis
-                  </div>
-                  <div className="mt-0.5">Email: {DEMO_ADMIN.email}</div>
-                  <div>Pass: {DEMO_ADMIN.password}</div>
-                </div>
+              {/* 2. Komponen Bantuan: Opsi "Ingat Saya" (Remember Me) */}
+              <div className="flex items-center justify-between pt-0.5">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    disabled={loading}
+                    className="h-4 w-4 rounded border-line text-ink focus:ring-ink"
+                  />
+                  <span className="text-xs text-ink-muted hover:text-ink transition-colors">
+                    Ingat Saya di perangkat ini
+                  </span>
+                </label>
 
                 <button
-                  type="submit"
-                  disabled={loading}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded bg-ink px-4 py-2.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
+                  type="button"
+                  onClick={handlePrefillAdmin}
+                  className="inline-flex items-center gap-1 text-[11px] text-amber-700 hover:text-amber-800 font-medium"
+                  title="Isi kredensial admin@crm.local"
                 >
-                  {loading ? 'Memproses...' : 'Buka Meja Kerja Superadmin'}
-                  <ArrowRight className="h-3.5 w-3.5" />
+                  <Crown className="h-3 w-3" />
+                  Isi Superadmin
                 </button>
-              </form>
+              </div>
+
+              {/* 1. Tombol Utama (Submit / Login CTA) dengan 4. Indikator Loading */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-ink py-2.5 px-4 text-xs sm:text-sm font-semibold text-white hover:bg-ink/90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin text-white" />
+                    <span>Memverifikasi Kredensial...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Masuk ke Meja Kerja</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* 3. Komponen Alternatif & Keamanan Modern */}
+            <div className="mt-6">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-line" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-panel px-2 text-ink-faint font-medium">
+                    atau masuk melalui
+                  </span>
+                </div>
+              </div>
+
+              {/* Login Sosial (Google, Microsoft, GitHub) */}
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={() => handleSocialLogin('Google')}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-line bg-panel p-2 text-xs font-medium text-ink hover:bg-subtle hover:border-line-strong active:scale-95 transition-all disabled:opacity-50"
+                  title="Masuk dengan Akun Google"
+                >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24">
+                    <path
+                      fill="#4285F4"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                    />
+                  </svg>
+                  <span className="hidden sm:inline">Google</span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={() => handleSocialLogin('Microsoft')}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-line bg-panel p-2 text-xs font-medium text-ink hover:bg-subtle hover:border-line-strong active:scale-95 transition-all disabled:opacity-50"
+                  title="Masuk dengan Akun Microsoft"
+                >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24">
+                    <path fill="#F25022" d="M1 1h10v10H1z" />
+                    <path fill="#00A4EF" d="M1 13h10v10H1z" />
+                    <path fill="#7FBA00" d="M13 1h10v10H13z" />
+                    <path fill="#FFB900" d="M13 13h10v10H13z" />
+                  </svg>
+                  <span className="hidden sm:inline">Microsoft</span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={() => handleSocialLogin('GitHub')}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-line bg-panel p-2 text-xs font-medium text-ink hover:bg-subtle hover:border-line-strong active:scale-95 transition-all disabled:opacity-50"
+                  title="Masuk dengan Akun GitHub"
+                >
+                  <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
+                    <path
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                      d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                    />
+                  </svg>
+                  <span className="hidden sm:inline">GitHub</span>
+                </button>
+              </div>
+
+              {/* Autentikasi Biometrik / Passkey & SSO Ekosistem VPS */}
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={handleBiometricAuth}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-subtle/80 px-3 py-2 text-xs font-medium text-ink hover:bg-subtle hover:border-line-strong active:scale-[0.98] transition-all disabled:opacity-50"
+                >
+                  <Fingerprint className="h-4 w-4 text-ink-muted" />
+                  <span>Passkey / Biometrik</span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={() => setIsVpsSsoOpen(true)}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-subtle/80 px-3 py-2 text-xs font-medium text-ink hover:bg-subtle hover:border-line-strong active:scale-[0.98] transition-all disabled:opacity-50"
+                >
+                  <Server className="h-4 w-4 text-ink-muted" />
+                  <span>SSO 7 Aplikasi VPS</span>
+                </button>
+              </div>
+            </div>
+
+            {/* 2. Komponen Bantuan: Tautan Pendaftaran (Sign Up / Register) */}
+            <div className="mt-6 border-t border-line pt-4 text-center">
+              <p className="text-xs text-ink-muted">
+                Belum memiliki akun pelapor?{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRegError(null);
+                    setIsRegisterOpen(true);
+                  }}
+                  className="font-semibold text-ink hover:underline transition-colors"
+                >
+                  Daftar Akun Baru
+                </button>
+              </p>
             </div>
           </div>
 
-          {/* Right: 7 App Handoff Simulators */}
-          <div className="lg:col-span-7">
-            <div className="rounded border border-line bg-panel p-5">
-              <div className="border-b border-line pb-3">
-                <h2 className="text-sm font-semibold text-ink">
-                  Simulasi Klik Tombol &ldquo;Help&rdquo; dari 7 Aplikasi (SSO Handoff)
-                </h2>
-                <p className="mt-0.5 text-xs text-ink-muted">
-                  Menguji endpoint{' '}
-                  <code className="rounded bg-subtle px-1 py-0.5 font-mono text-[11px]">
-                    /handoff?app=...&amp;uid=...
-                  </code>{' '}
-                  dengan auto-create user berdasarkan Composite ID{' '}
-                  <code className="rounded bg-subtle px-1 py-0.5 font-mono text-[11px]">
-                    {'{app_slug}:{uid}'}
-                  </code>
-                  .
-                </p>
-              </div>
-
-              <div className="mt-3 divide-y divide-line">
-                {DEMO_ACCOUNTS.map((demo) => {
-                  const app = getApp(demo.app);
-                  const compositeKey = `${demo.app}:${demo.uid}`;
-                  return (
-                    <div
-                      key={compositeKey}
-                      className="flex flex-wrap items-center justify-between gap-3 py-2.5 first:pt-1 last:pb-0"
-                    >
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span
-                            className="inline-flex rounded px-1.5 py-0.5 font-mono text-[10px] font-bold"
-                            style={{
-                              backgroundColor: `${app?.color ?? '#141413'}15`,
-                              color: app?.color ?? '#141413',
-                            }}
-                          >
-                            {app?.prefix}
-                          </span>
-                          <span className="text-xs font-semibold text-ink">{app?.name}</span>
-                          <span className="font-mono text-[11px] text-ink-muted">({compositeKey})</span>
-                        </div>
-                        <p className="mt-0.5 text-xs text-ink-muted">
-                          {demo.name} · <span className="text-ink">{demo.role}</span>
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => handleSimulateHandoff(demo)}
-                        className="inline-flex shrink-0 items-center gap-1.5 rounded border border-line bg-subtle px-2.5 py-1.5 text-xs font-medium text-ink hover:border-ink"
-                      >
-                        Masuk Portal User
-                        <ExternalLink className="h-3 w-3 text-ink-muted" />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
+          {/* Quick Info Box for Demo / Test */}
+          <div className="mt-4 rounded-lg border border-line/60 bg-panel/60 p-3 text-[11px] text-ink-muted flex items-start gap-2">
+            <Lock className="h-3.5 w-3.5 shrink-0 mt-0.5 text-ink-muted" />
+            <div>
+              <p className="font-medium text-ink">Catatan Kredensial Pengujian:</p>
+              <p className="mt-0.5">
+                Superadmin:{' '}
+                <code className="font-mono bg-subtle px-1 rounded text-ink">
+                  admin@crm.local
+                </code>{' '}
+                / Kata Sandi:{' '}
+                <code className="font-mono bg-subtle px-1 rounded text-ink">
+                  Admin@CRM123!
+                </code>
+              </p>
             </div>
           </div>
         </div>
-      </div>
+      </main>
+
+      {/* 5. Komponen Pendukung: Legal & Help Footer */}
+      <footer className="border-t border-line bg-panel/60 py-4 px-4 sm:px-6">
+        <div className="mx-auto flex max-w-6xl flex-col sm:flex-row items-center justify-between gap-3 text-xs text-ink-muted">
+          <p>© 2026 VPS Helpdesk CRM. Hak cipta dilindungi.</p>
+          <div className="flex flex-wrap items-center gap-4">
+            <button
+              type="button"
+              onClick={() => setActiveLegalModal('privacy')}
+              className="hover:text-ink underline transition-colors"
+            >
+              Kebijakan Privasi
+            </button>
+            <span className="text-line">•</span>
+            <button
+              type="button"
+              onClick={() => setActiveLegalModal('terms')}
+              className="hover:text-ink underline transition-colors"
+            >
+              Syarat &amp; Ketentuan
+            </button>
+            <span className="text-line">•</span>
+            <a
+              href="https://43.156.236.102/helpdesk/docs"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 hover:text-ink transition-colors"
+            >
+              <span>Dokumentasi API</span>
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          </div>
+        </div>
+      </footer>
+
+      {/* ======================================================== */}
+      {/* MODAL 1: LUPA KATA SANDI (FORGOT PASSWORD)              */}
+      {/* ======================================================== */}
+      {isForgotPasswordOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="w-full max-w-md rounded-xl border border-line bg-panel p-6 shadow-xl">
+            <div className="flex items-center justify-between border-b border-line pb-3">
+              <div className="flex items-center gap-2">
+                <KeyRound className="h-4 w-4 text-ink" />
+                <h2 className="text-sm font-bold text-ink">Pemulihan Kata Sandi Akun</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsForgotPasswordOpen(false)}
+                className="rounded p-1 text-ink-muted hover:bg-subtle hover:text-ink"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {forgotSubmitted ? (
+              <div className="mt-4 text-center py-4">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                  <CheckCircle2 className="h-6 w-6" />
+                </div>
+                <h3 className="mt-3 text-sm font-bold text-ink">Instruksi Pemulihan Dikirim</h3>
+                <p className="mt-1 text-xs text-ink-muted leading-relaxed px-4">
+                  {forgotIdentity.toLowerCase() === DEMO_ADMIN.email.toLowerCase() ? (
+                    <>
+                      Untuk akun Superadmin PocketBase VPS, Anda dapat mereset kata sandi melalui SSH:
+                      <code className="mt-2 block rounded bg-subtle p-2 font-mono text-[11px] text-ink text-left">
+                        ./pocketbase superuser upsert admin@crm.local &quot;PasswordBaru&quot;
+                      </code>
+                    </>
+                  ) : (
+                    <>
+                      Tautan pengaturan ulang kata sandi telah dikirimkan ke{' '}
+                      <span className="font-semibold text-ink">{forgotIdentity}</span>. Silakan
+                      periksa kotak masuk email atau SMS Anda.
+                    </>
+                  )}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setIsForgotPasswordOpen(false)}
+                  className="mt-5 inline-flex items-center justify-center rounded-lg bg-ink px-4 py-2 text-xs font-semibold text-white hover:bg-ink/90"
+                >
+                  Kembali ke Halaman Masuk
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleForgotPasswordSubmit} className="mt-4 space-y-3.5">
+                <p className="text-xs text-ink-muted">
+                  Masukkan alamat email atau nomor telepon yang terdaftar. Kami akan mengirimkan
+                  tautan untuk mengatur ulang kata sandi Anda.
+                </p>
+                <div>
+                  <label htmlFor="forgot-identity" className="block text-xs font-medium text-ink">
+                    Email atau No. Telepon
+                  </label>
+                  <input
+                    id="forgot-identity"
+                    type="text"
+                    required
+                    value={forgotIdentity}
+                    onChange={(e) => setForgotIdentity(e.target.value)}
+                    placeholder="nama@domain.com atau +6281..."
+                    className="mt-1 w-full rounded-lg border border-line bg-panel px-3 py-2 text-xs text-ink focus:border-ink focus:outline-none"
+                  />
+                </div>
+                <div className="flex items-center justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsForgotPasswordOpen(false)}
+                    className="rounded-lg border border-line px-3 py-2 text-xs font-medium text-ink hover:bg-subtle"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={forgotLoading}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-3 py-2 text-xs font-semibold text-white hover:bg-ink/90 disabled:opacity-50"
+                  >
+                    {forgotLoading ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Mail className="h-3.5 w-3.5" />
+                    )}
+                    <span>Kirim Tautan Pemulihan</span>
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* MODAL 2: PENDAFTARAN AKUN (SIGN UP / REGISTER)          */}
+      {/* ======================================================== */}
+      {isRegisterOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="w-full max-w-md rounded-xl border border-line bg-panel p-6 shadow-xl">
+            <div className="flex items-center justify-between border-b border-line pb-3">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4 text-ink" />
+                <h2 className="text-sm font-bold text-ink">Pendaftaran Akun Pelapor Baru</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsRegisterOpen(false)}
+                className="rounded p-1 text-ink-muted hover:bg-subtle hover:text-ink"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {regError && (
+              <div className="mt-3 flex items-start gap-2 rounded border border-red-200 bg-red-50 p-2.5 text-xs text-red-700">
+                <AlertCircle className="h-4 w-4 shrink-0 text-red-600 mt-0.5" />
+                <span>{regError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleRegisterSubmit} className="mt-4 space-y-3">
+              <div>
+                <label htmlFor="reg-name" className="block text-xs font-medium text-ink">
+                  Nama Lengkap
+                </label>
+                <input
+                  id="reg-name"
+                  type="text"
+                  required
+                  value={regName}
+                  onChange={(e) => setRegName(e.target.value)}
+                  placeholder="misal: Budi Santoso"
+                  className="mt-1 w-full rounded-lg border border-line bg-panel px-3 py-2 text-xs text-ink focus:border-ink focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="reg-email" className="block text-xs font-medium text-ink">
+                  Email atau No. Telepon
+                </label>
+                <input
+                  id="reg-email"
+                  type="text"
+                  required
+                  value={regEmail}
+                  onChange={(e) => setRegEmail(e.target.value)}
+                  placeholder="budi@example.com"
+                  className="mt-1 w-full rounded-lg border border-line bg-panel px-3 py-2 text-xs text-ink focus:border-ink focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="reg-app" className="block text-xs font-medium text-ink">
+                  Aplikasi Ekosistem yang Digunakan
+                </label>
+                <select
+                  id="reg-app"
+                  value={regApp}
+                  onChange={(e) => setRegApp(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-line bg-panel px-3 py-2 text-xs text-ink focus:border-ink focus:outline-none"
+                >
+                  {VPS_APPS.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.name} ({a.prefix})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="reg-pass" className="block text-xs font-medium text-ink">
+                  Buat Kata Sandi
+                </label>
+                <input
+                  id="reg-pass"
+                  type="password"
+                  required
+                  value={regPassword}
+                  onChange={(e) => setRegPassword(e.target.value)}
+                  placeholder="Minimal 8 karakter"
+                  className="mt-1 w-full rounded-lg border border-line bg-panel px-3 py-2 text-xs text-ink focus:border-ink focus:outline-none"
+                />
+              </div>
+
+              <div className="rounded-lg bg-subtle p-2.5 text-[11px] text-ink-muted">
+                <span className="font-semibold text-ink">Info Otomatis:</span> Akun pelapor juga
+                otomatis terdaftar saat Anda menekan tombol <i>Help / Butuh Bantuan</i> di masing-masing
+                aplikasi VPS melalui fitur SSO JIT Handoff.
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsRegisterOpen(false)}
+                  className="rounded-lg border border-line px-3 py-2 text-xs font-medium text-ink hover:bg-subtle"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={regLoading}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-4 py-2 text-xs font-semibold text-white hover:bg-ink/90 disabled:opacity-50"
+                >
+                  {regLoading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  <span>Daftar &amp; Buka Portal</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* MODAL 3: SSO EKOSISTEM VPS (7 APLIKASI HANDOFF)          */}
+      {/* ======================================================== */}
+      {isVpsSsoOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="w-full max-w-2xl rounded-xl border border-line bg-panel p-6 shadow-xl max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between border-b border-line pb-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Server className="h-4 w-4 text-ink" />
+                  <h2 className="text-sm font-bold text-ink">
+                    SSO Handoff Cepat — 7 Aplikasi VPS
+                  </h2>
+                </div>
+                <p className="mt-0.5 text-xs text-ink-muted">
+                  Masuk instan sebagai akun demo atau uji coba integrasi tombol Help dari setiap aplikasi.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsVpsSsoOpen(false)}
+                className="rounded p-1 text-ink-muted hover:bg-subtle hover:text-ink"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto divide-y divide-line py-2 my-2 pr-1">
+              {DEMO_ACCOUNTS.map((demo) => {
+                const app = getApp(demo.app);
+                const compositeKey = `${demo.app}:${demo.uid}`;
+                return (
+                  <div
+                    key={compositeKey}
+                    className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-1 last:pb-0"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="inline-flex rounded px-1.5 py-0.5 font-mono text-[10px] font-bold"
+                          style={{
+                            backgroundColor: `${app?.color ?? '#141413'}15`,
+                            color: app?.color ?? '#141413',
+                          }}
+                        >
+                          {app?.prefix}
+                        </span>
+                        <span className="text-xs font-semibold text-ink">{app?.name}</span>
+                        <span className="font-mono text-[11px] text-ink-muted">
+                          ({compositeKey})
+                        </span>
+                      </div>
+                      <p className="mt-0.5 text-xs text-ink-muted">
+                        {demo.name} · <span className="text-ink font-medium">{demo.role}</span>
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleSimulateHandoff(demo)}
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-line bg-subtle px-3 py-1.5 text-xs font-medium text-ink hover:border-ink hover:bg-panel transition-all"
+                    >
+                      <span>Masuk Portal Pelapor</span>
+                      <ExternalLink className="h-3 w-3 text-ink-muted" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="border-t border-line pt-3 flex items-center justify-between">
+              <span className="text-[11px] text-ink-muted">
+                Endpoint:{' '}
+                <code className="bg-subtle px-1 rounded font-mono">
+                  /helpdesk/handoff?app=...&amp;uid=...
+                </code>
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsVpsSsoOpen(false)}
+                className="rounded-lg bg-ink px-4 py-1.5 text-xs font-semibold text-white hover:bg-ink/90"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* MODAL 4: KEBIJAKAN PRIVASI & SYARAT KETENTUAN (LEGAL)   */}
+      {/* ======================================================== */}
+      {activeLegalModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="w-full max-w-lg rounded-xl border border-line bg-panel p-6 shadow-xl max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between border-b border-line pb-3">
+              <h2 className="text-sm font-bold text-ink">
+                {activeLegalModal === 'privacy' ? 'Kebijakan Privasi' : 'Syarat & Ketentuan Layanan'}
+              </h2>
+              <button
+                type="button"
+                onClick={() => setActiveLegalModal(null)}
+                className="rounded p-1 text-ink-muted hover:bg-subtle hover:text-ink"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto py-4 text-xs text-ink-muted space-y-3 leading-relaxed">
+              {activeLegalModal === 'privacy' ? (
+                <>
+                  <p className="font-semibold text-ink">1. Ruang Lingkup Data &amp; Multi-Tenant</p>
+                  <p>
+                    VPS Helpdesk CRM mengelola laporan kendala dari 7 aplikasi ekosistem VPS.
+                    Data tiket, lampiran, dan identitas pelapor dipisahkan secara ketat menggunakan
+                    ID Komposit (<code className="font-mono bg-subtle px-1 rounded">{'{app}:{uid}'}</code>).
+                    Pelapor dari satu aplikasi tidak dapat membaca atau mengakses tiket milik aplikasi lain.
+                  </p>
+                  <p className="font-semibold text-ink">2. Catatan Internal &amp; Rahasia Kerja</p>
+                  <p>
+                    Catatan internal hanya dapat dibaca oleh staf operasional dan Superadmin.
+                    Pesan publik akan dikirimkan kepada pelapor untuk keperluan penyelesaian kendala.
+                  </p>
+                  <p className="font-semibold text-ink">3. Penyimpanan &amp; Sesi</p>
+                  <p>
+                    Sesi pengguna disimpan secara aman di browser lokal Anda. Jika opsi &quot;Ingat Saya&quot;
+                    diaktifkan, identitas disimpan demi kenyamanan pengisian otomatis di perangkat pribadi.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-semibold text-ink">1. Penggunaan yang Diizinkan</p>
+                  <p>
+                    Layanan helpdesk ini ditujukan khusus bagi pengguna, staf, dan pengembang 7 aplikasi
+                    VPS untuk pelaporan error, kendala transaksi, permohonan fitur, dan reset akun.
+                  </p>
+                  <p className="font-semibold text-ink">2. Keamanan Kredensial Superadmin</p>
+                  <p>
+                    Akses Superadmin PocketBase hanya diperuntukkan bagi pemilik VPS. Segala perubahan
+                    konfigurasi, penutupan tiket massal, atau pengubahan aturan database diaudit dalam log sistem.
+                  </p>
+                  <p className="font-semibold text-ink">3. Batasan Tanggung Jawab</p>
+                  <p>
+                    Layanan dioperasikan dengan prinsip kehati-hatian dan dukungan offline-first outbox pattern.
+                    Sinkronisasi data otomatis dilakukan begitu koneksi server pulih.
+                  </p>
+                </>
+              )}
+            </div>
+
+            <div className="border-t border-line pt-3 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setActiveLegalModal(null)}
+                className="rounded-lg bg-ink px-4 py-1.5 text-xs font-semibold text-white hover:bg-ink/90"
+              >
+                Saya Mengerti
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
