@@ -265,10 +265,7 @@ export function LoginPage() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-sm tracking-tight text-ink">VPS Helpdesk</span>
-                <span className="rounded bg-subtle px-1.5 py-0.5 font-mono text-[10px] text-ink-muted border border-line">
-                  CRM
-                </span>
+                <span className="font-semibold text-sm tracking-tight text-ink">Helpdesk App</span>
               </div>
             </div>
           </div>
@@ -571,7 +568,7 @@ export function LoginPage() {
       {/* 5. Komponen Pendukung: Legal & Help Footer */}
       <footer className="border-t border-line bg-panel/60 py-4 px-4 sm:px-6">
         <div className="mx-auto flex max-w-6xl flex-col sm:flex-row items-center justify-between gap-3 text-xs text-ink-muted">
-          <p>© 2026 VPS Helpdesk CRM. Hak cipta dilindungi.</p>
+          <p>© 2026 Helpdesk App. Hak cipta dilindungi.</p>
           <div className="flex flex-wrap items-center gap-4">
             <button
               type="button"
@@ -929,7 +926,7 @@ export function LoginPage() {
                 <>
                   <p className="font-semibold text-ink">1. Ruang Lingkup Data &amp; Multi-Tenant</p>
                   <p>
-                    VPS Helpdesk CRM mengelola laporan kendala dari 7 aplikasi ekosistem VPS.
+                    Helpdesk App mengelola laporan kendala dari 7 aplikasi ekosistem VPS.
                     Data tiket, lampiran, dan identitas pelapor dipisahkan secara ketat menggunakan
                     ID Komposit (<code className="font-mono bg-subtle px-1 rounded">{'{app}:{uid}'}</code>).
                     Pelapor dari satu aplikasi tidak dapat membaca atau mengakses tiket milik aplikasi lain.

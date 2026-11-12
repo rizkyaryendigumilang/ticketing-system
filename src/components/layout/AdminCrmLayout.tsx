@@ -78,7 +78,7 @@ export function AdminCrmLayout() {
       <aside className="flex w-12 shrink-0 flex-col items-center border-r border-rail-line bg-rail py-3 gap-1">
           {/* Logo tile */}
           <div
-            title="VPS Helpdesk CRM"
+            title="Helpdesk App"
             className="mb-2 flex h-7 w-7 select-none items-center justify-center rounded bg-white font-mono text-xs font-bold text-neutral-950"
           >
             H
@@ -146,7 +146,7 @@ export function AdminCrmLayout() {
           <aside className="flex w-56 shrink-0 flex-col border-r border-rail-line bg-rail overflow-hidden">
             {/* Brand */}
             <div className="border-b border-rail-line px-4 py-3.5">
-              <p className="text-sm font-semibold tracking-tight text-white">VPS Helpdesk</p>
+              <p className="text-sm font-semibold tracking-tight text-white">Helpdesk App</p>
               <p className="mt-0.5 font-mono text-[11px] text-neutral-500">Helpdesk CRM</p>
             </div>
 

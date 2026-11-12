@@ -201,7 +201,7 @@ export function AdminSettingsPage() {
     setTestingTelegram(true);
     try {
       const text = `🔔 <b>UJI COBA NOTIFIKASI HELPDESK CRM</b>\n\n` +
-        `Koneksi notifikasi Telegram dari VPS Helpdesk CRM berhasil terhubung!\n` +
+        `Koneksi notifikasi Telegram dari Helpdesk App berhasil terhubung!\n` +
         `⏰ Waktu: ${new Date().toLocaleString('id-ID')}`;
 
       const res = await fetch(`https://api.telegram.org/bot${telegramBotToken.trim()}/sendMessage`, {
@@ -286,7 +286,7 @@ export function AdminSettingsPage() {
   const handleExportJsonDump = () => {
     const snapshot = {
       exportDate: new Date().toISOString(),
-      system: 'VPS Helpdesk CRM',
+      system: 'Helpdesk App',
       vpsHost: '43.156.236.102',
       counts: {
         tickets: data.tickets.length,
