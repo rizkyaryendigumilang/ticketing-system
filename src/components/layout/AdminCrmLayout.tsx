@@ -8,12 +8,15 @@ import {
   LogOut,
   PanelLeftClose,
   PanelLeftOpen,
+  RefreshCw,
   Settings,
   Users,
 } from 'lucide-react';
 import { VPS_APPS } from '../../config/vpsAppsConfig';
 import { useCrm } from '../../context/CrmContext';
+import { useToast } from '../../context/ToastContext';
 import { computeStats, countByApp } from '../../services/crmLogic';
+import { flush, isSuperuser } from '../../services/pbClient';
 
 type NavItem = {
   to: string;
@@ -33,9 +36,21 @@ const NAV: NavItem[] = [
 
 export function AdminCrmLayout() {
   const { data, admin, logoutAdmin, pendingAdminChanges, connection } = useCrm();
+  const toast = useToast();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [appsExpanded, setAppsExpanded] = useState(true);
+
+  const handleTriggerSync = async () => {
+    if (isSuperuser()) {
+      toast.info('Menyinkronkan antrean perubahan ke PocketBase...');
+      await flush();
+    } else {
+      toast.info(
+        'Sesi Superadmin PocketBase belum aktif. Masuk kembali dengan akun admin@crm.local untuk mengirim perubahan ke server.',
+      );
+    }
+  };
 
   const stats = computeStats(data.tickets);
   const appMatrix = countByApp(data.tickets, VPS_APPS.map((a) => a.id));
@@ -230,9 +245,15 @@ export function AdminCrmLayout() {
             {/* Admin footer */}
             <div className="border-t border-rail-line p-3">
               {pendingAdminChanges > 0 && (
-                <div className="mb-2 rounded bg-amber-500/15 px-2 py-1 text-[11px] text-amber-300">
-                  {pendingAdminChanges} perubahan menunggu sync PocketBase
-                </div>
+                <button
+                  type="button"
+                  onClick={handleTriggerSync}
+                  className="mb-2 w-full text-left rounded bg-amber-500/15 hover:bg-amber-500/25 px-2 py-1 text-[11px] text-amber-300 transition-colors flex items-center justify-between gap-1 group"
+                  title="Klik untuk mencoba sinkronisasi antrean ke PocketBase"
+                >
+                  <span className="truncate">{pendingAdminChanges} perubahan menunggu sinkronisasi</span>
+                  <RefreshCw className="h-3 w-3 shrink-0 text-amber-400 group-hover:rotate-180 transition-transform duration-300" />
+                </button>
               )}
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
