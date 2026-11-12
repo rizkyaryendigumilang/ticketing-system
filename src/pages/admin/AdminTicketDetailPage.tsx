@@ -69,7 +69,7 @@ export function AdminTicketDetailPage() {
             className="inline-flex items-center gap-1 rounded border border-line bg-panel px-2.5 py-1 font-medium text-ink hover:border-line-strong"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            Unified Inbox
+            Kotak Masuk
           </Link>
           <span className="text-ink-faint">/</span>
           <span className="font-mono font-bold text-ink">{ticket.ticketNumber}</span>

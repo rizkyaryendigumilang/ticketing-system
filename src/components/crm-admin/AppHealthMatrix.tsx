@@ -62,7 +62,7 @@ export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
                 {hasOpen ? (
                   <span className="inline-flex shrink-0 items-center gap-1.5 rounded bg-red-600 px-2 py-0.5 text-xs font-semibold text-white tabular-nums shadow-sm">
                     <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                    {counts.open} Open
+                    {counts.open} Baru
                   </span>
                 ) : (
                   <span className="inline-flex shrink-0 items-center gap-1 rounded border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-800">
@@ -86,7 +86,7 @@ export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
                   >
                     {counts.open}
                   </div>
-                  <div className="text-[10px] text-ink-muted">Open</div>
+                  <div className="text-[10px] text-ink-muted">Baru</div>
                 </button>
                 <button
                   type="button"
@@ -100,7 +100,7 @@ export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
                   >
                     {counts.in_progress}
                   </div>
-                  <div className="text-[10px] text-ink-muted">Proses</div>
+                  <div className="text-[10px] text-ink-muted">Diproses</div>
                 </button>
                 <button
                   type="button"
@@ -114,7 +114,7 @@ export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
                   >
                     {counts.waiting_on_user}
                   </div>
-                  <div className="text-[10px] text-ink-muted">Tunggu</div>
+                  <div className="text-[10px] text-ink-muted">Menunggu</div>
                 </button>
                 <button
                   type="button"
@@ -128,7 +128,7 @@ export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
                   >
                     {counts.solved}
                   </div>
-                  <div className="text-[10px] text-ink-muted">Solved</div>
+                  <div className="text-[10px] text-ink-muted">Selesai</div>
                 </button>
               </div>
             </div>
@@ -144,7 +144,7 @@ export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
                   title={app.appUrl}
                 >
                   <ExternalLink className="h-3 w-3" />
-                  Web App
+                  Aplikasi Web
                 </a>
                 {app.adminDbUrl && (
                   <a
@@ -155,7 +155,7 @@ export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
                     title={app.adminDbUrl}
                   >
                     <Database className="h-3 w-3" />
-                    Admin DB
+                    Database
                   </a>
                 )}
               </div>

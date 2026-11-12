@@ -24,10 +24,10 @@ export function AdminDashboardPage() {
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
         <div>
           <h1 className="text-xl font-semibold tracking-tight text-ink sm:text-2xl">
-            Peta Kesehatan 7 Aplikasi
+            Peta Kesehatan Aplikasi
           </h1>
           <p className="mt-0.5 text-xs text-ink-muted">
-            Pantau aplikasi mana yang sedang memiliki kendala aktif dan selesaikan laporan yang baru masuk.
+            Pantau kondisi operasional dan tangani laporan kendala aktif.
           </p>
         </div>
 
@@ -37,14 +37,14 @@ export function AdminDashboardPage() {
             className="inline-flex items-center gap-1.5 rounded border border-line bg-panel px-3 py-1.5 text-xs font-medium text-ink hover:border-line-strong active:scale-95 transition-[border-color,transform] duration-100"
           >
             <TerminalSquare className="h-3.5 w-3.5 text-ink-muted" />
-            Generator Tombol Bantuan
+            Integrasi Tombol Bantuan
           </Link>
           <Link
             to="/admin/tickets"
             className="inline-flex items-center gap-1.5 rounded bg-ink px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 active:scale-95 transition-[opacity,transform] duration-100"
           >
             <Inbox className="h-3.5 w-3.5" />
-            Buka Unified Inbox ({stats.open} Open)
+            Buka Kotak Masuk ({stats.open} Baru)
           </Link>
         </div>
       </div>
@@ -53,7 +53,7 @@ export function AdminDashboardPage() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <div className="rounded-lg border border-red-200 bg-panel p-4 shadow-sm">
           <div className="flex items-center justify-between text-xs text-ink-muted">
-            <span className="font-medium">Baru Masuk (Open)</span>
+            <span className="font-medium">Tiket Baru</span>
             <AlertCircle className="h-4 w-4 text-red-600" />
           </div>
           <div className="mt-1.5 text-2xl font-bold text-red-600 tabular-nums">{stats.open}</div>
@@ -64,12 +64,12 @@ export function AdminDashboardPage() {
 
         <div className="rounded-lg border border-line bg-panel p-4 shadow-sm">
           <div className="flex items-center justify-between text-xs text-ink-muted">
-            <span className="font-medium">Sedang Dikerjakan</span>
+            <span className="font-medium">Diproses</span>
             <Clock className="h-4 w-4 text-amber-600" />
           </div>
           <div className="mt-1.5 text-2xl font-bold text-ink tabular-nums">{stats.inProgress}</div>
           <div className="mt-0.5 text-[11px] text-ink-muted">
-            +{stats.waiting} menunggu respons user
+            +{stats.waiting} menunggu balasan pelapor
           </div>
         </div>
 
@@ -91,7 +91,7 @@ export function AdminDashboardPage() {
           <div className="mt-1.5 text-2xl font-bold text-ink tabular-nums">
             {stats.avgResolutionMs > 0 ? formatDuration(stats.avgResolutionMs) : '—'}
           </div>
-          <div className="mt-0.5 text-[11px] text-ink-muted">Dari tiket masuk hingga Solved</div>
+          <div className="mt-0.5 text-[11px] text-ink-muted">Dari tiket masuk hingga selesai</div>
         </div>
 
         <div className="rounded-lg border border-line bg-panel p-4 shadow-sm">
@@ -118,9 +118,9 @@ export function AdminDashboardPage() {
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-base font-semibold text-ink">App Issue Matrix (7 Aplikasi Go-Live)</h2>
+            <h2 className="text-base font-semibold text-ink">Matriks Kendala Aplikasi</h2>
             <p className="text-xs text-ink-muted">
-              Kartu menyala merah jika aplikasi memiliki tiket berstatus Open. Klik kartu untuk memfilter tiket aplikasi tersebut.
+              Pilih aplikasi untuk melihat rincian tiket terkait.
             </p>
           </div>
         </div>
@@ -137,7 +137,7 @@ export function AdminDashboardPage() {
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-red-600" />
             <h2 className="text-base font-semibold text-ink">
-              Antrean Prioritas Baru Masuk ({openQueue.length} Open)
+              Antrean Tiket Baru ({openQueue.length})
             </h2>
           </div>
           <Link
@@ -151,7 +151,7 @@ export function AdminDashboardPage() {
 
         {openQueue.length === 0 ? (
           <div className="px-4 py-8 text-center text-xs text-ink-muted">
-            Semua tiket berstatus Open sudah ditangani.
+            Tidak ada tiket berstatus baru.
           </div>
         ) : (
           <div className="divide-y divide-line">
@@ -178,7 +178,7 @@ export function AdminDashboardPage() {
                 <div className="flex shrink-0 items-center gap-3">
                   <span className="font-mono text-[11px] text-ink-muted">{timeAgo(ticket.createdAt)}</span>
                   <span className="rounded border border-line bg-subtle px-2.5 py-1 text-xs font-medium text-ink">
-                    Tangani Tiket →
+                    Buka Tiket →
                   </span>
                 </div>
               </div>

@@ -9,6 +9,7 @@ import {
   Download,
   Eye,
   EyeOff,
+  Globe,
   KeyRound,
   Lock,
   MessageSquareQuote,
@@ -67,6 +68,17 @@ export function AdminSettingsPage() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [selectedLanguage, setSelectedLanguage] = useState<'id' | 'en'>(settings.language ?? 'id');
+
+  const handleSaveLanguage = (lang: 'id' | 'en') => {
+    setSelectedLanguage(lang);
+    updateSettings({ ...settings, language: lang });
+    toast.success(
+      lang === 'id'
+        ? 'Bahasa antarmuka diubah ke Bahasa Indonesia.'
+        : 'Interface language updated to English.',
+    );
+  };
 
   // Security Form State
   const [handoffSecret, setHandoffSecret] = useState(settings.handoffSecret);
@@ -302,10 +314,10 @@ export function AdminSettingsPage() {
       {/* Header */}
       <div className="border-b border-line pb-4">
         <h1 className="text-xl font-bold tracking-tight text-ink sm:text-2xl">
-          Pengaturan Sistem Helpdesk CRM
+          Pengaturan Sistem
         </h1>
         <p className="mt-1 text-xs text-ink-muted">
-          Konfigurasi terpusat untuk akun Superadmin, kunci keamanan SSO Handoff, notifikasi Telegram, template balasan, dan cadangan database.
+          Kelola profil akun, bahasa antarmuka, keamanan handoff, notifikasi, dan data sistem.
         </p>
       </div>
 
@@ -489,6 +501,59 @@ export function AdminSettingsPage() {
                 </button>
               </div>
             </form>
+          </div>
+
+          {/* Language Selection Card */}
+          <div className="rounded-lg border border-line bg-panel p-5 shadow-sm lg:col-span-2">
+            <div className="flex items-center gap-2">
+              <Globe className="h-4 w-4 text-ink" />
+              <h2 className="text-sm font-semibold text-ink">Pilihan Bahasa Antarmuka</h2>
+            </div>
+            <p className="mt-0.5 text-xs text-ink-muted">
+              Pilih bahasa untuk tampilan menu, antrean tiket, dan pesan sistem.
+            </p>
+
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div
+                onClick={() => handleSaveLanguage('id')}
+                className={`flex cursor-pointer items-center justify-between rounded-lg border p-3.5 transition-colors ${
+                  selectedLanguage === 'id'
+                    ? 'border-ink bg-subtle font-medium text-ink ring-1 ring-ink/10'
+                    : 'border-line bg-panel hover:bg-subtle text-ink-muted'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-xl select-none">🇮🇩</span>
+                  <div>
+                    <div className="font-semibold text-ink">Bahasa Indonesia (Standar)</div>
+                    <div className="text-[11px] text-ink-muted mt-0.5">
+                      Istilah baku Helpdesk CRM (Pelapor, Tiket, ID Komposit)
+                    </div>
+                  </div>
+                </div>
+                {selectedLanguage === 'id' && <Check className="h-4 w-4 text-ink shrink-0" />}
+              </div>
+
+              <div
+                onClick={() => handleSaveLanguage('en')}
+                className={`flex cursor-pointer items-center justify-between rounded-lg border p-3.5 transition-colors ${
+                  selectedLanguage === 'en'
+                    ? 'border-ink bg-subtle font-medium text-ink ring-1 ring-ink/10'
+                    : 'border-line bg-panel hover:bg-subtle text-ink-muted'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-xl select-none">🇬🇧</span>
+                  <div>
+                    <div className="font-semibold text-ink">English</div>
+                    <div className="text-[11px] text-ink-muted mt-0.5">
+                      Standard terminology (Requesters, Tickets, Composite ID)
+                    </div>
+                  </div>
+                </div>
+                {selectedLanguage === 'en' && <Check className="h-4 w-4 text-ink shrink-0" />}
+              </div>
+            </div>
           </div>
         </div>
       )}

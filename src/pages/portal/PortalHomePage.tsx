@@ -29,22 +29,22 @@ export function PortalHomePage() {
       {/* Summary Header */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div className="rounded border border-line bg-panel p-4">
-          <div className="text-xs text-ink-muted">Baru Masuk (Open)</div>
+          <div className="text-xs text-ink-muted">Tiket Baru</div>
           <div className="mt-1 font-sans text-2xl font-bold tracking-tight text-red-600 tabular-nums">{openCount}</div>
-          <div className="mt-0.5 text-[11px] text-ink-muted">Menunggu antrean Superadmin</div>
+          <div className="mt-0.5 text-[11px] text-ink-muted">Menunggu antrean penanganan</div>
         </div>
 
         <div className="rounded border border-line bg-panel p-4">
-          <div className="text-xs text-ink-muted">Sedang Ditangani</div>
+          <div className="text-xs text-ink-muted">Diproses</div>
           <div className="mt-1 font-sans text-2xl font-bold tracking-tight text-amber-700 tabular-nums">{inProgressCount}</div>
-          <div className="mt-0.5 text-[11px] text-ink-muted">Dalam pengecekan / menunggu balasan Anda</div>
+          <div className="mt-0.5 text-[11px] text-ink-muted">Sedang diperiksa atau menunggu balasan Anda</div>
         </div>
 
         <div className="rounded border border-line bg-panel p-4">
-          <div className="text-xs text-ink-muted">Selesai (Solved)</div>
+          <div className="text-xs text-ink-muted">Selesai</div>
           <div className="mt-1 font-sans text-2xl font-bold tracking-tight text-emerald-700 tabular-nums">{solvedCount}</div>
           <div className="mt-0.5 text-[11px] text-ink-muted">
-            Kendala di {app?.name ?? 'aplikasi'} sudah teratasi
+            Kendala telah diselesaikan
           </div>
         </div>
       </div>
@@ -52,7 +52,7 @@ export function PortalHomePage() {
       {/* User's Ticket List */}
       <div className="space-y-2">
         <h2 className="text-sm font-semibold text-ink">
-          Daftar Laporan Kendala Saya di {app?.name ?? requester.appId}
+          Daftar Tiket Kendala Saya di {app?.name ?? requester.appId}
         </h2>
         <UserTicketList
           tickets={myTickets}

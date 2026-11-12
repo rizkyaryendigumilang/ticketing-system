@@ -15,6 +15,7 @@ export interface SystemSettings {
   outboundWebhookEnabled: boolean;
   outboundWebhookUrl: string;
   autoCloseDays: number;
+  language: 'id' | 'en';
 }
 
 export const DEFAULT_SETTINGS: SystemSettings = {
@@ -29,6 +30,7 @@ export const DEFAULT_SETTINGS: SystemSettings = {
   outboundWebhookEnabled: false,
   outboundWebhookUrl: '',
   autoCloseDays: 7,
+  language: 'id',
 };
 
 export interface CrmData {

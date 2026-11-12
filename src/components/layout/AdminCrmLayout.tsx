@@ -26,9 +26,9 @@ type NavItem = {
 /** Primary nav items — shown as icons in the icon-rail and as full rows in the text sidebar. */
 const NAV: NavItem[] = [
   { to: '/admin', end: true, icon: LayoutGrid, label: 'Peta Kesehatan Aplikasi' },
-  { to: '/admin/tickets', end: false, icon: Inbox, label: 'Kotak Masuk & Kanban', badgeKey: 'open' },
-  { to: '/admin/contacts', end: false, icon: Users, label: 'Direktori Kontak Pelapor' },
-  { to: '/admin/settings', end: false, icon: Settings, label: 'Pengaturan Sistem' },
+  { to: '/admin/tickets', end: false, icon: Inbox, label: 'Kotak Masuk Tiket', badgeKey: 'open' },
+  { to: '/admin/contacts', end: false, icon: Users, label: 'Kontak Pelapor' },
+  { to: '/admin/settings', end: false, icon: Settings, label: 'Pengaturan' },
 ];
 
 export function AdminCrmLayout() {
@@ -132,7 +132,7 @@ export function AdminCrmLayout() {
             {/* Brand */}
             <div className="border-b border-rail-line px-4 py-3.5">
               <p className="text-sm font-semibold tracking-tight text-white">VPS Helpdesk</p>
-              <p className="mt-0.5 font-mono text-[11px] text-neutral-500">7 Apps · Internal CRM</p>
+              <p className="mt-0.5 font-mono text-[11px] text-neutral-500">7 Aplikasi · Meja Kerja CRM</p>
             </div>
 
             {/* Primary nav */}

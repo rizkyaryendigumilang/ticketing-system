@@ -271,7 +271,7 @@ export function LoginPage() {
                 </span>
               </div>
               <p className="text-[11px] text-ink-muted hidden sm:block">
-                Pusat Bantuan &amp; Manajemen Tiket Terpadu 7 Aplikasi VPS
+                Layanan Bantuan &amp; Tiket Terpadu 7 Aplikasi
               </p>
             </div>
           </div>
@@ -322,10 +322,10 @@ export function LoginPage() {
                 <ShieldCheck className="h-6 w-6 text-ink" />
               </div>
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-ink">
-                Masuk ke Akun Anda
+                Masuk ke Akun
               </h1>
               <p className="mt-1 text-xs sm:text-sm text-ink-muted">
-                Autentikasi resmi untuk Superadmin &amp; Pelapor Ekosistem VPS
+                Pusat bantuan dan penanganan kendala aplikasi VPS.
               </p>
             </div>
 
@@ -584,24 +584,6 @@ export function LoginPage() {
               </p>
             </div>
           </div>
-
-          {/* Quick Info Box for Demo / Test */}
-          <div className="mt-4 rounded-lg border border-line/60 bg-panel/60 p-3 text-[11px] text-ink-muted flex items-start gap-2">
-            <Lock className="h-3.5 w-3.5 shrink-0 mt-0.5 text-ink-muted" />
-            <div>
-              <p className="font-medium text-ink">Catatan Kredensial Pengujian:</p>
-              <p className="mt-0.5">
-                Superadmin:{' '}
-                <code className="font-mono bg-subtle px-1 rounded text-ink">
-                  admin@crm.local
-                </code>{' '}
-                / Kata Sandi:{' '}
-                <code className="font-mono bg-subtle px-1 rounded text-ink">
-                  Admin@CRM123!
-                </code>
-              </p>
-            </div>
-          </div>
         </div>
       </main>
 
@@ -828,9 +810,7 @@ export function LoginPage() {
               </div>
 
               <div className="rounded-lg bg-subtle p-2.5 text-[11px] text-ink-muted">
-                <span className="font-semibold text-ink">Info Otomatis:</span> Akun pelapor juga
-                otomatis terdaftar saat Anda menekan tombol <i>Help / Butuh Bantuan</i> di masing-masing
-                aplikasi VPS melalui fitur SSO JIT Handoff.
+                <span className="font-semibold text-ink">Pendaftaran Otomatis:</span> Akun pelapor juga terdaftar otomatis saat Anda menekan tombol Bantuan pada aplikasi ekosistem.
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-2">
@@ -866,11 +846,11 @@ export function LoginPage() {
                 <div className="flex items-center gap-2">
                   <Server className="h-4 w-4 text-ink" />
                   <h2 className="text-sm font-bold text-ink">
-                    SSO Handoff Cepat — 7 Aplikasi VPS
+                    SSO Handoff Cepat — 7 Aplikasi
                   </h2>
                 </div>
                 <p className="mt-0.5 text-xs text-ink-muted">
-                  Masuk instan sebagai akun demo atau uji coba integrasi tombol Help dari setiap aplikasi.
+                  Akses portal pelapor atau uji coba integrasi tombol bantuan antaraplikasi.
                 </p>
               </div>
               <button
