@@ -53,9 +53,6 @@ export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
                       {app.name}
                     </button>
                   </div>
-                  <p className="mt-1 line-clamp-1 text-xs text-ink-muted">
-                    {app.description}
-                  </p>
                 </div>
 
                 {/* Health status indicator */}

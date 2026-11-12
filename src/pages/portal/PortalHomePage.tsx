@@ -31,28 +31,23 @@ export function PortalHomePage() {
         <div className="rounded border border-line bg-panel p-4">
           <div className="text-xs text-ink-muted">Tiket Baru</div>
           <div className="mt-1 font-sans text-2xl font-bold tracking-tight text-red-600 tabular-nums">{openCount}</div>
-          <div className="mt-0.5 text-[11px] text-ink-muted">Menunggu antrean penanganan</div>
         </div>
 
         <div className="rounded border border-line bg-panel p-4">
           <div className="text-xs text-ink-muted">Diproses</div>
           <div className="mt-1 font-sans text-2xl font-bold tracking-tight text-amber-700 tabular-nums">{inProgressCount}</div>
-          <div className="mt-0.5 text-[11px] text-ink-muted">Sedang diperiksa atau menunggu balasan Anda</div>
         </div>
 
         <div className="rounded border border-line bg-panel p-4">
           <div className="text-xs text-ink-muted">Selesai</div>
           <div className="mt-1 font-sans text-2xl font-bold tracking-tight text-emerald-700 tabular-nums">{solvedCount}</div>
-          <div className="mt-0.5 text-[11px] text-ink-muted">
-            Kendala telah diselesaikan
-          </div>
         </div>
       </div>
 
       {/* User's Ticket List */}
       <div className="space-y-2">
         <h2 className="text-sm font-semibold text-ink">
-          Daftar Tiket Kendala Saya di {app?.name ?? requester.appId}
+          Daftar Tiket Kendala Saya
         </h2>
         <UserTicketList
           tickets={myTickets}

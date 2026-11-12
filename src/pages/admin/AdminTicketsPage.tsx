@@ -66,10 +66,7 @@ export function AdminTicketsPage() {
     <div className="space-y-4 p-5 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-ink">Kotak Masuk Tiket &amp; Kanban</h1>
-          <p className="mt-0.5 text-xs text-ink-muted">
-            Kelola laporan kendala dari seluruh aplikasi. Tiket baru otomatis berada di posisi teratas.
-          </p>
+          <h1 className="text-xl font-bold tracking-tight text-ink">Kotak Masuk Tiket</h1>
         </div>
 
         {/* View Toggle */}

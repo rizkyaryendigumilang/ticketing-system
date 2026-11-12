@@ -26,9 +26,6 @@ export function AdminDashboardPage() {
           <h1 className="text-xl font-semibold tracking-tight text-ink sm:text-2xl">
             Peta Kesehatan Aplikasi
           </h1>
-          <p className="mt-0.5 text-xs text-ink-muted">
-            Pantau kondisi operasional dan tangani laporan kendala aktif.
-          </p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -37,14 +34,14 @@ export function AdminDashboardPage() {
             className="inline-flex items-center gap-1.5 rounded border border-line bg-panel px-3 py-1.5 text-xs font-medium text-ink hover:border-line-strong active:scale-95 transition-[border-color,transform] duration-100"
           >
             <TerminalSquare className="h-3.5 w-3.5 text-ink-muted" />
-            Integrasi Tombol Bantuan
+            Integrasi Tombol
           </Link>
           <Link
             to="/admin/tickets"
             className="inline-flex items-center gap-1.5 rounded bg-ink px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 active:scale-95 transition-[opacity,transform] duration-100"
           >
             <Inbox className="h-3.5 w-3.5" />
-            Buka Kotak Masuk ({stats.open} Baru)
+            Kotak Masuk ({stats.open})
           </Link>
         </div>
       </div>
@@ -57,9 +54,6 @@ export function AdminDashboardPage() {
             <AlertCircle className="h-4 w-4 text-red-600" />
           </div>
           <div className="mt-1.5 text-2xl font-bold text-red-600 tabular-nums">{stats.open}</div>
-          <div className="mt-0.5 text-[11px] text-ink-muted">
-            Pada {appsWithOpenIssues} dari {VPS_APPS.length} aplikasi
-          </div>
         </div>
 
         <div className="rounded-lg border border-line bg-panel p-4 shadow-sm">
@@ -68,9 +62,6 @@ export function AdminDashboardPage() {
             <Clock className="h-4 w-4 text-amber-600" />
           </div>
           <div className="mt-1.5 text-2xl font-bold text-ink tabular-nums">{stats.inProgress}</div>
-          <div className="mt-0.5 text-[11px] text-ink-muted">
-            +{stats.waiting} menunggu balasan pelapor
-          </div>
         </div>
 
         <div className="rounded-lg border border-line bg-panel p-4 shadow-sm">
@@ -81,9 +72,6 @@ export function AdminDashboardPage() {
           <div className="mt-1.5 text-2xl font-bold text-emerald-800 tabular-nums">
             {stats.solvedThisWeek}
           </div>
-          <div className="mt-0.5 text-[11px] text-ink-muted">
-            Dari total {data.tickets.length} tiket tercatat
-          </div>
         </div>
 
         <div className="rounded-lg border border-line bg-panel p-4 shadow-sm">
@@ -91,7 +79,6 @@ export function AdminDashboardPage() {
           <div className="mt-1.5 text-2xl font-bold text-ink tabular-nums">
             {stats.avgResolutionMs > 0 ? formatDuration(stats.avgResolutionMs) : '—'}
           </div>
-          <div className="mt-0.5 text-[11px] text-ink-muted">Dari tiket masuk hingga selesai</div>
         </div>
 
         <div className="rounded-lg border border-line bg-panel p-4 shadow-sm">
@@ -102,27 +89,18 @@ export function AdminDashboardPage() {
           <div className="mt-1.5 text-2xl font-bold text-ink tabular-nums">
             {stats.avgCsat > 0 ? `${stats.avgCsat} / 5` : '—'}
           </div>
-          <div className="mt-0.5 text-[11px] text-ink-muted">
-            {stats.totalRated > 0 ? `Dari ${stats.totalRated} ulasan` : 'Belum ada penilaian'}
-          </div>
         </div>
 
         <div className="col-span-2 rounded-lg border border-line bg-panel p-4 shadow-sm sm:col-span-1">
           <div className="text-xs font-medium text-ink-muted">Pelapor Terdaftar</div>
           <div className="mt-1.5 text-2xl font-bold text-ink tabular-nums">{contacts.length}</div>
-          <div className="mt-0.5 text-[11px] text-ink-muted">Terkumpul otomatis via Handoff</div>
         </div>
       </div>
 
       {/* App Health Matrix */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-semibold text-ink">Matriks Kendala Aplikasi</h2>
-            <p className="text-xs text-ink-muted">
-              Pilih aplikasi untuk melihat rincian tiket terkait.
-            </p>
-          </div>
+          <h2 className="text-base font-semibold text-ink">Matriks Kendala Aplikasi</h2>
         </div>
         <AppHealthMatrix
           apps={VPS_APPS}

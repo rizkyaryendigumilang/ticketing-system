@@ -62,15 +62,8 @@ export function AdminContactsPage() {
       <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line pb-4">
         <div>
           <h1 className="text-lg font-bold tracking-tight text-ink sm:text-xl">
-            Kontak Pelapor Lintas Aplikasi
+            Kontak Pelapor
           </h1>
-          <p className="mt-0.5 text-xs text-ink-muted">
-            Identitas pelapor terisolasi secara otomatis berdasarkan ID Komposit{' '}
-            <code className="rounded bg-subtle px-1.5 py-0.5 font-mono text-[11px] text-ink font-semibold">
-              {'{app_slug}:{external_uid}'}
-            </code>{' '}
-            sehingga data antaraplikasi tidak saling bercampur.
-          </p>
         </div>
       </div>
 
@@ -78,35 +71,32 @@ export function AdminContactsPage() {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div className="rounded-lg border border-line bg-panel p-4 shadow-sm">
           <div className="flex items-center justify-between text-xs text-ink-muted">
-            <span>Total Pelapor Terdaftar</span>
+            <span>Total Pelapor</span>
             <Users className="h-4 w-4 text-ink-muted" />
           </div>
           <div className="mt-1 font-mono text-2xl font-bold text-ink tabular-nums">
             {contacts.length}
           </div>
-          <div className="mt-0.5 text-[11px] text-ink-muted">Tercatat di seluruh aplikasi ekosistem</div>
         </div>
 
         <div className="rounded-lg border border-line bg-panel p-4 shadow-sm">
           <div className="flex items-center justify-between text-xs text-ink-muted">
-            <span>Total Tiket Dilaporkan</span>
+            <span>Total Tiket</span>
             <KeyRound className="h-4 w-4 text-ink-muted" />
           </div>
           <div className="mt-1 font-mono text-2xl font-bold text-ink tabular-nums">
             {totalUserTickets}
           </div>
-          <div className="mt-0.5 text-[11px] text-ink-muted">Akumulasi laporan dari seluruh pelapor</div>
         </div>
 
         <div className="rounded-lg border border-line bg-panel p-4 shadow-sm">
           <div className="flex items-center justify-between text-xs text-ink-muted">
-            <span>Pelapor dengan Tiket Baru</span>
+            <span>Tiket Baru</span>
             <span className="h-2 w-2 rounded-full bg-red-600" />
           </div>
           <div className="mt-1 font-mono text-2xl font-bold text-red-600 tabular-nums">
             {contactsWithOpenTickets}
           </div>
-          <div className="mt-0.5 text-[11px] text-ink-muted">Menunggu tanggapan Superadmin</div>
         </div>
       </div>
 

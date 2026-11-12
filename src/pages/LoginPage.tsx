@@ -265,14 +265,11 @@ export function LoginPage() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-sm tracking-tight text-ink">VPS Helpdesk CRM</span>
+                <span className="font-semibold text-sm tracking-tight text-ink">VPS Helpdesk</span>
                 <span className="rounded bg-subtle px-1.5 py-0.5 font-mono text-[10px] text-ink-muted border border-line">
-                  v1.0
+                  CRM
                 </span>
               </div>
-              <p className="text-[11px] text-ink-muted hidden sm:block">
-                Layanan Bantuan &amp; Tiket Terpadu 7 Aplikasi
-              </p>
             </div>
           </div>
 
@@ -322,11 +319,8 @@ export function LoginPage() {
                 <ShieldCheck className="h-6 w-6 text-ink" />
               </div>
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-ink">
-                Masuk ke Akun
+                Masuk
               </h1>
-              <p className="mt-1 text-xs sm:text-sm text-ink-muted">
-                Pusat bantuan dan penanganan kendala aplikasi VPS.
-              </p>
             </div>
 
             {/* 4. Komponen Umpan Balik: Banner Validasi & Pesan Error */}
@@ -349,12 +343,9 @@ export function LoginPage() {
               <div>
                 <label
                   htmlFor="login-identity"
-                  className="block text-xs font-medium text-ink flex items-center justify-between"
+                  className="block text-xs font-medium text-ink"
                 >
-                  <span>Identitas Akun</span>
-                  <span className="text-[11px] text-ink-faint font-normal">
-                    Email / Username / No. HP
-                  </span>
+                  Identitas Akun
                 </label>
                 <div className="relative mt-1">
                   <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-ink-muted">
@@ -368,7 +359,7 @@ export function LoginPage() {
                     disabled={loading}
                     value={identity}
                     onChange={(e) => setIdentity(e.target.value)}
-                    placeholder="misal: admin@crm.local atau user@demo.com"
+                    placeholder="Email atau username"
                     className="w-full rounded-lg border border-line bg-panel pl-9 pr-3 py-2 text-xs sm:text-sm text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none transition-colors disabled:opacity-50"
                   />
                 </div>
@@ -431,19 +422,9 @@ export function LoginPage() {
                     className="h-4 w-4 rounded border-line text-ink focus:ring-ink"
                   />
                   <span className="text-xs text-ink-muted hover:text-ink transition-colors">
-                    Ingat Saya di perangkat ini
+                    Ingat saya
                   </span>
                 </label>
-
-                <button
-                  type="button"
-                  onClick={handlePrefillAdmin}
-                  className="inline-flex items-center gap-1 text-[11px] text-amber-700 hover:text-amber-800 font-medium"
-                  title="Isi kredensial admin@crm.local"
-                >
-                  <Crown className="h-3 w-3" />
-                  Isi Superadmin
-                </button>
               </div>
 
               {/* 1. Tombol Utama (Submit / Login CTA) dengan 4. Indikator Loading */}
@@ -474,7 +455,7 @@ export function LoginPage() {
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-panel px-2 text-ink-faint font-medium">
-                    atau masuk melalui
+                    atau
                   </span>
                 </div>
               </div>

@@ -147,7 +147,7 @@ export function AdminCrmLayout() {
             {/* Brand */}
             <div className="border-b border-rail-line px-4 py-3.5">
               <p className="text-sm font-semibold tracking-tight text-white">VPS Helpdesk</p>
-              <p className="mt-0.5 font-mono text-[11px] text-neutral-500">7 Aplikasi · Meja Kerja CRM</p>
+              <p className="mt-0.5 font-mono text-[11px] text-neutral-500">Helpdesk CRM</p>
             </div>
 
             {/* Primary nav */}

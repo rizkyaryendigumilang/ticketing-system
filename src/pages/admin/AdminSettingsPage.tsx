@@ -314,11 +314,8 @@ export function AdminSettingsPage() {
       {/* Header */}
       <div className="border-b border-line pb-4">
         <h1 className="text-xl font-bold tracking-tight text-ink sm:text-2xl">
-          Pengaturan Sistem
+          Pengaturan
         </h1>
-        <p className="mt-1 text-xs text-ink-muted">
-          Kelola profil akun, bahasa antarmuka, keamanan handoff, notifikasi, dan data sistem.
-        </p>
       </div>
 
       {/* Navigation Tabs */}
