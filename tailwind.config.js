@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Schibsted Grotesk"', 'system-ui', 'sans-serif'],
+        sans: ['"Noto Sans"', 'system-ui', 'sans-serif'],
         mono: ['ui-monospace', 'SFMono-Regular', 'Consolas', 'monospace'],
       },
       // Neutral chrome; colour is reserved for ticket status and app identity.
