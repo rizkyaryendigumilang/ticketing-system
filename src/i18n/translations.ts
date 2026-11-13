@@ -1,0 +1,336 @@
+import type { TicketCategory, TicketPriority, TicketStatus } from '../types/crm';
+
+export type Language = 'id' | 'en';
+
+export const translations = {
+  id: {
+    // Navigation & Common
+    'nav.brand': 'Helpdesk App',
+    'nav.crm': 'Helpdesk CRM',
+    'nav.healthMap': 'Peta Kesehatan Aplikasi',
+    'nav.tickets': 'Kotak Masuk Tiket',
+    'nav.contacts': 'Kontak Pelapor',
+    'nav.settings': 'Pengaturan',
+    'nav.portal': 'Buka Portal Pelapor',
+    'nav.portalTooltip': 'Buka Pusat Bantuan Pelapor di Tab Baru',
+    'nav.ecosystem': 'Ekosistem (7)',
+    'nav.pendingSync': 'perubahan menunggu sinkronisasi',
+    'nav.syncTrigger': 'Menyinkronkan antrean perubahan ke PocketBase...',
+    'nav.syncNotAdmin': 'Sesi Superadmin PocketBase belum aktif. Masuk kembali dengan akun admin@crm.local untuk mengirim perubahan ke server.',
+    'nav.logout': 'Keluar',
+    'nav.adminTitle': 'Superadmin VPS',
+
+    // Statuses
+    'status.open': 'Baru',
+    'status.in_progress': 'Diproses',
+    'status.waiting_on_user': 'Menunggu Balasan',
+    'status.solved': 'Selesai',
+    'status.closed': 'Ditutup',
+
+    // Priorities
+    'priority.urgent': 'Darurat',
+    'priority.high': 'Tinggi',
+    'priority.medium': 'Sedang',
+    'priority.low': 'Rendah',
+
+    // Categories
+    'category.bug_error': 'Bug / error fitur',
+    'category.account_login': 'Akun & akses login',
+    'category.data_transaction': 'Selisih data / transaksi',
+    'category.feature_question': 'Pertanyaan / request fitur',
+    'category.other': 'Lainnya',
+
+    // Dashboard
+    'dash.title': 'Peta Kesehatan Aplikasi',
+    'dash.integrationsBtn': 'Integrasi Tombol',
+    'dash.inboxBtn': 'Kotak Masuk',
+    'dash.newTickets': 'Tiket Baru',
+    'dash.inProgress': 'Diproses',
+    'dash.solvedThisWeek': 'Selesai Minggu Ini',
+    'dash.avgResolution': 'Rata-rata Penyelesaian',
+    'dash.csat': 'Kepuasan (CSAT)',
+    'dash.contacts': 'Pelapor Terdaftar',
+    'dash.matrixTitle': 'Matriks Kendala Aplikasi',
+    'dash.openQueueTitle': 'Antrean Tiket Baru',
+    'dash.emptyQueue': 'Tidak ada tiket baru dalam antrean saat ini.',
+    'dash.viewTickets': 'Lihat tiket',
+    'dash.openActiveTickets': 'Buka {count} tiket aktif',
+    'dash.webApp': 'Aplikasi Web',
+    'dash.database': 'Database',
+
+    // Tickets Inbox
+    'tickets.title': 'Kotak Masuk Tiket',
+    'tickets.searchPlaceholder': 'Cari nomor tiket, subjek, nama pelapor...',
+    'tickets.filterAllApps': 'Semua Aplikasi',
+    'tickets.filterAllStatus': 'Semua Status',
+    'tickets.filterActiveOnly': 'Aktif (Baru / Proses)',
+    'tickets.filterAllPriority': 'Semua Prioritas',
+    'tickets.colTicket': 'Tiket',
+    'tickets.colApp': 'Aplikasi',
+    'tickets.colRequester': 'Pelapor',
+    'tickets.colSubject': 'Subjek',
+    'tickets.colPriority': 'Prioritas',
+    'tickets.colStatus': 'Status',
+    'tickets.colTime': 'Waktu',
+    'tickets.empty': 'Tidak ada tiket yang cocok dengan filter pencarian.',
+    'tickets.exportCsv': 'Ekspor CSV',
+    'tickets.viewTable': 'Tampilan Tabel',
+    'tickets.viewKanban': 'Tampilan Kanban',
+
+    // Ticket Detail
+    'detail.back': 'Kembali ke Kotak Masuk',
+    'detail.replyTab': 'Balas Pelapor',
+    'detail.noteTab': 'Catatan Internal',
+    'detail.replyPlaceholder': 'Tulis balasan untuk pelapor...',
+    'detail.notePlaceholder': 'Tulis catatan internal (hanya terlihat oleh Superadmin)...',
+    'detail.sendReply': 'Kirim Balasan',
+    'detail.saveNote': 'Simpan Catatan',
+    'detail.markSolved': 'Tandai Selesai',
+    'detail.reopen': 'Buka Kembali',
+    'detail.customerInfo': 'Informasi Pelapor',
+    'detail.deviceInfo': 'Informasi Perangkat & Rujukan',
+    'detail.cannedResponse': 'Pilih Template Balasan Cepat',
+    'detail.solvedModalTitle': 'Selesaikan Tiket',
+    'detail.solvedSummaryLabel': 'Ringkasan Solusi (akan terlihat oleh pelapor)',
+    'detail.internalNoteNotice': 'Catatan internal hanya dapat dibaca oleh Superadmin dan tidak dikirimkan ke pelapor.',
+
+    // Contacts
+    'contacts.title': 'Kontak Pelapor',
+    'contacts.searchPlaceholder': 'Cari nama, email, UID, atau aplikasi...',
+    'contacts.colName': 'Nama Pelapor',
+    'contacts.colApp': 'Aplikasi',
+    'contacts.colUid': 'ID Pengguna',
+    'contacts.colRole': 'Role',
+    'contacts.colLastSeen': 'Terakhir Aktif',
+    'contacts.colTotalTickets': 'Total Tiket',
+    'contacts.viewTickets': 'Lihat Tiket',
+    'contacts.empty': 'Belum ada kontak pelapor terdaftar.',
+
+    // Settings
+    'settings.title': 'Pengaturan Sistem',
+    'settings.tabGeneral': 'Umum & Profil',
+    'settings.tabIntegrations': 'Integrasi Tombol',
+    'settings.tabSecurity': 'Keamanan & Handoff',
+    'settings.tabNotifications': 'Notifikasi',
+    'settings.tabCanned': 'Template Balasan',
+    'settings.langTitle': 'Pilihan Bahasa Antarmuka',
+    'settings.langSubtitle': 'Pilih bahasa untuk tampilan menu, antrean tiket, dan pesan sistem.',
+    'settings.langIdTitle': 'Bahasa Indonesia (Standar)',
+    'settings.langIdDesc': 'Istilah baku Helpdesk CRM (Pelapor, Tiket, ID Komposit)',
+    'settings.langEnTitle': 'English',
+    'settings.langEnDesc': 'Standard terminology (Requesters, Tickets, Composite ID)',
+    'settings.langSuccessId': 'Bahasa antarmuka diubah ke Bahasa Indonesia.',
+    'settings.langSuccessEn': 'Interface language updated to English.',
+
+    // Portal
+    'portal.welcomeTitle': 'Pusat Bantuan & Tiket Kendala',
+    'portal.welcomeSubtitle': 'Sampaikan kendala, pertanyaan, atau perbaikan terkait aplikasi VPS yang Anda gunakan.',
+    'portal.newTicket': 'Buat Tiket Baru',
+    'portal.myTickets': 'Tiket Saya',
+    'portal.back': 'Kembali',
+    'portal.ticketNumber': 'Nomor Tiket',
+    'portal.subject': 'Subjek Masalah',
+    'portal.description': 'Rincian Kendala',
+    'portal.category': 'Kategori',
+    'portal.priority': 'Prioritas',
+    'portal.submit': 'Kirim Tiket',
+    'portal.csatPrompt': 'Bagaimana pelayanan penyelesaian kendala ini?',
+    'portal.csatPlaceholder': 'Tuliskan masukan singkat Anda (opsional)...',
+    'portal.csatSubmit': 'Kirim Penilaian',
+    'portal.csatThanks': 'Terima kasih atas penilaian Anda!',
+    'portal.markSolved': 'Tandai Selesai',
+    'portal.replyPlaceholder': 'Ketik balasan Anda...',
+    'portal.sendReply': 'Kirim Balasan',
+    'portal.logout': 'Keluar Akun',
+
+    // Login
+    'login.title': 'Masuk ke Meja Kerja CRM',
+    'login.subtitle': 'Akses Superadmin untuk mengelola antrean bantuan 7 aplikasi VPS.',
+    'login.identity': 'Email atau Username',
+    'login.password': 'Kata Sandi',
+    'login.submit': 'Masuk',
+    'login.loggingIn': 'Memproses autentikasi...',
+    'login.rememberMe': 'Ingat sesi saya di perangkat ini',
+    'login.forgotPassword': 'Lupa kata sandi?',
+  },
+
+  en: {
+    // Navigation & Common
+    'nav.brand': 'Helpdesk App',
+    'nav.crm': 'Helpdesk CRM',
+    'nav.healthMap': 'App Health Map',
+    'nav.tickets': 'Ticket Inbox',
+    'nav.contacts': 'Requester Contacts',
+    'nav.settings': 'Settings',
+    'nav.portal': 'Open User Portal',
+    'nav.portalTooltip': 'Open User Help Center in New Tab',
+    'nav.ecosystem': 'Ecosystem (7)',
+    'nav.pendingSync': 'changes pending sync',
+    'nav.syncTrigger': 'Syncing queued changes to PocketBase...',
+    'nav.syncNotAdmin': 'PocketBase Superadmin session inactive. Log in with admin@crm.local to sync changes.',
+    'nav.logout': 'Log out',
+    'nav.adminTitle': 'VPS Superadmin',
+
+    // Statuses
+    'status.open': 'Open',
+    'status.in_progress': 'In Progress',
+    'status.waiting_on_user': 'Waiting on User',
+    'status.solved': 'Solved',
+    'status.closed': 'Closed',
+
+    // Priorities
+    'priority.urgent': 'Urgent',
+    'priority.high': 'High',
+    'priority.medium': 'Medium',
+    'priority.low': 'Low',
+
+    // Categories
+    'category.bug_error': 'Bug / Feature Error',
+    'category.account_login': 'Account & Login Access',
+    'category.data_transaction': 'Data / Transaction Discrepancy',
+    'category.feature_question': 'Feature Question / Request',
+    'category.other': 'Other',
+
+    // Dashboard
+    'dash.title': 'App Health Map',
+    'dash.integrationsBtn': 'Button Integrations',
+    'dash.inboxBtn': 'Inbox',
+    'dash.newTickets': 'New Tickets',
+    'dash.inProgress': 'In Progress',
+    'dash.solvedThisWeek': 'Solved This Week',
+    'dash.avgResolution': 'Avg. Resolution Time',
+    'dash.csat': 'Satisfaction (CSAT)',
+    'dash.contacts': 'Registered Requesters',
+    'dash.matrixTitle': 'App Incident Matrix',
+    'dash.openQueueTitle': 'New Tickets Queue',
+    'dash.emptyQueue': 'No new tickets in queue currently.',
+    'dash.viewTickets': 'View tickets',
+    'dash.openActiveTickets': 'Open {count} active tickets',
+    'dash.webApp': 'Web App',
+    'dash.database': 'Database',
+
+    // Tickets Inbox
+    'tickets.title': 'Ticket Inbox',
+    'tickets.searchPlaceholder': 'Search ticket #, subject, requester name...',
+    'tickets.filterAllApps': 'All Applications',
+    'tickets.filterAllStatus': 'All Statuses',
+    'tickets.filterActiveOnly': 'Active (New / In Progress)',
+    'tickets.filterAllPriority': 'All Priorities',
+    'tickets.colTicket': 'Ticket',
+    'tickets.colApp': 'App',
+    'tickets.colRequester': 'Requester',
+    'tickets.colSubject': 'Subject',
+    'tickets.colPriority': 'Priority',
+    'tickets.colStatus': 'Status',
+    'tickets.colTime': 'Time',
+    'tickets.empty': 'No tickets match the current filters.',
+    'tickets.exportCsv': 'Export CSV',
+    'tickets.viewTable': 'Table View',
+    'tickets.viewKanban': 'Kanban View',
+
+    // Ticket Detail
+    'detail.back': 'Back to Inbox',
+    'detail.replyTab': 'Reply to Requester',
+    'detail.noteTab': 'Internal Note',
+    'detail.replyPlaceholder': 'Write a reply to the requester...',
+    'detail.notePlaceholder': 'Write internal note (visible to Superadmin only)...',
+    'detail.sendReply': 'Send Reply',
+    'detail.saveNote': 'Save Note',
+    'detail.markSolved': 'Mark as Solved',
+    'detail.reopen': 'Reopen Ticket',
+    'detail.customerInfo': 'Requester Information',
+    'detail.deviceInfo': 'Device & Referral Details',
+    'detail.cannedResponse': 'Select Canned Response',
+    'detail.solvedModalTitle': 'Resolve Ticket',
+    'detail.solvedSummaryLabel': 'Resolution Summary (visible to requester)',
+    'detail.internalNoteNotice': 'Internal notes are only visible to Superadmin and will not be sent to the requester.',
+
+    // Contacts
+    'contacts.title': 'Requester Contacts',
+    'contacts.searchPlaceholder': 'Search name, email, UID, or app...',
+    'contacts.colName': 'Requester Name',
+    'contacts.colApp': 'Application',
+    'contacts.colUid': 'User UID',
+    'contacts.colRole': 'Role',
+    'contacts.colLastSeen': 'Last Active',
+    'contacts.colTotalTickets': 'Total Tickets',
+    'contacts.viewTickets': 'View Tickets',
+    'contacts.empty': 'No requester contacts registered yet.',
+
+    // Settings
+    'settings.title': 'System Settings',
+    'settings.tabGeneral': 'General & Profile',
+    'settings.tabIntegrations': 'Button Integrations',
+    'settings.tabSecurity': 'Security & Handoff',
+    'settings.tabNotifications': 'Notifications',
+    'settings.tabCanned': 'Canned Responses',
+    'settings.langTitle': 'Interface Language',
+    'settings.langSubtitle': 'Choose language for menus, ticket queues, and system messages.',
+    'settings.langIdTitle': 'Bahasa Indonesia (Standar)',
+    'settings.langIdDesc': 'Standard Helpdesk CRM terms (Pelapor, Tiket, ID Komposit)',
+    'settings.langEnTitle': 'English',
+    'settings.langEnDesc': 'Standard terminology (Requesters, Tickets, Composite ID)',
+    'settings.langSuccessId': 'Bahasa antarmuka diubah ke Bahasa Indonesia.',
+    'settings.langSuccessEn': 'Interface language updated to English.',
+
+    // Portal
+    'portal.welcomeTitle': 'Help Center & Support Tickets',
+    'portal.welcomeSubtitle': 'Report issues, ask questions, or request assistance regarding VPS applications.',
+    'portal.newTicket': 'New Ticket',
+    'portal.myTickets': 'My Tickets',
+    'portal.back': 'Back',
+    'portal.ticketNumber': 'Ticket Number',
+    'portal.subject': 'Issue Subject',
+    'portal.description': 'Issue Details',
+    'portal.category': 'Category',
+    'portal.priority': 'Priority',
+    'portal.submit': 'Submit Ticket',
+    'portal.csatPrompt': 'How would you rate our resolution of this issue?',
+    'portal.csatPlaceholder': 'Write a brief feedback (optional)...',
+    'portal.csatSubmit': 'Submit Rating',
+    'portal.csatThanks': 'Thank you for your rating!',
+    'portal.markSolved': 'Mark as Solved',
+    'portal.replyPlaceholder': 'Type your reply...',
+    'portal.sendReply': 'Send Reply',
+    'portal.logout': 'Sign Out',
+
+    // Login
+    'login.title': 'Sign in to CRM Workspace',
+    'login.subtitle': 'Superadmin access to manage 7 VPS application support queues.',
+    'login.identity': 'Email or Username',
+    'login.password': 'Password',
+    'login.submit': 'Sign In',
+    'login.loggingIn': 'Authenticating...',
+    'login.rememberMe': 'Remember my session on this device',
+    'login.forgotPassword': 'Forgot password?',
+  },
+} as const;
+
+export type TranslationKey = keyof typeof translations.id;
+
+export function translate(
+  lang: Language,
+  key: TranslationKey,
+  params?: Record<string, string | number>,
+): string {
+  const dict = translations[lang] ?? translations.id;
+  let text: string = dict[key] ?? translations.id[key] ?? key;
+  if (params) {
+    for (const [k, v] of Object.entries(params)) {
+      text = text.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));
+    }
+  }
+  return text;
+}
+
+export function getLocalizedStatus(lang: Language, status: TicketStatus): string {
+  return translate(lang, `status.${status}` as TranslationKey);
+}
+
+export function getLocalizedPriority(lang: Language, priority: TicketPriority): string {
+  return translate(lang, `priority.${priority}` as TranslationKey);
+}
+
+export function getLocalizedCategory(lang: Language, category: TicketCategory): string {
+  return translate(lang, `category.${category}` as TranslationKey);
+}

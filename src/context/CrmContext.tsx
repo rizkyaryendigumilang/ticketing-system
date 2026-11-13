@@ -25,7 +25,15 @@ import {
 import { useToast } from './ToastContext';
 const ADMIN_SENDER_ID = 'system:admin';
 import type { Actor } from '../services/ticketCrmService';
-import type { CannedResponse, CrmUser, HandoffParams } from '../types/crm';
+import type { CannedResponse, CrmUser, HandoffParams, TicketCategory, TicketPriority, TicketStatus } from '../types/crm';
+import {
+  translate,
+  type TranslationKey,
+  type Language,
+  getLocalizedStatus,
+  getLocalizedPriority,
+  getLocalizedCategory,
+} from '../i18n/translations';
 
 interface CrmContextValue {
   data: CrmData;
@@ -38,6 +46,11 @@ interface CrmContextValue {
   requesterActor: Actor | null;
   settings: SystemSettings;
   updateSettings: (next: SystemSettings) => void;
+  lang: Language;
+  t: (key: TranslationKey, params?: Record<string, string | number>) => string;
+  statusLabel: (status: TicketStatus) => string;
+  priorityLabel: (priority: TicketPriority) => string;
+  categoryLabel: (category: TicketCategory) => string;
   cannedResponses: CannedResponse[];
   updateCannedResponses: (next: CannedResponse[]) => void;
   loginAdmin: (email: string, password: string) => Promise<void>;
@@ -143,6 +156,15 @@ export function CrmProvider({ children }: { children: React.ReactNode }) {
 
   const requester = data.users.find((u) => u.id === requesterId) ?? null;
 
+  const lang: Language = settings.language ?? 'id';
+  const t = useCallback(
+    (key: TranslationKey, params?: Record<string, string | number>) => translate(lang, key, params),
+    [lang],
+  );
+  const statusLabel = useCallback((status: TicketStatus) => getLocalizedStatus(lang, status), [lang]);
+  const priorityLabel = useCallback((priority: TicketPriority) => getLocalizedPriority(lang, priority), [lang]);
+  const categoryLabel = useCallback((category: TicketCategory) => getLocalizedCategory(lang, category), [lang]);
+
   const value: CrmContextValue = {
     data,
     connection,
@@ -153,6 +175,11 @@ export function CrmProvider({ children }: { children: React.ReactNode }) {
     requesterActor: requester ? { id: requester.id, name: requester.name, role: 'requester' } : null,
     settings,
     updateSettings,
+    lang,
+    t,
+    statusLabel,
+    priorityLabel,
+    categoryLabel,
     cannedResponses,
     updateCannedResponses,
     loginAdmin: useCallback(async (email: string, password: string) => {

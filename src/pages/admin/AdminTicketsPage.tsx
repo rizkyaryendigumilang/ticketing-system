@@ -11,7 +11,7 @@ import { TicketInboxTable } from '../../components/crm-admin/TicketInboxTable';
 import { TicketKanbanBoard } from '../../components/crm-admin/TicketKanbanBoard';
 
 export function AdminTicketsPage() {
-  const { data, adminActor } = useCrm();
+  const { data, adminActor, t, statusLabel } = useCrm();
   const toast = useToast();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -49,7 +49,7 @@ export function AdminTicketsPage() {
     const ticket = data.tickets.find((t) => t.id === ticketId);
     if (ticket) {
       changeTicket(ticket, { status }, adminActor);
-      toast.success(`Tiket #${ticket.ticketNumber} diubah ke: ${STATUS_LABEL[status]}`);
+      toast.success(`Tiket #${ticket.ticketNumber} → ${statusLabel(status)}`);
     }
   };
 
@@ -66,7 +66,7 @@ export function AdminTicketsPage() {
     <div className="space-y-4 p-5 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-ink">Kotak Masuk Tiket</h1>
+          <h1 className="text-xl font-bold tracking-tight text-ink">{t('tickets.title')}</h1>
         </div>
 
         {/* View Toggle */}
@@ -79,7 +79,7 @@ export function AdminTicketsPage() {
             }`}
           >
             <Table2 className="h-3.5 w-3.5" />
-            Tabel Inbox
+            {t('tickets.viewTable')}
           </button>
           <button
             type="button"
@@ -89,7 +89,7 @@ export function AdminTicketsPage() {
             }`}
           >
             <Columns3 className="h-3.5 w-3.5" />
-            Kanban Board
+            {t('tickets.viewKanban')}
           </button>
         </div>
       </div>

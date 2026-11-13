@@ -8,7 +8,7 @@ import { AppBadge } from '../../components/common/AppBadge';
 import { useToast } from '../../context/ToastContext';
 
 export function AdminContactsPage() {
-  const { data } = useCrm();
+  const { data, t } = useCrm();
   const navigate = useNavigate();
   const toast = useToast();
   const [selectedApp, setSelectedApp] = useState<string>('all');
@@ -62,7 +62,7 @@ export function AdminContactsPage() {
       <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line pb-4">
         <div>
           <h1 className="text-lg font-bold tracking-tight text-ink sm:text-xl">
-            Kontak Pelapor
+            {t('contacts.title')}
           </h1>
         </div>
       </div>
@@ -108,7 +108,7 @@ export function AdminContactsPage() {
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cari nama, username, composite ID..."
+            placeholder={t('contacts.searchPlaceholder')}
             className="w-full rounded border border-line bg-canvas py-1.5 pl-8 pr-7 text-xs text-ink placeholder:text-ink-faint focus:border-ink focus:bg-panel focus:outline-none"
           />
           {search && (
@@ -172,13 +172,13 @@ export function AdminContactsPage() {
           <table className="w-full border-collapse text-left text-xs">
             <thead>
               <tr className="border-b border-line bg-subtle/70 text-[11px] font-semibold text-ink-muted">
-                <th className="py-2.5 pl-4 pr-2">Nama & Username</th>
-                <th className="px-2 py-2.5">Composite ID (Unik)</th>
-                <th className="px-2 py-2.5">Aplikasi</th>
-                <th className="px-2 py-2.5">Role Aplikasi</th>
-                <th className="px-2 py-2.5">Riwayat Tiket</th>
-                <th className="px-2 py-2.5">Aktif Terakhir</th>
-                <th className="py-2.5 pl-2 pr-4 text-right">Aksi Pintas</th>
+                <th className="py-2.5 pl-4 pr-2">{t('contacts.colName')}</th>
+                <th className="px-2 py-2.5">{t('contacts.colUid')}</th>
+                <th className="px-2 py-2.5">{t('contacts.colApp')}</th>
+                <th className="px-2 py-2.5">{t('contacts.colRole')}</th>
+                <th className="px-2 py-2.5">{t('contacts.colTotalTickets')}</th>
+                <th className="px-2 py-2.5">{t('contacts.colLastSeen')}</th>
+                <th className="py-2.5 pl-2 pr-4 text-right">{t('contacts.viewTickets')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">

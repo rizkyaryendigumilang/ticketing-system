@@ -45,6 +45,7 @@ export function AdminSettingsPage() {
     cannedResponses,
     updateCannedResponses,
     requestDesktopNotification,
+    t,
   } = useCrm();
   const toast = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -70,13 +71,17 @@ export function AdminSettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState<'id' | 'en'>(settings.language ?? 'id');
 
+  useEffect(() => {
+    setSelectedLanguage(settings.language ?? 'id');
+  }, [settings.language]);
+
   const handleSaveLanguage = (lang: 'id' | 'en') => {
     setSelectedLanguage(lang);
     updateSettings({ ...settings, language: lang });
     toast.success(
       lang === 'id'
-        ? 'Bahasa antarmuka diubah ke Bahasa Indonesia.'
-        : 'Interface language updated to English.',
+        ? t('settings.langSuccessId')
+        : t('settings.langSuccessEn'),
     );
   };
 
@@ -314,7 +319,7 @@ export function AdminSettingsPage() {
       {/* Header */}
       <div className="border-b border-line pb-4">
         <h1 className="text-xl font-bold tracking-tight text-ink sm:text-2xl">
-          Pengaturan
+          {t('settings.title')}
         </h1>
       </div>
 
@@ -330,7 +335,7 @@ export function AdminSettingsPage() {
           }`}
         >
           <User className="h-4 w-4" />
-          Akun &amp; Profil
+          {t('settings.tabGeneral')}
         </button>
 
         <button
@@ -343,7 +348,7 @@ export function AdminSettingsPage() {
           }`}
         >
           <TerminalSquare className="h-4 w-4" />
-          Integrasi Tombol Bantuan
+          {t('settings.tabIntegrations')}
         </button>
 
         <button
@@ -356,7 +361,7 @@ export function AdminSettingsPage() {
           }`}
         >
           <ShieldCheck className="h-4 w-4" />
-          Keamanan &amp; Handoff
+          {t('settings.tabSecurity')}
         </button>
 
         <button
@@ -369,7 +374,7 @@ export function AdminSettingsPage() {
           }`}
         >
           <Bell className="h-4 w-4" />
-          Notifikasi &amp; Alert
+          {t('settings.tabNotifications')}
         </button>
 
         <button
@@ -382,7 +387,7 @@ export function AdminSettingsPage() {
           }`}
         >
           <MessageSquareQuote className="h-4 w-4" />
-          Template Balasan Cepat
+          {t('settings.tabCanned')}
         </button>
 
         <button
@@ -504,10 +509,10 @@ export function AdminSettingsPage() {
           <div className="rounded-lg border border-line bg-panel p-5 shadow-sm lg:col-span-2">
             <div className="flex items-center gap-2">
               <Globe className="h-4 w-4 text-ink" />
-              <h2 className="text-sm font-semibold text-ink">Pilihan Bahasa Antarmuka</h2>
+              <h2 className="text-sm font-semibold text-ink">{t('settings.langTitle')}</h2>
             </div>
             <p className="mt-0.5 text-xs text-ink-muted">
-              Pilih bahasa untuk tampilan menu, antrean tiket, dan pesan sistem.
+              {t('settings.langSubtitle')}
             </p>
 
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
@@ -522,9 +527,9 @@ export function AdminSettingsPage() {
                 <div className="flex items-center gap-3">
                   <span className="text-xl select-none">🇮🇩</span>
                   <div>
-                    <div className="font-semibold text-ink">Bahasa Indonesia (Standar)</div>
+                    <div className="font-semibold text-ink">{t('settings.langIdTitle')}</div>
                     <div className="text-[11px] text-ink-muted mt-0.5">
-                      Istilah baku Helpdesk CRM (Pelapor, Tiket, ID Komposit)
+                      {t('settings.langIdDesc')}
                     </div>
                   </div>
                 </div>
@@ -542,9 +547,9 @@ export function AdminSettingsPage() {
                 <div className="flex items-center gap-3">
                   <span className="text-xl select-none">🇬🇧</span>
                   <div>
-                    <div className="font-semibold text-ink">English</div>
+                    <div className="font-semibold text-ink">{t('settings.langEnTitle')}</div>
                     <div className="text-[11px] text-ink-muted mt-0.5">
-                      Standard terminology (Requesters, Tickets, Composite ID)
+                      {t('settings.langEnDesc')}
                     </div>
                   </div>
                 </div>

@@ -1,6 +1,7 @@
 import { Database, ExternalLink, ArrowUpRight } from 'lucide-react';
 import type { AppSource } from '../../types/crm';
 import type { StatusCounts } from '../../services/crmLogic';
+import { useCrm } from '../../context/CrmContext';
 
 interface Props {
   apps: AppSource[];
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
+  const { t } = useCrm();
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {apps.map((app) => {
@@ -141,7 +143,7 @@ export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
                   title={app.appUrl}
                 >
                   <ExternalLink className="h-3 w-3" />
-                  Aplikasi Web
+                  {t('dash.webApp')}
                 </a>
                 {app.adminDbUrl && (
                   <a
@@ -152,7 +154,7 @@ export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
                     title={app.adminDbUrl}
                   >
                     <Database className="h-3 w-3" />
-                    Database
+                    {t('dash.database')}
                   </a>
                 )}
               </div>
@@ -162,7 +164,9 @@ export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
                 onClick={() => onSelectApp(app.id)}
                 className="inline-flex items-center gap-0.5 font-medium text-ink hover:underline"
               >
-                {activeCount > 0 ? `Buka ${activeCount} tiket aktif` : 'Lihat tiket'}
+                {activeCount > 0
+                  ? t('dash.openActiveTickets', { count: activeCount })
+                  : t('dash.viewTickets')}
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </button>
             </div>

@@ -26,29 +26,26 @@ type NavItem = {
   badgeKey?: 'open';
 };
 
-/** Primary nav items — shown as icons in the icon-rail and as full rows in the text sidebar. */
-const NAV: NavItem[] = [
-  { to: '/admin', end: true, icon: LayoutGrid, label: 'Peta Kesehatan Aplikasi' },
-  { to: '/admin/tickets', end: false, icon: Inbox, label: 'Kotak Masuk Tiket', badgeKey: 'open' },
-  { to: '/admin/contacts', end: false, icon: Users, label: 'Kontak Pelapor' },
-  { to: '/admin/settings', end: false, icon: Settings, label: 'Pengaturan' },
-];
-
 export function AdminCrmLayout() {
-  const { data, admin, logoutAdmin, pendingAdminChanges, connection } = useCrm();
+  const { data, admin, logoutAdmin, pendingAdminChanges, connection, t } = useCrm();
   const toast = useToast();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [appsExpanded, setAppsExpanded] = useState(true);
 
+  const navItems: NavItem[] = [
+    { to: '/admin', end: true, icon: LayoutGrid, label: t('nav.healthMap') },
+    { to: '/admin/tickets', end: false, icon: Inbox, label: t('nav.tickets'), badgeKey: 'open' },
+    { to: '/admin/contacts', end: false, icon: Users, label: t('nav.contacts') },
+    { to: '/admin/settings', end: false, icon: Settings, label: t('nav.settings') },
+  ];
+
   const handleTriggerSync = async () => {
     if (isSuperuser()) {
-      toast.info('Menyinkronkan antrean perubahan ke PocketBase...');
+      toast.info(t('nav.syncTrigger'));
       await flush();
     } else {
-      toast.info(
-        'Sesi Superadmin PocketBase belum aktif. Masuk kembali dengan akun admin@crm.local untuk mengirim perubahan ke server.',
-      );
+      toast.info(t('nav.syncNotAdmin'));
     }
   };
 
@@ -85,7 +82,7 @@ export function AdminCrmLayout() {
           </div>
 
           {/* Nav icons */}
-          {NAV.map(({ to, end, icon: Icon, label }) => (
+          {navItems.map(({ to, end, icon: Icon, label }) => (
             <NavLink
               key={to}
               to={to}
@@ -146,13 +143,13 @@ export function AdminCrmLayout() {
           <aside className="flex w-56 shrink-0 flex-col border-r border-rail-line bg-rail overflow-hidden">
             {/* Brand */}
             <div className="border-b border-rail-line px-4 py-3.5">
-              <p className="text-sm font-semibold tracking-tight text-white">Helpdesk App</p>
-              <p className="mt-0.5 font-mono text-[11px] text-neutral-500">Helpdesk CRM</p>
+              <p className="text-sm font-semibold tracking-tight text-white">{t('nav.brand')}</p>
+              <p className="mt-0.5 font-mono text-[11px] text-neutral-500">{t('nav.crm')}</p>
             </div>
 
             {/* Primary nav */}
             <nav className="space-y-0.5 px-2 py-2">
-              {NAV.map(({ to, end, icon: Icon, label, badgeKey }) => {
+              {navItems.map(({ to, end, icon: Icon, label, badgeKey }) => {
                 const badge = badgeKey ? badgeFor[badgeKey] : null;
                 return (
                   <NavLink
@@ -184,12 +181,12 @@ export function AdminCrmLayout() {
                 href={portalUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                title="Buka Pusat Bantuan Pelapor di Tab Baru"
+                title={t('nav.portalTooltip')}
                 className="mt-1 flex items-center justify-between rounded border border-rail-line bg-white/5 px-2.5 py-2 text-xs font-medium text-emerald-400 transition-colors hover:bg-white/10 hover:text-emerald-300"
               >
                 <span className="inline-flex items-center gap-2.5">
                   <ExternalLink className="h-3.5 w-3.5 shrink-0" />
-                  Buka Portal Pelapor
+                  {t('nav.portal')}
                 </span>
                 <span className="font-mono text-[10px] opacity-75">↗</span>
               </a>
@@ -202,7 +199,7 @@ export function AdminCrmLayout() {
                 onClick={() => setAppsExpanded((v) => !v)}
                 className="flex w-full items-center justify-between px-3.5 py-2.5 text-[11px] font-medium text-neutral-400 hover:text-neutral-300"
               >
-                <span>Ekosistem (7)</span>
+                <span>{t('nav.ecosystem')}</span>
                 <ChevronDown
                   className={`h-3.5 w-3.5 transition-transform duration-150 ${appsExpanded ? '' : '-rotate-90'}`}
                 />
@@ -251,7 +248,7 @@ export function AdminCrmLayout() {
                   className="mb-2 w-full text-left rounded bg-amber-500/15 hover:bg-amber-500/25 px-2 py-1 text-[11px] text-amber-300 transition-colors flex items-center justify-between gap-1 group"
                   title="Klik untuk mencoba sinkronisasi antrean ke PocketBase"
                 >
-                  <span className="truncate">{pendingAdminChanges} perubahan menunggu sinkronisasi</span>
+                  <span className="truncate">{pendingAdminChanges} {t('nav.pendingSync')}</span>
                   <RefreshCw className="h-3 w-3 shrink-0 text-amber-400 group-hover:rotate-180 transition-transform duration-300" />
                 </button>
               )}
@@ -259,7 +256,7 @@ export function AdminCrmLayout() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
                     <p className="truncate text-xs font-medium text-white">
-                      {admin?.name ?? 'Superadmin VPS'}
+                      {admin?.name ?? t('nav.adminTitle')}
                     </p>
                     <span
                       className={`inline-block h-1.5 w-1.5 rounded-full ${
@@ -275,7 +272,7 @@ export function AdminCrmLayout() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  title="Keluar sesi"
+                  title={t('nav.logout')}
                   className="rounded p-1.5 text-neutral-500 hover:bg-rail-hover hover:text-red-400"
                 >
                   <LogOut className="h-4 w-4" />

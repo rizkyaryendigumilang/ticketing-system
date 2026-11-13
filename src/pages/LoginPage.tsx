@@ -28,7 +28,7 @@ import { useCrm } from '../context/CrmContext';
 import { useToast } from '../context/ToastContext';
 
 export function LoginPage() {
-  const { loginAdmin, handoff, data, connection } = useCrm();
+  const { loginAdmin, handoff, data, connection, t } = useCrm();
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -342,7 +342,7 @@ export function LoginPage() {
                   htmlFor="login-identity"
                   className="block text-xs font-medium text-ink"
                 >
-                  Identitas Akun
+                  {t('login.identity')}
                 </label>
                 <div className="relative mt-1">
                   <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-ink-muted">
@@ -356,7 +356,7 @@ export function LoginPage() {
                     disabled={loading}
                     value={identity}
                     onChange={(e) => setIdentity(e.target.value)}
-                    placeholder="Email atau username"
+                    placeholder="Email or username"
                     className="w-full rounded-lg border border-line bg-panel pl-9 pr-3 py-2 text-xs sm:text-sm text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none transition-colors disabled:opacity-50"
                   />
                 </div>
@@ -366,7 +366,7 @@ export function LoginPage() {
               <div>
                 <div className="flex items-center justify-between">
                   <label htmlFor="login-password" className="block text-xs font-medium text-ink">
-                    Kata Sandi
+                    {t('login.password')}
                   </label>
                   {/* 2. Komponen Bantuan: Tautan Lupa Kata Sandi */}
                   <button
@@ -378,7 +378,7 @@ export function LoginPage() {
                     }}
                     className="text-xs text-ink-muted hover:text-ink underline transition-colors"
                   >
-                    Lupa Kata Sandi?
+                    {t('login.forgotPassword')}
                   </button>
                 </div>
                 <div className="relative mt-1">
@@ -419,7 +419,7 @@ export function LoginPage() {
                     className="h-4 w-4 rounded border-line text-ink focus:ring-ink"
                   />
                   <span className="text-xs text-ink-muted hover:text-ink transition-colors">
-                    Ingat saya
+                    {t('login.rememberMe')}
                   </span>
                 </label>
               </div>
@@ -433,11 +433,11 @@ export function LoginPage() {
                 {loading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin text-white" />
-                    <span>Memverifikasi Kredensial...</span>
+                    <span>{t('login.loggingIn')}</span>
                   </>
                 ) : (
                   <>
-                    <span>Masuk ke Meja Kerja</span>
+                    <span>{t('login.submit')}</span>
                     <ArrowRight className="h-4 w-4" />
                   </>
                 )}

@@ -1,5 +1,6 @@
 import { STATUS_LABEL } from '../../config/vpsAppsConfig';
 import type { TicketStatus } from '../../types/crm';
+import { useCrm } from '../../context/CrmContext';
 
 /** Lifecycle colours from the spec: open red, in progress yellow, waiting purple, solved green, closed grey. */
 export const STATUS_COLOR: Record<TicketStatus, string> = {
@@ -11,10 +12,20 @@ export const STATUS_COLOR: Record<TicketStatus, string> = {
 };
 
 export function StatusBadge({ status }: { status: TicketStatus }) {
+  let label = STATUS_LABEL[status];
+  try {
+    const crm = useCrm();
+    if (crm?.statusLabel) {
+      label = crm.statusLabel(status);
+    }
+  } catch {
+    // fallback to static label if rendered outside CrmProvider
+  }
+
   return (
     <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-xs font-medium text-ink">
       <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: STATUS_COLOR[status] }} />
-      {STATUS_LABEL[status]}
+      {label}
     </span>
   );
 }

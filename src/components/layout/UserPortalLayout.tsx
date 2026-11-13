@@ -4,7 +4,7 @@ import { getApp } from '../../config/vpsAppsConfig';
 import { useCrm } from '../../context/CrmContext';
 
 export function UserPortalLayout() {
-  const { data, admin, requester, logoutRequester } = useCrm();
+  const { data, admin, requester, logoutRequester, t } = useCrm();
   const navigate = useNavigate();
 
   const app = getApp(requester?.appId);
@@ -93,13 +93,13 @@ export function UserPortalLayout() {
               style={{ backgroundColor: app?.color ?? '#141413' }}
             >
               <Plus className="h-3.5 w-3.5" />
-              Buat Tiket Laporan
+              {t('portal.newTicket')}
             </button>
 
             <button
               type="button"
               onClick={handleLogout}
-              title="Ganti akun / Keluar sesi user"
+              title={t('portal.logout')}
               className="inline-flex items-center gap-1 rounded-md border border-line px-2.5 py-1.5 text-xs text-ink-muted transition-colors hover:border-line-strong hover:text-ink hover:bg-subtle"
             >
               <LogOut className="h-3.5 w-3.5" />

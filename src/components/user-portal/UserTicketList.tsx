@@ -5,6 +5,7 @@ import { timeAgo } from '../../services/crmLogic';
 import type { Ticket } from '../../types/crm';
 import { PriorityBadge } from '../common/PriorityBadge';
 import { StatusBadge } from '../common/StatusBadge';
+import { useCrm } from '../../context/CrmContext';
 
 interface Props {
   tickets: Ticket[];
@@ -17,6 +18,7 @@ export function UserTicketList({
   onTicketClick,
   onCreateNew,
 }: Props) {
+  const { t, categoryLabel } = useCrm();
   const [filter, setFilter] = useState<'all' | 'active' | 'solved'>('all');
   const [search, setSearch] = useState('');
 
@@ -67,7 +69,7 @@ export function UserTicketList({
               filter === 'all' ? 'bg-ink text-white font-semibold' : 'text-ink-muted hover:text-ink'
             }`}
           >
-            Semua ({tickets.length})
+            {t('tickets.filterAllStatus')} ({tickets.length})
           </button>
           <button
             type="button"
@@ -76,7 +78,7 @@ export function UserTicketList({
               filter === 'active' ? 'bg-ink text-white font-semibold' : 'text-ink-muted hover:text-ink'
             }`}
           >
-            Sedang Diproses ({activeCount})
+            {t('dash.inProgress')} ({activeCount})
           </button>
           <button
             type="button"
@@ -85,7 +87,7 @@ export function UserTicketList({
               filter === 'solved' ? 'bg-ink text-white font-semibold' : 'text-ink-muted hover:text-ink'
             }`}
           >
-            Selesai ({solvedCount})
+            {t('status.solved')} ({solvedCount})
           </button>
         </div>
 
@@ -96,7 +98,7 @@ export function UserTicketList({
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cari tiket atau keluhan..."
+            placeholder={t('tickets.searchPlaceholder')}
             className="w-full rounded border border-line bg-canvas py-1.5 pl-8 pr-7 text-xs text-ink placeholder:text-ink-faint focus:border-ink focus:bg-panel focus:outline-none"
           />
           {search && (
@@ -159,7 +161,7 @@ export function UserTicketList({
                   <StatusBadge status={ticket.status} />
                   <PriorityBadge priority={ticket.priority} />
                   <span className="text-xs text-ink-muted">
-                    · {CATEGORY_LABEL[ticket.category]}
+                    · {categoryLabel(ticket.category)}
                   </span>
                 </div>
 

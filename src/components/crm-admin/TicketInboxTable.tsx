@@ -12,6 +12,7 @@ import type { Ticket, TicketMessage, TicketPriority, TicketStatus } from '../../
 import { AppBadge } from '../common/AppBadge';
 import { PriorityBadge } from '../common/PriorityBadge';
 import { StatusBadge } from '../common/StatusBadge';
+import { useCrm } from '../../context/CrmContext';
 
 interface Props {
   tickets: Ticket[];
@@ -42,6 +43,8 @@ export function TicketInboxTable({
   onTicketClick,
   onQuickStatusChange,
 }: Props) {
+  const { t, statusLabel, priorityLabel, categoryLabel } = useCrm();
+
   const filtered = sortQueue(
     filterTickets(tickets, {
       appId: selectedApp,
@@ -76,7 +79,7 @@ export function TicketInboxTable({
               type="search"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Cari nomor tiket, subjek, atau pelapor..."
+              placeholder={t('tickets.searchPlaceholder')}
               className="w-full rounded border border-line bg-canvas py-1.5 pl-8 pr-3 text-xs text-ink placeholder:text-ink-faint focus:border-ink focus:bg-panel focus:outline-none"
             />
           </div>
@@ -91,7 +94,7 @@ export function TicketInboxTable({
               onChange={(e) => onAppChange(e.target.value)}
               className="rounded border border-line bg-canvas px-2.5 py-1.5 text-xs text-ink focus:border-ink focus:outline-none"
             >
-              <option value="all">Semua Aplikasi (7)</option>
+              <option value="all">{t('tickets.filterAllApps')} (7)</option>
               {VPS_APPS.map((app) => (
                 <option key={app.id} value={app.id}>
                   [{app.prefix}] {app.name}
@@ -106,11 +109,11 @@ export function TicketInboxTable({
               }
               className="rounded border border-line bg-canvas px-2.5 py-1.5 text-xs text-ink focus:border-ink focus:outline-none"
             >
-              <option value="all">Semua Status</option>
-              <option value="active">Aktif (Open / Proses / Tunggu)</option>
+              <option value="all">{t('tickets.filterAllStatus')}</option>
+              <option value="active">{t('tickets.filterActiveOnly')}</option>
               {STATUS_ORDER.map((st) => (
                 <option key={st} value={st}>
-                  {STATUS_LABEL[st]}
+                  {statusLabel(st)}
                 </option>
               ))}
             </select>
@@ -122,10 +125,10 @@ export function TicketInboxTable({
               }
               className="rounded border border-line bg-canvas px-2.5 py-1.5 text-xs text-ink focus:border-ink focus:outline-none"
             >
-              <option value="all">Semua Prioritas</option>
+              <option value="all">{t('tickets.filterAllPriority')}</option>
               {PRIORITY_ORDER.map((pr) => (
                 <option key={pr} value={pr}>
-                  {PRIORITY_LABEL[pr]}
+                  {priorityLabel(pr)}
                 </option>
               ))}
             </select>
@@ -149,13 +152,13 @@ export function TicketInboxTable({
             onClick={() => downloadTicketsCsv(filtered)}
             disabled={filtered.length === 0}
             className="inline-flex items-center gap-1.5 rounded border border-line bg-subtle px-2.5 py-1 text-xs font-medium text-ink hover:border-line-strong active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-[border-color,transform]"
-            title="Download hasil filter antrean tiket sebagai file CSV"
+            title="Download CSV"
           >
             <FileDown className="h-3.5 w-3.5 text-ink-muted" />
-            Export CSV
+            {t('tickets.exportCsv')}
           </button>
           <div className="font-mono text-xs text-ink-muted tabular-nums">
-            {filtered.length} dari {tickets.length} tiket
+            {filtered.length} / {tickets.length}
           </div>
         </div>
       </div>
@@ -164,33 +167,21 @@ export function TicketInboxTable({
       {filtered.length === 0 ? (
         <div className="px-6 py-12 text-center">
           <p className="text-sm font-medium text-ink">
-            Tidak ada tiket yang cocok dengan filter ini.
+            {t('tickets.empty')}
           </p>
-          <p className="mt-1 text-xs text-ink-muted">
-            Ubah kata kunci pencarian atau reset filter untuk melihat seluruh antrean.
-          </p>
-          {hasActiveFilter && (
-            <button
-              type="button"
-              onClick={resetFilters}
-              className="mt-3 rounded border border-line bg-subtle px-3 py-1.5 text-xs font-medium text-ink hover:border-line-strong"
-            >
-              Tampilkan semua tiket
-            </button>
-          )}
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left text-xs">
             <thead>
               <tr className="border-b border-line bg-subtle/70 text-[11px] font-semibold text-ink-muted">
-                <th className="py-2.5 pl-4 pr-2">Tiket</th>
-                <th className="px-2 py-2.5">Aplikasi</th>
-                <th className="px-2 py-2.5">Subjek & Kategori</th>
-                <th className="px-2 py-2.5">Pelapor</th>
-                <th className="px-2 py-2.5">Prioritas</th>
-                <th className="px-2 py-2.5">Status</th>
-                <th className="py-2.5 pl-2 pr-4 text-right">Masuk</th>
+                <th className="py-2.5 pl-4 pr-2">{t('tickets.colTicket')}</th>
+                <th className="px-2 py-2.5">{t('tickets.colApp')}</th>
+                <th className="px-2 py-2.5">{t('tickets.colSubject')}</th>
+                <th className="px-2 py-2.5">{t('tickets.colRequester')}</th>
+                <th className="px-2 py-2.5">{t('tickets.colPriority')}</th>
+                <th className="px-2 py-2.5">{t('tickets.colStatus')}</th>
+                <th className="py-2.5 pl-2 pr-4 text-right">{t('tickets.colTime')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
@@ -211,7 +202,7 @@ export function TicketInboxTable({
                         {isOpen && (
                           <span
                             className="h-2 w-2 rounded-full bg-red-600"
-                            title="Baru masuk — belum ditangani"
+                            title="Open"
                           />
                         )}
                         <span>{ticket.ticketNumber}</span>
@@ -227,7 +218,7 @@ export function TicketInboxTable({
                         {ticket.subject}
                       </div>
                       <div className="mt-0.5 flex items-center gap-2 text-[11px] text-ink-muted">
-                        <span>{CATEGORY_LABEL[ticket.category]}</span>
+                        <span>{categoryLabel(ticket.category)}</span>
                         {ticket.sourcePageUrl && (
                           <>
                             <span>·</span>
