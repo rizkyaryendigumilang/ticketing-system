@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   compositeKeyOf,
+  computeTicketSla,
   computeTrendMetrics,
   createHandoffSignature,
   filterTickets,
@@ -285,4 +286,48 @@ test('computeTrendMetrics produces daily trends, breakdown by category and prior
 
   // Urgent open count (urgent + high in open/in_progress) -> T1 is urgent open
   assert.equal(metrics.urgentOpenCount, 1);
+});
+
+test('computeTicketSla calculates on_track, warning, and breached states accurately', () => {
+  const baseTime = Date.parse('2026-11-13T12:00:00.000Z');
+
+  // Urgent ticket created 30 mins ago (deadline is +2h, remaining = 1.5h) -> on_track
+  const urgentTicket = t('T-URGENT', 'open', 'urgent', new Date(baseTime - 30 * 60_000).toISOString());
+  const slaUrgent = computeTicketSla(urgentTicket, baseTime);
+  assert.equal(slaUrgent.status, 'on_track');
+  assert.equal(slaUrgent.remainingMs, 90 * 60_000);
+
+  // Urgent ticket created 105 mins ago (deadline +2h, remaining = 15m) -> warning (<24m for urgent)
+  const warnTicket = t('T-WARN', 'open', 'urgent', new Date(baseTime - 105 * 60_000).toISOString());
+  const slaWarn = computeTicketSla(warnTicket, baseTime);
+  assert.equal(slaWarn.status, 'warning');
+
+  // Urgent ticket created 3 hours ago -> breached
+  const breachTicket = t('T-BREACH', 'open', 'urgent', new Date(baseTime - 180 * 60_000).toISOString());
+  const slaBreach = computeTicketSla(breachTicket, baseTime);
+  assert.equal(slaBreach.status, 'breached');
+  assert.ok(slaBreach.label.includes('Lewat'));
+
+  // Solved ticket within deadline -> achieved
+  const solvedTicket = t('T-SOLVED', 'solved', 'urgent', new Date(baseTime - 60 * 60_000).toISOString(), {
+    solvedAt: new Date(baseTime - 10 * 60_000).toISOString(),
+  });
+  const slaSolved = computeTicketSla(solvedTicket, baseTime);
+  assert.equal(slaSolved.status, 'achieved');
+});
+
+test('filterTickets supports assignedFilter for me, unassigned, and all', () => {
+  const tickets: Ticket[] = [
+    t('T1', 'open', 'low', '1', { assignedTo: 'admin1', assignedToName: 'Budi' }),
+    t('T2', 'open', 'low', '1', { assignedTo: 'admin2', assignedToName: 'Siti' }),
+    t('T3', 'open', 'low', '1', { assignedTo: undefined }),
+  ];
+
+  // Unassigned filter
+  const unassigned = filterTickets(tickets, { assignedFilter: 'unassigned' });
+  assert.deepEqual(unassigned.map((x) => x.id), ['T3']);
+
+  // Assigned to me (admin1)
+  const myTickets = filterTickets(tickets, { assignedFilter: 'me', currentAdminId: 'admin1' });
+  assert.deepEqual(myTickets.map((x) => x.id), ['T1']);
 });

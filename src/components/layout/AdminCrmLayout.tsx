@@ -1,4 +1,4 @@
-import { type ComponentType, useState } from 'react';
+import { type ComponentType, useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   ChevronDown,
@@ -9,6 +9,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   RefreshCw,
+  Search,
   Settings,
   Users,
 } from 'lucide-react';
@@ -17,6 +18,7 @@ import { useCrm } from '../../context/CrmContext';
 import { useToast } from '../../context/ToastContext';
 import { computeStats, countByApp } from '../../services/crmLogic';
 import { flush, isSuperuser } from '../../services/pbClient';
+import { CommandPalette } from '../common/CommandPalette';
 
 type NavItem = {
   to: string;
@@ -32,6 +34,18 @@ export function AdminCrmLayout() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [appsExpanded, setAppsExpanded] = useState(true);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const navItems: NavItem[] = [
     { to: '/admin', end: true, icon: LayoutDashboard, label: t('nav.dashboard') },
@@ -80,6 +94,16 @@ export function AdminCrmLayout() {
           >
             H
           </div>
+
+          {/* Command Palette Trigger */}
+          <button
+            type="button"
+            title="Pencarian & Perintah Cepat (Ctrl+K)"
+            onClick={() => setPaletteOpen(true)}
+            className="flex h-9 w-9 items-center justify-center rounded text-neutral-400 transition-colors hover:bg-rail-hover hover:text-white"
+          >
+            <Search className="h-4 w-4" />
+          </button>
 
           {/* Nav icons */}
           {navItems.map(({ to, end, icon: Icon, label }) => (
@@ -286,6 +310,9 @@ export function AdminCrmLayout() {
         <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>
+
+        {/* Global Command Palette */}
+        <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
     </div>
   );
 }

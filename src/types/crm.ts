@@ -39,6 +39,9 @@ export interface Ticket {
   category: TicketCategory;
   priority: TicketPriority;
   status: TicketStatus;
+  assignedTo?: string;       // Admin user ID or email
+  assignedToName?: string;   // Admin display name
+  assignedToRole?: string;   // Admin role
   sourcePageUrl?: string;  // URL halaman saat terjadi kendala
   deviceInfo?: string;     // Browser / OS
   attachments: string[];   // Array DataURL / URL gambar screenshot

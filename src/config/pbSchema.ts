@@ -18,6 +18,7 @@ export const FIELD_MAP: Record<CollectionName, Record<string, string>> = {
     id: 'id', ticketNumber: 'ticket_number', appId: 'app_id', requesterId: 'requester_id',
     requesterName: 'requester_name', requesterUid: 'requester_uid', requesterRole: 'requester_role',
     subject: 'subject', description: 'description', category: 'category', priority: 'priority', status: 'status',
+    assignedTo: 'assigned_to', assignedToName: 'assigned_to_name', assignedToRole: 'assigned_to_role',
     sourcePageUrl: 'source_page_url', deviceInfo: 'device_info', attachments: 'attachments',
     resolutionSummary: 'resolution_summary', satisfactionRating: 'satisfaction_rating', satisfactionComment: 'satisfaction_comment',
     createdAt: 'created_at', updatedAt: 'updated_at', solvedAt: 'solved_at',

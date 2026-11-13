@@ -2,7 +2,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCrm } from '../../context/CrmContext';
 import { sortQueue, visibleMessages } from '../../services/crmLogic';
-import { changeTicket, replyToTicket, solveTicket } from '../../services/ticketCrmService';
+import { changeTicket, replyToTicket, solveTicket, assignTicket } from '../../services/ticketCrmService';
 import type { TicketStatus } from '../../types/crm';
 import { TicketWorkspace3Col } from '../../components/crm-admin/TicketWorkspace3Col';
 
@@ -54,6 +54,8 @@ export function AdminTicketDetailPage() {
   const handleStatusChange = (status: TicketStatus) => changeTicket(ticket, { status }, adminActor);
   const handlePriorityChange = (priority: typeof ticket.priority) => changeTicket(ticket, { priority }, adminActor);
   const handleCategoryChange = (category: typeof ticket.category) => changeTicket(ticket, { category }, adminActor);
+  const handleAssignTicket = (assignee: { id?: string; name?: string; role?: string } | null) =>
+    assignTicket(ticket, assignee, adminActor);
   const handleSendMessage = (body: string, isInternalNote: boolean, attachments: string[], nextStatus?: TicketStatus) =>
     replyToTicket(ticket, adminActor, body, { internal: isInternalNote, attachments, nextStatus });
   const handleSolveTicket = (resolution: string, attachments: string[]) =>
@@ -106,6 +108,7 @@ export function AdminTicketDetailPage() {
         onStatusChange={handleStatusChange}
         onPriorityChange={handlePriorityChange}
         onCategoryChange={handleCategoryChange}
+        onAssignTicket={handleAssignTicket}
         onSendMessage={handleSendMessage}
         onSolveTicket={handleSolveTicket}
       />

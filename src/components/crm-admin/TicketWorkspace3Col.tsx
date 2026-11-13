@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -9,6 +9,7 @@ import {
   Monitor,
   Send,
   Sparkles,
+  UserCheck,
 } from 'lucide-react';
 import {
   CATEGORY_LABEL,
@@ -31,9 +32,13 @@ import { AppBadge } from '../common/AppBadge';
 import { PriorityBadge } from '../common/PriorityBadge';
 import { ScreenshotUploader } from '../common/ScreenshotUploader';
 import { StatusBadge } from '../common/StatusBadge';
+import { SlaBadge } from '../common/SlaBadge';
+import { MessageToolbar } from '../common/MessageToolbar';
+import { FormattedMessage } from '../common/FormattedMessage';
 import { CannedResponsePicker } from './CannedResponsePicker';
 import { CustomerProfileCard } from './CustomerProfileCard';
 import { useToast } from '../../context/ToastContext';
+import { useCrm } from '../../context/CrmContext';
 
 interface Props {
   ticket: Ticket;
@@ -43,6 +48,7 @@ interface Props {
   onStatusChange: (status: TicketStatus) => void;
   onPriorityChange: (priority: TicketPriority) => void;
   onCategoryChange: (category: TicketCategory) => void;
+  onAssignTicket?: (assignee: { id?: string; name?: string; role?: string } | null) => void;
   onSendMessage: (body: string, isInternalNote: boolean, attachments: string[], nextStatus?: TicketStatus) => void;
   onSolveTicket: (resolution: string, attachments: string[]) => void;
 }
@@ -63,15 +69,18 @@ export function TicketWorkspace3Col({
   onStatusChange,
   onPriorityChange,
   onCategoryChange,
+  onAssignTicket,
   onSendMessage,
   onSolveTicket,
 }: Props) {
+  const { adminActor } = useCrm();
   const toast = useToast();
   const [composerMode, setComposerMode] = useState<'public' | 'internal'>('public');
   const [body, setBody] = useState('');
   const [attachments, setAttachments] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   React.useEffect(() => {
     if (!lightboxImg) return;
@@ -251,6 +260,44 @@ export function TicketWorkspace3Col({
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Target SLA */}
+            <div className="flex items-center justify-between border-t border-line/60 pt-2.5">
+              <span className="text-[11px] font-medium text-ink-muted">Target SLA</span>
+              <SlaBadge ticket={ticket} />
+            </div>
+
+            {/* Petugas PIC */}
+            <div className="border-t border-line/60 pt-2.5">
+              <div className="flex items-center justify-between">
+                <label className="block text-[11px] font-medium text-ink-muted">Petugas (PIC)</label>
+                {onAssignTicket && (
+                  ticket.assignedTo !== adminActor.id ? (
+                    <button
+                      type="button"
+                      onClick={() => onAssignTicket({ id: adminActor.id, name: adminActor.name, role: adminActor.role })}
+                      className="text-[10px] font-semibold text-ink hover:underline"
+                    >
+                      Tugaskan ke Saya
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => onAssignTicket(null)}
+                      className="text-[10px] text-red-600 hover:underline"
+                    >
+                      Lepas Tugas
+                    </button>
+                  )
+                )}
+              </div>
+              <div className="mt-1 flex items-center gap-1.5 rounded border border-line bg-canvas px-2.5 py-1.5 text-xs">
+                <span className={`h-2 w-2 rounded-full ${ticket.assignedTo ? 'bg-emerald-600' : 'bg-neutral-400'}`} />
+                <span className="font-medium text-ink truncate">
+                  {ticket.assignedToName || 'Belum ditugaskan'}
+                </span>
+              </div>
             </div>
 
             <div className="border-t border-line pt-3 space-y-1.5 text-[11px] text-ink-muted">
@@ -442,9 +489,9 @@ export function TicketWorkspace3Col({
                       </span>
                     </div>
 
-                    <p className="mt-2.5 whitespace-pre-wrap text-xs leading-relaxed text-ink pl-8">
-                      {m.body}
-                    </p>
+                    <div className="mt-2.5 pl-8 text-xs leading-relaxed text-ink">
+                      <FormattedMessage text={m.body} />
+                    </div>
 
                     {m.attachments && m.attachments.length > 0 && (
                       <div className="mt-2.5 pl-8 flex flex-wrap gap-2">
@@ -522,19 +569,27 @@ export function TicketWorkspace3Col({
             </div>
           )}
 
-          {/* Text Area */}
-          <textarea
-            rows={4}
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={
-              composerMode === 'internal'
-                ? 'Tulis catatan teknis rahasia (hanya terlihat oleh Superadmin di CRM)... Tekan Ctrl+Enter untuk menyimpan.'
-                : 'Tulis balasan atau instruksi untuk pelapor... Tekan Ctrl+Enter untuk mengirim.'
-            }
-            className="mt-3 w-full rounded border border-line bg-canvas p-3 text-xs leading-relaxed text-ink placeholder:text-ink-faint focus:border-ink focus:bg-panel focus:outline-none"
-          />
+          {/* Text Area with Formatting Toolbar */}
+          <div className="mt-3 overflow-hidden rounded border border-line focus-within:border-ink">
+            <MessageToolbar
+              textareaRef={textareaRef}
+              value={body}
+              onChange={setBody}
+            />
+            <textarea
+              ref={textareaRef}
+              rows={4}
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={
+                composerMode === 'internal'
+                  ? 'Tulis catatan teknis rahasia (hanya terlihat oleh Superadmin di CRM)... Tekan Ctrl+Enter untuk menyimpan.'
+                  : 'Tulis balasan atau instruksi untuk pelapor... Tekan Ctrl+Enter untuk mengirim.'
+              }
+              className="w-full bg-canvas p-3 text-xs leading-relaxed text-ink placeholder:text-ink-faint focus:bg-panel focus:outline-none"
+            />
+          </div>
 
           <div className="mt-2.5">
             <ScreenshotUploader

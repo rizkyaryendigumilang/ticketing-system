@@ -24,6 +24,7 @@ export function AdminTicketsPage() {
     (searchParams.get('status') as TicketStatus | 'active' | 'all') ?? 'all',
   );
   const [selectedPriority, setSelectedPriority] = useState<TicketPriority | 'all'>('all');
+  const [assignedFilter, setAssignedFilter] = useState<'all' | 'me' | 'unassigned'>('all');
   const [searchQuery, setSearchQuery] = useState(
     searchParams.get('q') || searchParams.get('search') || '',
   );
@@ -101,6 +102,8 @@ export function AdminTicketsPage() {
           selectedApp={selectedApp}
           selectedStatus={selectedStatus}
           selectedPriority={selectedPriority}
+          assignedFilter={assignedFilter}
+          onAssignedFilterChange={setAssignedFilter}
           searchQuery={searchQuery}
           onAppChange={handleAppChange}
           onStatusChange={setSelectedStatus}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, ExternalLink, MessageSquare, Send, Sparkles, Star } from 'lucide-react';
 import { CATEGORY_LABEL, STATUS_LABEL } from '../../config/vpsAppsConfig';
@@ -9,6 +9,8 @@ import type { TicketStatus } from '../../types/crm';
 import { PriorityBadge } from '../../components/common/PriorityBadge';
 import { ScreenshotUploader } from '../../components/common/ScreenshotUploader';
 import { StatusBadge } from '../../components/common/StatusBadge';
+import { FormattedMessage } from '../../components/common/FormattedMessage';
+import { MessageToolbar } from '../../components/common/MessageToolbar';
 import { useToast } from '../../context/ToastContext';
 
 const STEPS: TicketStatus[] = ['open', 'in_progress', 'waiting_on_user', 'solved'];
@@ -24,6 +26,7 @@ export function PortalTicketViewPage() {
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
   const [csatRating, setCsatRating] = useState<number>(0);
   const [csatComment, setCsatComment] = useState<string>('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const ticket = data.tickets.find((t) => t.id === id) ?? null;
 
@@ -363,7 +366,9 @@ export function PortalTicketViewPage() {
                     </div>
                     <span className="text-[11px] text-ink-faint">{timeAgo(m.createdAt)}</span>
                   </div>
-                  <p className="mt-2.5 pl-8 whitespace-pre-wrap text-xs leading-relaxed text-ink font-sans">{m.body}</p>
+                  <div className="mt-2.5 pl-8 text-xs leading-relaxed text-ink font-sans">
+                    <FormattedMessage text={m.body} />
+                  </div>
                   {m.attachments && m.attachments.length > 0 && (
                     <div className="mt-2.5 pl-8 flex flex-wrap gap-2">
                       {m.attachments.map((src, i) => (
@@ -396,15 +401,23 @@ export function PortalTicketViewPage() {
           </label>
         </div>
 
-        <textarea
-          id="portal-reply"
-          rows={3}
-          value={replyBody}
-          onChange={(e) => setReplyBody(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Tulis balasan untuk Superadmin... Tekan Ctrl+Enter untuk langsung mengirim."
-          className="w-full rounded border border-line bg-canvas p-3 text-xs leading-relaxed text-ink placeholder:text-ink-faint focus:border-ink focus:bg-panel focus:outline-none"
-        />
+        <div className="overflow-hidden rounded border border-line focus-within:border-ink">
+          <MessageToolbar
+            textareaRef={textareaRef}
+            value={replyBody}
+            onChange={setReplyBody}
+          />
+          <textarea
+            ref={textareaRef}
+            id="portal-reply"
+            rows={3}
+            value={replyBody}
+            onChange={(e) => setReplyBody(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Tulis balasan untuk Superadmin... Tekan Ctrl+Enter untuk langsung mengirim."
+            className="w-full bg-canvas p-3 text-xs leading-relaxed text-ink placeholder:text-ink-faint focus:bg-panel focus:outline-none"
+          />
+        </div>
 
         <ScreenshotUploader attachments={attachments} onChange={setAttachments} />
 

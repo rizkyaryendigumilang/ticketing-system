@@ -79,6 +79,24 @@ export function changeTicket(ticket: Ticket, patch: Partial<Pick<Ticket, 'status
   if (statusChanged) postMessage(ticket.id, 'system', `${actor.name} mengubah status ke ${STATUS_LABEL[patch.status!]}.`);
 }
 
+/** Assigns or reassigns a ticket to a support agent. */
+export function assignTicket(
+  ticket: Ticket,
+  assignee: { id?: string; name?: string; role?: string } | null,
+  actor: Actor,
+) {
+  const patch = {
+    assignedTo: assignee?.id || undefined,
+    assignedToName: assignee?.name || undefined,
+    assignedToRole: assignee?.role || undefined,
+  };
+  patchTicket(ticket, patch, actor);
+  const logMsg = assignee?.name
+    ? `${actor.name} menugaskan tiket ke ${assignee.name}.`
+    : `${actor.name} membatalkan penugasan tiket.`;
+  postMessage(ticket.id, 'system', logMsg);
+}
+
 export function replyToTicket(
   ticket: Ticket,
   actor: Actor,

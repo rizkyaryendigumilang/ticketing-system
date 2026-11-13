@@ -2,6 +2,7 @@ import { Lock } from 'lucide-react';
 import { timeAgo } from '../../services/crmLogic';
 import type { TicketMessage } from '../../types/crm';
 import { AttachmentGrid } from './AttachmentGrid';
+import { FormattedMessage } from './FormattedMessage';
 
 interface Props {
   messages: TicketMessage[];
@@ -46,7 +47,9 @@ export function MessageThread({ messages, selfId, emptyText }: Props) {
                 {timeAgo(m.createdAt)}
               </time>
             </div>
-            <p className="mt-1.5 max-w-prose whitespace-pre-wrap text-sm leading-relaxed">{m.body}</p>
+            <div className="mt-1.5 max-w-prose text-sm leading-relaxed text-ink">
+              <FormattedMessage text={m.body} />
+            </div>
             {m.attachments && m.attachments.length > 0 && (
               <div className="mt-2">
                 <AttachmentGrid urls={m.attachments} size="sm" />

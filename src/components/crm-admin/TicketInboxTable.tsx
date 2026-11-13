@@ -12,6 +12,7 @@ import type { Ticket, TicketMessage, TicketPriority, TicketStatus } from '../../
 import { AppBadge } from '../common/AppBadge';
 import { PriorityBadge } from '../common/PriorityBadge';
 import { StatusBadge } from '../common/StatusBadge';
+import { SlaBadge } from '../common/SlaBadge';
 import { useCrm } from '../../context/CrmContext';
 
 interface Props {
@@ -21,6 +22,8 @@ interface Props {
   selectedStatus: TicketStatus | 'active' | 'all';
   selectedPriority: TicketPriority | 'all';
   searchQuery: string;
+  assignedFilter?: 'all' | 'me' | 'unassigned';
+  onAssignedFilterChange?: (filter: 'all' | 'me' | 'unassigned') => void;
   onAppChange: (appId: string) => void;
   onStatusChange: (status: TicketStatus | 'active' | 'all') => void;
   onPriorityChange: (priority: TicketPriority | 'all') => void;
@@ -36,6 +39,8 @@ export function TicketInboxTable({
   selectedStatus,
   selectedPriority,
   searchQuery,
+  assignedFilter = 'all',
+  onAssignedFilterChange,
   onAppChange,
   onStatusChange,
   onPriorityChange,
@@ -43,7 +48,10 @@ export function TicketInboxTable({
   onTicketClick,
   onQuickStatusChange,
 }: Props) {
-  const { t, statusLabel, priorityLabel, categoryLabel } = useCrm();
+  const { t, statusLabel, priorityLabel, categoryLabel, adminActor } = useCrm();
+
+  const myCount = tickets.filter((t) => t.assignedTo === adminActor.id).length;
+  const unassignedCount = tickets.filter((t) => !t.assignedTo).length;
 
   const filtered = sortQueue(
     filterTickets(tickets, {
@@ -51,6 +59,8 @@ export function TicketInboxTable({
       status: selectedStatus,
       priority: selectedPriority,
       search: searchQuery,
+      assignedFilter,
+      currentAdminId: adminActor.id,
       messages,
     }),
   );
@@ -69,7 +79,47 @@ export function TicketInboxTable({
   };
 
   return (
-    <div className="rounded border border-line bg-panel">
+    <div className="rounded border border-line bg-panel overflow-hidden">
+      {/* Assignment Filter Tabs */}
+      {onAssignedFilterChange && (
+        <div className="flex items-center gap-1.5 border-b border-line bg-subtle/40 px-3 py-2 text-xs">
+          <span className="font-semibold text-ink-muted text-[11px] mr-1">Penugasan:</span>
+          <button
+            type="button"
+            onClick={() => onAssignedFilterChange('all')}
+            className={`rounded px-2.5 py-1 font-medium transition-colors ${
+              assignedFilter === 'all'
+                ? 'bg-ink text-white shadow-xs'
+                : 'text-ink-muted hover:text-ink hover:bg-subtle'
+            }`}
+          >
+            Semua ({tickets.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => onAssignedFilterChange('me')}
+            className={`rounded px-2.5 py-1 font-medium transition-colors ${
+              assignedFilter === 'me'
+                ? 'bg-ink text-white shadow-xs'
+                : 'text-ink-muted hover:text-ink hover:bg-subtle'
+            }`}
+          >
+            Ditugaskan ke Saya ({myCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => onAssignedFilterChange('unassigned')}
+            className={`rounded px-2.5 py-1 font-medium transition-colors ${
+              assignedFilter === 'unassigned'
+                ? 'bg-ink text-white shadow-xs'
+                : 'text-ink-muted hover:text-ink hover:bg-subtle'
+            }`}
+          >
+            Belum Ditugaskan ({unassignedCount})
+          </button>
+        </div>
+      )}
+
       {/* Filter Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-2.5 border-b border-line p-3">
         <div className="flex flex-1 flex-wrap items-center gap-2">
@@ -180,7 +230,9 @@ export function TicketInboxTable({
                 <th className="px-2 py-2.5">{t('tickets.colSubject')}</th>
                 <th className="px-2 py-2.5">{t('tickets.colRequester')}</th>
                 <th className="px-2 py-2.5">{t('tickets.colPriority')}</th>
+                <th className="px-2 py-2.5">SLA</th>
                 <th className="px-2 py-2.5">{t('tickets.colStatus')}</th>
+                <th className="px-2 py-2.5">Petugas (PIC)</th>
                 <th className="py-2.5 pl-2 pr-4 text-right">{t('tickets.colTime')}</th>
               </tr>
             </thead>
@@ -243,6 +295,10 @@ export function TicketInboxTable({
                       <PriorityBadge priority={ticket.priority} />
                     </td>
 
+                    <td className="whitespace-nowrap px-2 py-3">
+                      <SlaBadge ticket={ticket} />
+                    </td>
+
                     <td
                       className="whitespace-nowrap px-2 py-3"
                       onClick={(e) => e.stopPropagation()}
@@ -270,6 +326,17 @@ export function TicketInboxTable({
                         </div>
                       ) : (
                         <StatusBadge status={ticket.status} />
+                      )}
+                    </td>
+
+                    <td className="whitespace-nowrap px-2 py-3">
+                      {ticket.assignedToName ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-subtle px-2 py-0.5 text-[11px] font-medium text-ink">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
+                          {ticket.assignedToName}
+                        </span>
+                      ) : (
+                        <span className="text-[11px] text-ink-faint italic">Belum ditugaskan</span>
                       )}
                     </td>
 

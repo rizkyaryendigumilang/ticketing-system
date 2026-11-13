@@ -1,27 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ImagePlus, X } from 'lucide-react';
-
-const MAX_EDGE = 1600;
-
-/** Downscale to max 1600 px JPEG so screenshots stay small enough for localStorage and upload. */
-async function compress(file: File): Promise<string | null> {
-  try {
-    const bitmap = await createImageBitmap(file);
-    const scale = Math.min(1, MAX_EDGE / Math.max(bitmap.width, bitmap.height));
-    const canvas = document.createElement('canvas');
-    canvas.width = Math.round(bitmap.width * scale);
-    canvas.height = Math.round(bitmap.height * scale);
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
-    ctx.fillStyle = '#fff'; // JPEG has no transparency
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-    return canvas.toDataURL('image/jpeg', 0.85);
-  } catch (err) {
-    console.warn('Gagal memproses gambar screenshot:', file.name, err);
-    return null;
-  }
-}
+import { compressImage } from '../../services/imageCompression';
 
 const images = (files: FileList | File[] | null | undefined) =>
   Array.from(files ?? []).filter((f) => f.type.startsWith('image/'));
@@ -45,7 +24,7 @@ export function ScreenshotUploader({ attachments, onChange, max = 5 }: Props) {
       const { attachments: current, onChange: update } = latest.current;
       const picked = files.slice(0, max - current.length);
       if (picked.length) {
-        const compressed = await Promise.all(picked.map(compress));
+        const compressed = await Promise.all(picked.map((f) => compressImage(f)));
         const valid = compressed.filter((img): img is string => Boolean(img));
         if (valid.length) update([...current, ...valid]);
       }

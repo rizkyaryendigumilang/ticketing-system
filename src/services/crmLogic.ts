@@ -144,6 +144,8 @@ export interface TicketFilter {
   priority?: TicketPriority | 'all';
   search?: string;
   messages?: TicketMessage[];
+  assignedFilter?: 'all' | 'me' | 'unassigned';
+  currentAdminId?: string;
 }
 
 export function filterTickets(tickets: Ticket[], f: TicketFilter): Ticket[] {
@@ -153,12 +155,78 @@ export function filterTickets(tickets: Ticket[], f: TicketFilter): Ticket[] {
       (!f.appId || f.appId === 'all' || t.appId === f.appId) &&
       (!f.status || f.status === 'all' || (f.status === 'active' ? ACTIVE_STATUSES.includes(t.status) : t.status === f.status)) &&
       (!f.priority || f.priority === 'all' || t.priority === f.priority) &&
+      (!f.assignedFilter || f.assignedFilter === 'all' ||
+        (f.assignedFilter === 'unassigned'
+          ? !t.assignedTo
+          : f.currentAdminId
+          ? t.assignedTo === f.currentAdminId
+          : Boolean(t.assignedTo))) &&
       (!q ||
-        [t.ticketNumber, t.subject, t.description, t.requesterName, t.requesterUid].some((v) =>
+        [t.ticketNumber, t.subject, t.description, t.requesterName, t.requesterUid, t.assignedToName].some((v) =>
           (v ?? '').toLowerCase().includes(q),
         ) ||
         Boolean(f.messages?.some((m) => m.ticketId === t.id && m.body.toLowerCase().includes(q)))),
   );
+}
+
+export type SlaStatus = 'on_track' | 'warning' | 'breached' | 'achieved';
+
+export interface SlaInfo {
+  deadline: number;
+  durationMs: number;
+  remainingMs: number;
+  status: SlaStatus;
+  label: string;
+}
+
+export const SLA_DURATIONS: Record<TicketPriority, number> = {
+  urgent: 2 * 3600 * 1000,   // 2 jam
+  high: 6 * 3600 * 1000,     // 6 jam
+  medium: 24 * 3600 * 1000,  // 24 jam
+  low: 48 * 3600 * 1000,     // 48 jam
+};
+
+export function computeTicketSla(ticket: Ticket, now = Date.now()): SlaInfo {
+  const durationMs = SLA_DURATIONS[ticket.priority] || SLA_DURATIONS.medium;
+  const createdMs = Date.parse(ticket.createdAt);
+  const deadline = createdMs + durationMs;
+
+  // If already solved or closed, check if solved within deadline
+  if (ticket.status === 'solved' || ticket.status === 'closed') {
+    const solvedMs = ticket.solvedAt ? Date.parse(ticket.solvedAt) : Date.parse(ticket.updatedAt || ticket.createdAt);
+    const achieved = solvedMs <= deadline;
+    return {
+      deadline,
+      durationMs,
+      remainingMs: 0,
+      status: achieved ? 'achieved' : 'breached',
+      label: achieved ? 'SLA Tercapai' : 'SLA Terlewat',
+    };
+  }
+
+  const remainingMs = deadline - now;
+  if (remainingMs <= 0) {
+    const overdueMinutes = Math.abs(Math.round(remainingMs / 60_000));
+    return {
+      deadline,
+      durationMs,
+      remainingMs,
+      status: 'breached',
+      label: overdueMinutes < 60 ? `Lewat ${overdueMinutes}m` : `Lewat ${Math.round(overdueMinutes / 60)}j`,
+    };
+  }
+
+  const warningThreshold = Math.min(30 * 60_000, durationMs * 0.2);
+  const isWarning = remainingMs <= warningThreshold;
+  const remMinutes = Math.round(remainingMs / 60_000);
+
+  return {
+    deadline,
+    durationMs,
+    remainingMs,
+    status: isWarning ? 'warning' : 'on_track',
+    label: remMinutes < 60 ? `${remMinutes}m tersisa` : `${Math.floor(remMinutes / 60)}j ${remMinutes % 60}m`,
+  };
 }
 
 export type StatusCounts = Record<TicketStatus, number>;

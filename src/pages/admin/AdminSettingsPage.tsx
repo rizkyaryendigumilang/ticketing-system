@@ -34,6 +34,7 @@ import {
 import { CANNED_RESPONSES, CATEGORY_LABEL, VPS_APPS } from '../../config/vpsAppsConfig';
 import { useCrm } from '../../context/CrmContext';
 import { useToast } from '../../context/ToastContext';
+import { pruneOldClosedTickets } from '../../services/storageService';
 import type { CannedResponse } from '../../types/crm';
 import { IntegrationTabContent } from './AdminIntegrationPage';
 
@@ -1236,6 +1237,20 @@ export function AdminSettingsPage() {
                   >
                     <Download className="h-4 w-4" />
                     Unduh Snapshot JSON
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirm('Bersihkan tiket berstatus selesai/ditutup yang berusia lebih dari 60 hari dari penyimpanan lokal?')) {
+                        const count = pruneOldClosedTickets(60);
+                        toast.success(`${count} tiket lama berhasil dibersihkan dari penyimpanan lokal.`);
+                      }
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded border border-line bg-subtle px-3 py-2 text-xs font-medium text-ink hover:border-line-strong active:scale-95 transition-all"
+                  >
+                    <Trash2 className="h-4 w-4 text-ink-muted" />
+                    Pangkas Tiket Lama (&gt;60 hari)
                   </button>
 
                   <button

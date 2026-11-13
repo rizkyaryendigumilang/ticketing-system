@@ -159,6 +159,39 @@ export function resetToSeed() {
   commit(seed());
 }
 
+/**
+ * Prunes closed tickets older than maxDays from local memory to save browser storage.
+ * Returns count of pruned tickets.
+ */
+export function pruneOldClosedTickets(maxDays = 60): number {
+  const cutoff = Date.now() - maxDays * 86_400_000;
+  const toKeep: Ticket[] = [];
+  const removedIds = new Set<string>();
+
+  for (const t of data.tickets) {
+    const isOldClosed =
+      (t.status === 'closed' || t.status === 'solved') &&
+      Date.parse(t.updatedAt || t.createdAt) < cutoff;
+
+    if (isOldClosed) {
+      removedIds.add(t.id);
+    } else {
+      toKeep.push(t);
+    }
+  }
+
+  if (removedIds.size === 0) return 0;
+
+  const keptMessages = data.messages.filter((m) => !removedIds.has(m.ticketId));
+  commit({
+    ...data,
+    tickets: toKeep,
+    messages: keptMessages,
+  });
+
+  return removedIds.size;
+}
+
 let settings = read<SystemSettings>(SETTINGS_KEY, () => DEFAULT_SETTINGS);
 export const getSettings = () => settings;
 export function saveSettings(next: SystemSettings) {
