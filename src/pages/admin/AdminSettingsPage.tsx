@@ -5,6 +5,7 @@ import {
   Clock,
   Database,
   Globe,
+  HelpCircle,
   Info,
   MessageSquareQuote,
   Search,
@@ -12,6 +13,8 @@ import {
   SlidersHorizontal,
   TerminalSquare,
   User,
+  UserCheck,
+  Users,
 } from 'lucide-react';
 import { useCrm } from '../../context/CrmContext';
 import { AccountTab } from '../../components/crm-admin/settings/AccountTab';
@@ -24,17 +27,23 @@ import { StorageTab } from '../../components/crm-admin/settings/StorageTab';
 import { AutomationsTab } from '../../components/crm-admin/settings/AutomationsTab';
 import { CannedResponsesTab } from '../../components/crm-admin/settings/CannedResponsesTab';
 import { AboutSystemTab } from '../../components/crm-admin/settings/AboutSystemTab';
+import { TeamTab } from '../../components/crm-admin/settings/TeamTab';
+import { ContactsTab } from '../../components/crm-admin/settings/ContactsTab';
+import { SupportTab } from '../../components/crm-admin/settings/SupportTab';
 
 export type TabKey =
   | 'account'
   | 'preferences'
   | 'appearance'
   | 'notifications'
+  | 'team'
+  | 'contacts'
   | 'security'
   | 'integrations'
   | 'storage'
   | 'automation'
   | 'canned'
+  | 'support'
   | 'about';
 
 interface NavItemDef {
@@ -97,6 +106,26 @@ export function AdminSettingsPage() {
         ],
       },
       {
+        titleKey: 'settings.groupTeam',
+        defaultTitle: 'Tim & Pelapor',
+        items: [
+          {
+            key: 'team',
+            labelKey: 'settings.tabTeam',
+            defaultLabel: 'Tim & Otoritas',
+            icon: UserCheck,
+            description: 'Operator helpdesk, hak akses RBAC, dan undangan',
+          },
+          {
+            key: 'contacts',
+            labelKey: 'settings.tabContacts',
+            defaultLabel: 'Kontak Pelapor',
+            icon: Users,
+            description: 'Daftar pelapor terdaftar dari 7 aplikasi ekosistem',
+          },
+        ],
+      },
+      {
         titleKey: 'settings.groupSecurity',
         defaultTitle: 'Keamanan & Integrasi',
         items: [
@@ -125,7 +154,7 @@ export function AdminSettingsPage() {
       },
       {
         titleKey: 'settings.groupOperations',
-        defaultTitle: 'Operasional & Sistem',
+        defaultTitle: 'Operasional & Bantuan',
         items: [
           {
             key: 'automation',
@@ -140,6 +169,13 @@ export function AdminSettingsPage() {
             defaultLabel: 'Template Balasan',
             icon: MessageSquareQuote,
             description: 'Template respon cepat untuk agen helpdesk',
+          },
+          {
+            key: 'support',
+            labelKey: 'settings.tabSupport',
+            defaultLabel: 'Bantuan & FAQ',
+            icon: HelpCircle,
+            description: 'Tanya jawab umum, panduan solusi, dan eskalasi',
           },
           {
             key: 'about',
@@ -276,11 +312,14 @@ export function AdminSettingsPage() {
           {activeTab === 'preferences' && <PreferencesTab />}
           {activeTab === 'appearance' && <AppearanceTab />}
           {activeTab === 'notifications' && <NotificationsTab />}
+          {activeTab === 'team' && <TeamTab />}
+          {activeTab === 'contacts' && <ContactsTab />}
           {activeTab === 'security' && <SecurityTab />}
           {activeTab === 'integrations' && <IntegrationsTab />}
           {activeTab === 'storage' && <StorageTab />}
           {activeTab === 'automation' && <AutomationsTab />}
           {activeTab === 'canned' && <CannedResponsesTab />}
+          {activeTab === 'support' && <SupportTab />}
           {activeTab === 'about' && <AboutSystemTab />}
         </div>
       </div>

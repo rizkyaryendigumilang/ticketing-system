@@ -5,13 +5,11 @@ import { AdminCrmLayout } from './components/layout/AdminCrmLayout';
 import { UserPortalLayout } from './components/layout/UserPortalLayout';
 import { HandoffRedirectPage } from './pages/HandoffRedirectPage';
 import { LoginPage } from './pages/LoginPage';
-import { AdminContactsPage } from './pages/admin/AdminContactsPage';
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage';
 import { AdminSettingsPage } from './pages/admin/AdminSettingsPage';
 import { AdminTicketDetailPage } from './pages/admin/AdminTicketDetailPage';
 import { AdminTicketsPage } from './pages/admin/AdminTicketsPage';
 import { AdminAnalyticsPage } from './pages/admin/AdminAnalyticsPage';
-import { AdminTeamPage } from './pages/admin/AdminTeamPage';
 import { AdminSupportPage } from './pages/admin/AdminSupportPage';
 import { PortalHomePage } from './pages/portal/PortalHomePage';
 import { PortalNewTicketPage } from './pages/portal/PortalNewTicketPage';
@@ -60,9 +58,9 @@ export default function App() {
         <Route path="tickets" element={<AdminTicketsPage />} />
         <Route path="tickets/:id" element={<AdminTicketDetailPage />} />
         <Route path="analytics" element={<AdminAnalyticsPage />} />
-        <Route path="team" element={<AdminTeamPage />} />
-        <Route path="support" element={<AdminSupportPage />} />
-        <Route path="contacts" element={<AdminContactsPage />} />
+        <Route path="team" element={<Navigate to="/admin/settings?tab=team" replace />} />
+        <Route path="support" element={<Navigate to="/admin/settings?tab=support" replace />} />
+        <Route path="contacts" element={<Navigate to="/admin/settings?tab=contacts" replace />} />
         <Route path="integrations" element={<Navigate to="/admin/settings?tab=integrations" replace />} />
         <Route path="settings" element={<AdminSettingsPage />} />
       </Route>

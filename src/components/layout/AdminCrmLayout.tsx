@@ -5,7 +5,6 @@ import {
   Bell,
   ChevronDown,
   ExternalLink,
-  HelpCircle,
   Inbox,
   LayoutDashboard,
   LogOut,
@@ -14,8 +13,6 @@ import {
   RefreshCw,
   Search,
   Settings,
-  UserCheck,
-  Users,
 } from 'lucide-react';
 import { VPS_APPS } from '../../config/vpsAppsConfig';
 import { useCrm } from '../../context/CrmContext';
@@ -67,9 +64,6 @@ export function AdminCrmLayout() {
     { to: '/admin', end: true, icon: LayoutDashboard, label: t('nav.dashboard') },
     { to: '/admin/tickets', end: false, icon: Inbox, label: t('nav.tickets'), badgeKey: 'open' },
     { to: '/admin/analytics', end: false, icon: BarChart3, label: 'Analitik & Laporan' },
-    { to: '/admin/team', end: false, icon: UserCheck, label: 'Tim & Otoritas' },
-    { to: '/admin/support', end: false, icon: HelpCircle, label: 'Bantuan & FAQ' },
-    { to: '/admin/contacts', end: false, icon: Users, label: t('nav.contacts') },
     { to: '/admin/settings', end: false, icon: Settings, label: t('nav.settings') },
   ];
 

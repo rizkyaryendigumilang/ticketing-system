@@ -14,7 +14,7 @@ export function ServerErrorPage() {
       description="Layanan backend PocketBase atau proxy Caddy mengalami kendala saat memproses permintaan ini."
       icon={<AlertOctagon className="h-8 w-8 text-red-600" />}
       primaryAction={{ label: 'Muat Ulang Halaman', onClick: handleReload }}
-      secondaryAction={{ label: 'Status Server & Bantuan', to: '/admin/support' }}
+      secondaryAction={{ label: 'Status Server & Bantuan', to: '/admin/settings?tab=support' }}
       details={
         <dl className="space-y-1 font-mono text-[11px]">
           <div className="flex justify-between">

@@ -2,13 +2,16 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   AppWindow,
+  BarChart3,
   ExternalLink,
   Globe,
+  HelpCircle,
   Inbox,
   LayoutDashboard,
   Search,
   Settings,
   Ticket as TicketIcon,
+  UserCheck,
   Users,
   X,
 } from 'lucide-react';
@@ -90,13 +93,46 @@ export function CommandPalette({ open, onClose }: Props) {
         },
       },
       {
+        id: 'nav-analytics',
+        category: 'Navigasi',
+        title: 'Analitik & Laporan',
+        subtitle: 'Grafik tren, SLA performa, dan metrik aplikasi',
+        icon: BarChart3,
+        action: () => {
+          navigate('/admin/analytics');
+          onClose();
+        },
+      },
+      {
+        id: 'nav-team',
+        category: 'Navigasi',
+        title: 'Tim & Otoritas',
+        subtitle: 'Kelola peran RBAC, staf operator, dan undangan (Pengaturan)',
+        icon: UserCheck,
+        action: () => {
+          navigate('/admin/settings?tab=team');
+          onClose();
+        },
+      },
+      {
         id: 'nav-contacts',
         category: 'Navigasi',
         title: t('nav.contacts') || 'Kontak Pelapor',
-        subtitle: 'Daftar pengguna dan identitas pelapor',
+        subtitle: 'Daftar pengguna ekosistem dan composite key (Pengaturan)',
         icon: Users,
         action: () => {
-          navigate('/admin/contacts');
+          navigate('/admin/settings?tab=contacts');
+          onClose();
+        },
+      },
+      {
+        id: 'nav-support',
+        category: 'Navigasi',
+        title: 'Bantuan & FAQ',
+        subtitle: 'Tanya jawab umum, basis solusi, dan kontak darurat (Pengaturan)',
+        icon: HelpCircle,
+        action: () => {
+          navigate('/admin/settings?tab=support');
           onClose();
         },
       },
