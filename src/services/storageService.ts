@@ -15,7 +15,12 @@ export interface SystemSettings {
   outboundWebhookEnabled: boolean;
   outboundWebhookUrl: string;
   autoCloseDays: number;
+  autoCloseEnabled: boolean;
   language: 'id' | 'en';
+  timezone: string;
+  uiDensity: 'comfortable' | 'compact';
+  defaultView: 'dashboard' | 'tickets';
+  theme: 'light' | 'dark' | 'system';
 }
 
 export const DEFAULT_SETTINGS: SystemSettings = {
@@ -30,7 +35,12 @@ export const DEFAULT_SETTINGS: SystemSettings = {
   outboundWebhookEnabled: false,
   outboundWebhookUrl: '',
   autoCloseDays: 7,
+  autoCloseEnabled: true,
   language: 'id',
+  timezone: 'Asia/Jakarta',
+  uiDensity: 'comfortable',
+  defaultView: 'dashboard',
+  theme: 'light',
 };
 
 export interface CrmData {
