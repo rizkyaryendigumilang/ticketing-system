@@ -91,13 +91,6 @@ export const PERMISSION_DEFINITIONS: PermissionDefinition[] = [
     description: 'Dapat mengunduh snapshot JSON database dan ekspor laporan CSV.',
     allowedRoles: ['superadmin'],
   },
-  {
-    key: 'billing.view',
-    category: 'Infrastruktur & Kuota',
-    label: 'Kelola Kuota & Atribusi VPS',
-    description: 'Dapat memantau penggunaan storage, RAM, dan alokasi biaya per aplikasi.',
-    allowedRoles: ['superadmin'],
-  },
 ];
 
 function hasLocalStorage(): boolean {

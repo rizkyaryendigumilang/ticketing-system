@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react';
-import { Database, Download, Trash2, RotateCcw } from 'lucide-react';
+import { Database, Download, RotateCcw } from 'lucide-react';
 import { useCrm } from '../../../context/CrmContext';
 import { useToast } from '../../../context/ToastContext';
-import { pruneOldClosedTickets } from '../../../services/storageService';
 
 export function StorageTab() {
   const { data, connection, pendingAdminChanges, settings, resetDemo, t } = useCrm();
@@ -53,13 +52,6 @@ export function StorageTab() {
     toast.success('Snapshot database berhasil diunduh.');
   };
 
-  const handlePruneTickets = () => {
-    if (confirm('Bersihkan tiket berstatus selesai/ditutup yang berusia lebih dari 60 hari dari penyimpanan lokal?')) {
-      const count = pruneOldClosedTickets(60);
-      toast.success(`${count} tiket lama berhasil dibersihkan dari penyimpanan lokal.`);
-    }
-  };
-
   const handleResetDemo = () => {
     if (confirm('Kembalikan database demo lokal ke data seed awal?')) {
       resetDemo();
@@ -68,7 +60,7 @@ export function StorageTab() {
 
   return (
     <div className="space-y-6">
-      {/* Local Storage Quota Card */}
+      {/* Storage Status Card */}
       <div className="rounded-lg border border-line bg-panel p-5 shadow-xs">
         <div className="flex items-center gap-2 border-b border-line pb-3">
           <Database className="h-4 w-4 text-ink" />
@@ -109,7 +101,7 @@ export function StorageTab() {
         {/* LocalStorage usage progress */}
         <div className="mt-4 pt-3 border-t border-line text-xs">
           <div className="flex justify-between items-center text-ink-muted">
-            <span>Penggunaan Cache LocalStorage:</span>
+            <span>Penyimpanan Offline LocalStorage:</span>
             <span className="font-mono font-semibold text-ink">
               {storageUsage.kb} KB / ~5,120 KB ({storageUsage.percent}%)
             </span>
@@ -144,15 +136,6 @@ export function StorageTab() {
 
           <button
             type="button"
-            onClick={handlePruneTickets}
-            className="inline-flex items-center gap-1.5 rounded border border-line bg-subtle px-3 py-2 text-xs font-medium text-ink hover:border-line-strong active:scale-95 transition-all"
-          >
-            <Trash2 className="h-4 w-4 text-ink-muted" />
-            Pangkas Tiket Lama (&gt;60 hari)
-          </button>
-
-          <button
-            type="button"
             onClick={handleResetDemo}
             className="inline-flex items-center gap-1.5 rounded border border-line bg-subtle px-3 py-2 text-xs font-medium text-ink hover:border-line-strong active:scale-95 transition-all"
           >
@@ -176,7 +159,7 @@ export function StorageTab() {
           </div>
           <div className="flex justify-between gap-1">
             <dt className="text-ink-muted">Masa Retensi:</dt>
-            <dd className="text-ink">14 Hari (Pembersihan otomatis file lama)</dd>
+            <dd className="text-ink">14 Hari (Rotasi file backup otomatis)</dd>
           </div>
         </dl>
       </div>

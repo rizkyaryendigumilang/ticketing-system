@@ -12,7 +12,6 @@ import { AdminTicketDetailPage } from './pages/admin/AdminTicketDetailPage';
 import { AdminTicketsPage } from './pages/admin/AdminTicketsPage';
 import { AdminAnalyticsPage } from './pages/admin/AdminAnalyticsPage';
 import { AdminTeamPage } from './pages/admin/AdminTeamPage';
-import { AdminBillingPage } from './pages/admin/AdminBillingPage';
 import { AdminSupportPage } from './pages/admin/AdminSupportPage';
 import { PortalHomePage } from './pages/portal/PortalHomePage';
 import { PortalNewTicketPage } from './pages/portal/PortalNewTicketPage';
@@ -62,7 +61,6 @@ export default function App() {
         <Route path="tickets/:id" element={<AdminTicketDetailPage />} />
         <Route path="analytics" element={<AdminAnalyticsPage />} />
         <Route path="team" element={<AdminTeamPage />} />
-        <Route path="billing" element={<AdminBillingPage />} />
         <Route path="support" element={<AdminSupportPage />} />
         <Route path="contacts" element={<AdminContactsPage />} />
         <Route path="integrations" element={<Navigate to="/admin/settings?tab=integrations" replace />} />
