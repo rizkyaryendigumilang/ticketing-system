@@ -7,13 +7,22 @@ import { HandoffRedirectPage } from './pages/HandoffRedirectPage';
 import { LoginPage } from './pages/LoginPage';
 import { AdminContactsPage } from './pages/admin/AdminContactsPage';
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage';
-import { AdminIntegrationPage } from './pages/admin/AdminIntegrationPage';
 import { AdminSettingsPage } from './pages/admin/AdminSettingsPage';
 import { AdminTicketDetailPage } from './pages/admin/AdminTicketDetailPage';
 import { AdminTicketsPage } from './pages/admin/AdminTicketsPage';
+import { AdminAnalyticsPage } from './pages/admin/AdminAnalyticsPage';
+import { AdminTeamPage } from './pages/admin/AdminTeamPage';
+import { AdminBillingPage } from './pages/admin/AdminBillingPage';
+import { AdminSupportPage } from './pages/admin/AdminSupportPage';
 import { PortalHomePage } from './pages/portal/PortalHomePage';
 import { PortalNewTicketPage } from './pages/portal/PortalNewTicketPage';
 import { PortalTicketViewPage } from './pages/portal/PortalTicketViewPage';
+import { NotFoundPage } from './pages/system/NotFoundPage';
+import { ForbiddenPage } from './pages/system/ForbiddenPage';
+import { ServerErrorPage } from './pages/system/ServerErrorPage';
+import { MaintenancePage } from './pages/system/MaintenancePage';
+import { OfflinePage } from './pages/system/OfflinePage';
+import { SessionExpiredPage } from './pages/system/SessionExpiredPage';
 
 function AdminGuard({ children }: { children: React.ReactNode }) {
   const { admin } = useCrm();
@@ -22,28 +31,6 @@ function AdminGuard({ children }: { children: React.ReactNode }) {
 }
 
 function PortalGuard({ children }: { children: React.ReactNode }) {
-  const { data, requester } = useCrm();
-  if (!requester) {
-    // If there is an existing registered contact (e.g. snackloop:admin), bounce to that contact
-    const defaultUser = data.users.find((u) => u.systemRole === 'requester');
-    if (defaultUser) {
-      const qs = new URLSearchParams({
-        app: defaultUser.appId,
-        uid: defaultUser.externalUid,
-        name: defaultUser.name,
-        role: defaultUser.appRole,
-        ...(defaultUser.lastSeenUrl ? { from_url: defaultUser.lastSeenUrl } : {}),
-      });
-      return <Navigate to={`/handoff?${qs.toString()}`} replace />;
-    }
-    // Fallback default
-    return (
-      <Navigate
-        to="/handoff?app=snackloop&uid=admin&name=admin&role=Owner+%28Super+Admin%29&from_url=https%3A%2F%2F43.156.236.102%2Fsnackloop%2F%23"
-        replace
-      />
-    );
-  }
   return <>{children}</>;
 }
 
@@ -73,6 +60,10 @@ export default function App() {
         <Route index element={<AdminDashboardPage />} />
         <Route path="tickets" element={<AdminTicketsPage />} />
         <Route path="tickets/:id" element={<AdminTicketDetailPage />} />
+        <Route path="analytics" element={<AdminAnalyticsPage />} />
+        <Route path="team" element={<AdminTeamPage />} />
+        <Route path="billing" element={<AdminBillingPage />} />
+        <Route path="support" element={<AdminSupportPage />} />
         <Route path="contacts" element={<AdminContactsPage />} />
         <Route path="integrations" element={<Navigate to="/admin/settings?tab=integrations" replace />} />
         <Route path="settings" element={<AdminSettingsPage />} />
@@ -90,9 +81,19 @@ export default function App() {
         <Route index element={<PortalHomePage />} />
         <Route path="new" element={<PortalNewTicketPage />} />
         <Route path="ticket/:id" element={<PortalTicketViewPage />} />
+        <Route path="help" element={<AdminSupportPage />} />
       </Route>
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* Dedicated System Pages */}
+      <Route path="/404" element={<NotFoundPage />} />
+      <Route path="/403" element={<ForbiddenPage />} />
+      <Route path="/500" element={<ServerErrorPage />} />
+      <Route path="/maintenance" element={<MaintenancePage />} />
+      <Route path="/offline" element={<OfflinePage />} />
+      <Route path="/session-expired" element={<SessionExpiredPage />} />
+
+      {/* Wildcard 404 */}
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }

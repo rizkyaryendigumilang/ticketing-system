@@ -1,8 +1,12 @@
 import { type ComponentType, useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
+  BarChart3,
+  Bell,
   ChevronDown,
+  CreditCard,
   ExternalLink,
+  HelpCircle,
   Inbox,
   LayoutDashboard,
   LogOut,
@@ -11,6 +15,7 @@ import {
   RefreshCw,
   Search,
   Settings,
+  UserCheck,
   Users,
 } from 'lucide-react';
 import { VPS_APPS } from '../../config/vpsAppsConfig';
@@ -18,6 +23,8 @@ import { useCrm } from '../../context/CrmContext';
 import { useToast } from '../../context/ToastContext';
 import { computeStats, countByApp } from '../../services/crmLogic';
 import { flush, isSuperuser } from '../../services/pbClient';
+import { getNotifications, subscribeNotifications, syncTicketAlerts } from '../../services/notificationService';
+import { NotificationCenterDrawer } from '../notifications/NotificationCenterDrawer';
 import { CommandPalette } from '../common/CommandPalette';
 
 type NavItem = {
@@ -35,6 +42,16 @@ export function AdminCrmLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [appsExpanded, setAppsExpanded] = useState(true);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(() => getNotifications().filter((n) => !n.read).length);
+
+  useEffect(() => {
+    syncTicketAlerts(data.tickets);
+    setUnreadCount(getNotifications().filter((n) => !n.read).length);
+    return subscribeNotifications(() => {
+      setUnreadCount(getNotifications().filter((n) => !n.read).length);
+    });
+  }, [data.tickets]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -50,6 +67,10 @@ export function AdminCrmLayout() {
   const navItems: NavItem[] = [
     { to: '/admin', end: true, icon: LayoutDashboard, label: t('nav.dashboard') },
     { to: '/admin/tickets', end: false, icon: Inbox, label: t('nav.tickets'), badgeKey: 'open' },
+    { to: '/admin/analytics', end: false, icon: BarChart3, label: 'Analitik & Laporan' },
+    { to: '/admin/team', end: false, icon: UserCheck, label: 'Tim & Otoritas' },
+    { to: '/admin/billing', end: false, icon: CreditCard, label: 'Kuota & Biaya VPS' },
+    { to: '/admin/support', end: false, icon: HelpCircle, label: 'Bantuan & FAQ' },
     { to: '/admin/contacts', end: false, icon: Users, label: t('nav.contacts') },
     { to: '/admin/settings', end: false, icon: Settings, label: t('nav.settings') },
   ];
@@ -103,6 +124,22 @@ export function AdminCrmLayout() {
             className="flex h-9 w-9 items-center justify-center rounded text-neutral-400 transition-colors hover:bg-rail-hover hover:text-white"
           >
             <Search className="h-4 w-4" />
+          </button>
+
+          {/* Notification Center Trigger */}
+          <button
+            type="button"
+            title={`Pusat Notifikasi & Alert ${unreadCount > 0 ? `(${unreadCount} belum dibaca)` : ''}`}
+            onClick={() => setNotificationsOpen(true)}
+            className="relative flex h-9 w-9 items-center justify-center rounded text-neutral-400 transition-colors hover:bg-rail-hover hover:text-white"
+          >
+            <Bell className="h-4 w-4" />
+            {unreadCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+              </span>
+            )}
           </button>
 
           {/* Nav icons */}
@@ -200,6 +237,22 @@ export function AdminCrmLayout() {
                   </NavLink>
                 );
               })}
+
+              <button
+                type="button"
+                onClick={() => setNotificationsOpen(true)}
+                className="mt-1 flex w-full items-center justify-between rounded px-2.5 py-2 text-xs font-medium text-neutral-400 hover:bg-rail-hover hover:text-neutral-200 transition-colors"
+              >
+                <span className="inline-flex items-center gap-2.5">
+                  <Bell className="h-3.5 w-3.5 shrink-0" />
+                  Notifikasi & Alert
+                </span>
+                {unreadCount > 0 && (
+                  <span className="rounded bg-red-600 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-white">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
 
               <a
                 href={portalUrl}
@@ -313,6 +366,12 @@ export function AdminCrmLayout() {
 
         {/* Global Command Palette */}
         <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+
+        {/* In-app Notification Center Drawer */}
+        <NotificationCenterDrawer
+          open={notificationsOpen}
+          onClose={() => setNotificationsOpen(false)}
+        />
     </div>
   );
 }
