@@ -11,7 +11,7 @@ import {
   type Actor,
   type NewTicketInput,
 } from './ticketCrmService.ts';
-import { getData, getOutbox } from './storageService.ts';
+import { enqueue, getData, getOutbox, upsertLocal } from './storageService.ts';
 import type { CrmUser } from '../types/crm.ts';
 
 const demoUser: CrmUser = {
@@ -149,4 +149,21 @@ test('submitSatisfactionFeedback stores 1-5 star rating and comment', () => {
     (m) => m.ticketId === ticket.id && m.body.includes('5/5 bintang'),
   );
   assert.ok(auditMsg);
+});
+
+test('upsertLocal with isServerRealtime=true guards optimistic outbox mutations against SSE stale overwrites', () => {
+  const ticket = getData().tickets[0];
+  const optimisticTicket = { ...ticket, status: 'in_progress' as const, priority: 'urgent' as const };
+
+  // 1. Optimistic save: update local cache and queue operation into outbox
+  upsertLocal('tickets', optimisticTicket);
+  enqueue({ collection: 'tickets', action: 'update', item: optimisticTicket });
+  assert.equal(getData().tickets.find((t) => t.id === ticket.id)?.status, 'in_progress');
+
+  // 2. Incoming SSE event with stale data ('open') arriving before outbox flushes
+  const staleServerTicket = { ...ticket, status: 'open' as const, priority: 'low' as const };
+  upsertLocal('tickets', staleServerTicket, true);
+
+  // Status must remain 'in_progress' because pending outbox protected it
+  assert.equal(getData().tickets.find((t) => t.id === ticket.id)?.status, 'in_progress');
 });

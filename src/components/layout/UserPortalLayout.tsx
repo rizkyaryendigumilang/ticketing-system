@@ -45,7 +45,7 @@ export function UserPortalLayout() {
             <div>
               <div className="flex items-center gap-2">
                 <Link to="/portal" className="text-base font-bold tracking-tight text-ink hover:underline">
-                  Pusat Bantuan {app?.name ?? 'Aplikasi'}
+                  {requester ? `Pusat Bantuan ${app?.name ?? 'Aplikasi'}` : 'Pusat Bantuan Ekosistem VPS'}
                 </Link>
                 {activeCount > 0 && (
                   <span className="rounded-full bg-red-100 text-red-700 font-mono text-[10px] font-bold px-2 py-0.5 shadow-sm">
@@ -53,11 +53,17 @@ export function UserPortalLayout() {
                   </span>
                 )}
               </div>
-              <p className="text-xs text-ink-muted">
-                Pelapor: <span className="font-semibold text-ink">{requester?.name}</span>{' '}
-                (<span className="font-mono text-[11px]">{requester?.externalUid}</span> ·{' '}
-                <span className="text-ink">{requester?.appRole}</span>)
-              </p>
+              {requester ? (
+                <p className="text-xs text-ink-muted">
+                  Pelapor: <span className="font-semibold text-ink">{requester.name}</span>{' '}
+                  (<span className="font-mono text-[11px]">{requester.externalUid}</span> ·{' '}
+                  <span className="text-ink">{requester.appRole}</span>)
+                </p>
+              ) : (
+                <p className="text-xs text-ink-muted">
+                  Layanan Bantuan Terpadu 7 Aplikasi VPS (43.156.236.102)
+                </p>
+              )}
             </div>
           </div>
 
@@ -86,24 +92,35 @@ export function UserPortalLayout() {
               </a>
             )}
 
-            <button
-              type="button"
-              onClick={() => navigate('/portal/new')}
-              className="inline-flex items-center gap-1.5 rounded-md px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition-[opacity,transform] hover:opacity-90 active:scale-95"
-              style={{ backgroundColor: app?.color ?? '#141413' }}
-            >
-              <Plus className="h-3.5 w-3.5" />
-              {t('portal.newTicket')}
-            </button>
+            {requester ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => navigate('/portal/new')}
+                  className="inline-flex items-center gap-1.5 rounded-md px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition-[opacity,transform] hover:opacity-90 active:scale-95"
+                  style={{ backgroundColor: app?.color ?? '#141413' }}
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  {t('portal.newTicket')}
+                </button>
 
-            <button
-              type="button"
-              onClick={handleLogout}
-              title={t('portal.logout')}
-              className="inline-flex items-center gap-1 rounded-md border border-line px-2.5 py-1.5 text-xs text-ink-muted transition-colors hover:border-line-strong hover:text-ink hover:bg-subtle"
-            >
-              <LogOut className="h-3.5 w-3.5" />
-            </button>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  title={t('portal.logout')}
+                  className="inline-flex items-center gap-1 rounded-md border border-line px-2.5 py-1.5 text-xs text-ink-muted transition-colors hover:border-line-strong hover:text-ink hover:bg-subtle"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/login"
+                className="inline-flex items-center gap-1.5 rounded-md bg-ink px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90 transition-all"
+              >
+                Masuk
+              </Link>
+            )}
           </div>
         </div>
       </header>

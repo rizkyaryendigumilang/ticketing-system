@@ -9,7 +9,7 @@ import { createTicket } from '../services/ticketCrmService';
 export function HandoffRedirectPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { handoff } = useCrm();
+  const { handoff, settings } = useCrm();
   const [error, setError] = useState<string | null>(null);
   const processedRef = useRef<string | null>(null);
 
@@ -66,7 +66,7 @@ export function HandoffRedirectPage() {
 
     const sig = searchParams.get('sig');
     if (sig) {
-      const secret = import.meta.env.VITE_HANDOFF_SECRET || 'vps-helpdesk-secret-key';
+      const secret = settings?.handoffSecret || import.meta.env.VITE_HANDOFF_SECRET || 'vps-helpdesk-secret-key';
       verifyHandoffSignature(searchParams, secret).then((check) => {
         if (!check.valid) {
           setError(check.reason || 'Tanda tangan keamanan link bantuan tidak valid atau kedaluwarsa.');
@@ -78,7 +78,7 @@ export function HandoffRedirectPage() {
     }
 
     proceedHandoff();
-  }, [searchParams, handoff, navigate]);
+  }, [searchParams, handoff, settings, navigate]);
 
   if (error) {
     return (

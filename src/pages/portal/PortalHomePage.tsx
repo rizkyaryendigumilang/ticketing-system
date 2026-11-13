@@ -2,12 +2,15 @@ import { useNavigate } from 'react-router-dom';
 import { getApp } from '../../config/vpsAppsConfig';
 import { useCrm } from '../../context/CrmContext';
 import { UserTicketList } from '../../components/user-portal/UserTicketList';
+import { PortalNoSessionGuide } from '../../components/user-portal/PortalNoSessionGuide';
 
 export function PortalHomePage() {
   const { data, requester, t } = useCrm();
   const navigate = useNavigate();
 
-  if (!requester) return null;
+  if (!requester) {
+    return <PortalNoSessionGuide />;
+  }
 
   const app = getApp(requester.appId);
   const myTickets = data.tickets.filter(

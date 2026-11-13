@@ -123,7 +123,13 @@ function commit(next: CrmData) {
   notify();
 }
 
-export function upsertLocal(collection: Collection, item: Item) {
+export function upsertLocal(collection: Collection, item: Item, isServerRealtime = false) {
+  // If this update comes from server realtime, do not overwrite optimistic mutations pending in outbox
+  if (isServerRealtime) {
+    const hasPendingOutbox = outbox.some((op) => op.collection === collection && op.item.id === item.id);
+    if (hasPendingOutbox) return;
+  }
+
   const key = LIST[collection];
   const list = data[key] as Item[];
   const exists = list.some((x) => x.id === item.id);

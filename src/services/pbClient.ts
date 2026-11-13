@@ -181,7 +181,7 @@ async function subscribeRealtime() {
     REALTIME.map((c) =>
       pb.collection(c).subscribe('*', (e) => {
         if (e.action === 'delete') removeLocal(c, e.record.id);
-        else upsertLocal(c, fromPb(c, e.record));
+        else upsertLocal(c, fromPb(c, e.record), true);
       }),
     ),
   );
