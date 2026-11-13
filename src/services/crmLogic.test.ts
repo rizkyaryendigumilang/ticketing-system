@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   compositeKeyOf,
+  computeTrendMetrics,
   createHandoffSignature,
   filterTickets,
   formatTicketsCsv,
@@ -254,4 +255,34 @@ test('requester ticket ownership isolation prevents cross-tenant access with ide
 
   // Wedding user with identical uid ('admin') CANNOT access snackloop ticket
   assert.equal(checkAccess(snackloopTicket, weddingUser), false);
+});
+
+test('computeTrendMetrics produces daily trends, breakdown by category and priority', () => {
+  const fakeNow = Date.parse('2026-11-13T12:00:00.000Z');
+  const sampleTickets: Ticket[] = [
+    t('T1', 'open', 'urgent', '2026-11-13T08:00:00.000Z', { category: 'bug_error' }),
+    t('T2', 'solved', 'high', '2026-11-12T10:00:00.000Z', { category: 'account_login', solvedAt: '2026-11-13T09:00:00.000Z' }),
+    t('T3', 'in_progress', 'medium', '2026-11-11T14:00:00.000Z', { category: 'data_transaction' }),
+  ];
+
+  const metrics = computeTrendMetrics(sampleTickets, 7, fakeNow);
+  assert.equal(metrics.totalTickets, 3);
+  assert.equal(metrics.openCount, 1);
+  assert.equal(metrics.solvedCount, 1);
+  assert.equal(metrics.inProgressCount, 1);
+  assert.equal(metrics.dailyTrends.length, 7);
+
+  // Today (2026-11-13): 1 created (T1), 1 solved (T2)
+  const todayPoint = metrics.dailyTrends[metrics.dailyTrends.length - 1];
+  assert.equal(todayPoint.dateKey, '2026-11-13');
+  assert.equal(todayPoint.created, 1);
+  assert.equal(todayPoint.solved, 1);
+
+  // Categories
+  assert.equal(metrics.categoryBreakdown.bug_error, 1);
+  assert.equal(metrics.categoryBreakdown.account_login, 1);
+  assert.equal(metrics.categoryBreakdown.data_transaction, 1);
+
+  // Urgent open count (urgent + high in open/in_progress) -> T1 is urgent open
+  assert.equal(metrics.urgentOpenCount, 1);
 });

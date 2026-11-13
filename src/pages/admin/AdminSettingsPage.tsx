@@ -800,7 +800,7 @@ export function AdminSettingsPage() {
                       onChange={(e) => setDefaultView(e.target.value as 'dashboard' | 'tickets')}
                       className="mt-1 w-full rounded border border-line bg-canvas px-3 py-2 text-ink focus:border-ink focus:outline-none"
                     >
-                      <option value="dashboard">Peta Kesehatan (Dashboard)</option>
+                      <option value="dashboard">Dashboard</option>
                       <option value="tickets">Kotak Masuk Tiket (Tickets Inbox)</option>
                     </select>
                   </div>

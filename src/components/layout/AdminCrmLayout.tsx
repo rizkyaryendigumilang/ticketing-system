@@ -4,7 +4,7 @@ import {
   ChevronDown,
   ExternalLink,
   Inbox,
-  LayoutGrid,
+  LayoutDashboard,
   LogOut,
   PanelLeftClose,
   PanelLeftOpen,
@@ -34,7 +34,7 @@ export function AdminCrmLayout() {
   const [appsExpanded, setAppsExpanded] = useState(true);
 
   const navItems: NavItem[] = [
-    { to: '/admin', end: true, icon: LayoutGrid, label: t('nav.healthMap') },
+    { to: '/admin', end: true, icon: LayoutDashboard, label: t('nav.dashboard') },
     { to: '/admin/tickets', end: false, icon: Inbox, label: t('nav.tickets'), badgeKey: 'open' },
     { to: '/admin/contacts', end: false, icon: Users, label: t('nav.contacts') },
     { to: '/admin/settings', end: false, icon: Settings, label: t('nav.settings') },

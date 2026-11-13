@@ -1,5 +1,5 @@
 // Pure CRM rules. No runtime imports, so `node --test` and the PocketBase seeder can use it directly.
-import type { HandoffParams, Ticket, TicketMessage, TicketPriority, TicketStatus } from '../types/crm';
+import type { HandoffParams, Ticket, TicketCategory, TicketMessage, TicketPriority, TicketStatus } from '../types/crm';
 
 export const compositeKeyOf = (appId: string, externalUid: string) => `${appId}:${externalUid.trim()}`;
 
@@ -189,6 +189,132 @@ export function computeStats(tickets: Ticket[], now = Date.now()) {
       : 0,
     avgCsat,
     totalRated: rated.length,
+  };
+}
+
+export interface DailyTrendPoint {
+  dateKey: string;      // "2026-11-13"
+  label: string;        // "13 Nov"
+  fullDate: string;     // "13 Nov 2026"
+  created: number;
+  solved: number;
+}
+
+export interface DashboardAnalytics {
+  totalTickets: number;
+  openCount: number;
+  inProgressCount: number;
+  waitingCount: number;
+  solvedCount: number;
+  closedCount: number;
+  activeCount: number;
+  resolutionRatePct: number;
+  avgResolutionMs: number;
+  avgCsat: number;
+  totalRated: number;
+  urgentOpenCount: number;
+  dailyTrends: DailyTrendPoint[];
+  categoryBreakdown: Record<TicketCategory, number>;
+  priorityBreakdown: Record<TicketPriority, number>;
+}
+
+export function computeTrendMetrics(
+  tickets: Ticket[],
+  days: number = 7,
+  now: number = Date.now(),
+): DashboardAnalytics {
+  const count = (s: TicketStatus) => tickets.filter((t) => t.status === s).length;
+  const openCount = count('open');
+  const inProgressCount = count('in_progress');
+  const waitingCount = count('waiting_on_user');
+  const solvedCount = count('solved');
+  const closedCount = count('closed');
+  const activeCount = openCount + inProgressCount + waitingCount;
+
+  const totalTickets = tickets.length;
+  const resolutionRatePct = totalTickets > 0 ? Math.round(((solvedCount + closedCount) / totalTickets) * 100) : 0;
+
+  const solvedTickets = tickets.filter((t) => t.solvedAt);
+  const avgResolutionMs = solvedTickets.length
+    ? solvedTickets.reduce((sum, t) => sum + (Date.parse(t.solvedAt!) - Date.parse(t.createdAt)), 0) / solvedTickets.length
+    : 0;
+
+  const rated = tickets.filter((t) => typeof t.satisfactionRating === 'number' && t.satisfactionRating > 0);
+  const avgCsat = rated.length
+    ? Number((rated.reduce((sum, t) => sum + (t.satisfactionRating ?? 0), 0) / rated.length).toFixed(1))
+    : 0;
+
+  const urgentOpenCount = tickets.filter(
+    (t) => (t.priority === 'urgent' || t.priority === 'high') && (t.status === 'open' || t.status === 'in_progress'),
+  ).length;
+
+  const pointsCount = Math.min(Math.max(days, 1), 60);
+  const dailyTrends: DailyTrendPoint[] = [];
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+  for (let i = pointsCount - 1; i >= 0; i--) {
+    const targetMs = now - i * 86_400_000;
+    const d = new Date(targetMs);
+    const dateKey = d.toISOString().slice(0, 10);
+    const dayNum = d.getDate();
+    const month = monthNames[d.getMonth()];
+    const year = d.getFullYear();
+
+    const created = tickets.filter((t) => t.createdAt && t.createdAt.slice(0, 10) === dateKey).length;
+    const solved = tickets.filter((t) => t.solvedAt && t.solvedAt.slice(0, 10) === dateKey).length;
+
+    dailyTrends.push({
+      dateKey,
+      label: `${dayNum} ${month}`,
+      fullDate: `${dayNum} ${month} ${year}`,
+      created,
+      solved,
+    });
+  }
+
+  const categoryBreakdown: Record<TicketCategory, number> = {
+    bug_error: 0,
+    account_login: 0,
+    data_transaction: 0,
+    feature_question: 0,
+    other: 0,
+  };
+  for (const t of tickets) {
+    if (categoryBreakdown[t.category] !== undefined) {
+      categoryBreakdown[t.category] += 1;
+    } else {
+      categoryBreakdown.other += 1;
+    }
+  }
+
+  const priorityBreakdown: Record<TicketPriority, number> = {
+    urgent: 0,
+    high: 0,
+    medium: 0,
+    low: 0,
+  };
+  for (const t of tickets) {
+    if (priorityBreakdown[t.priority] !== undefined) {
+      priorityBreakdown[t.priority] += 1;
+    }
+  }
+
+  return {
+    totalTickets,
+    openCount,
+    inProgressCount,
+    waitingCount,
+    solvedCount,
+    closedCount,
+    activeCount,
+    resolutionRatePct,
+    avgResolutionMs,
+    avgCsat,
+    totalRated: rated.length,
+    urgentOpenCount,
+    dailyTrends,
+    categoryBreakdown,
+    priorityBreakdown,
   };
 }
 

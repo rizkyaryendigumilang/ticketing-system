@@ -10,7 +10,7 @@ interface Props {
 }
 
 export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
-  const { t } = useCrm();
+  const { t, statusLabel } = useCrm();
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {apps.map((app) => {
@@ -61,7 +61,7 @@ export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
                 {hasOpen ? (
                   <span className="inline-flex shrink-0 items-center gap-1.5 rounded bg-red-600 px-2 py-0.5 text-xs font-semibold text-white tabular-nums shadow-sm">
                     <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                    {counts.open} Baru
+                    {counts.open} {statusLabel('open')}
                   </span>
                 ) : (
                   <span className="inline-flex shrink-0 items-center gap-1 rounded border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-800">
@@ -85,7 +85,7 @@ export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
                   >
                     {counts.open}
                   </div>
-                  <div className="text-[10px] text-ink-muted">Baru</div>
+                  <div className="text-[10px] text-ink-muted">{statusLabel('open')}</div>
                 </button>
                 <button
                   type="button"
@@ -99,7 +99,7 @@ export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
                   >
                     {counts.in_progress}
                   </div>
-                  <div className="text-[10px] text-ink-muted">Diproses</div>
+                  <div className="text-[10px] text-ink-muted">{statusLabel('in_progress')}</div>
                 </button>
                 <button
                   type="button"
@@ -113,7 +113,7 @@ export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
                   >
                     {counts.waiting_on_user}
                   </div>
-                  <div className="text-[10px] text-ink-muted">Menunggu</div>
+                  <div className="text-[10px] text-ink-muted">{statusLabel('waiting_on_user')}</div>
                 </button>
                 <button
                   type="button"
@@ -127,7 +127,7 @@ export function AppHealthMatrix({ apps, matrix, onSelectApp }: Props) {
                   >
                     {counts.solved}
                   </div>
-                  <div className="text-[10px] text-ink-muted">Selesai</div>
+                  <div className="text-[10px] text-ink-muted">{statusLabel('solved')}</div>
                 </button>
               </div>
             </div>
