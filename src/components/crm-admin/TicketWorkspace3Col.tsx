@@ -292,8 +292,8 @@ export function TicketWorkspace3Col({
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-      {/* ═══ LEFT COLUMN: Ticket Properties ═══ */}
-      <div className="space-y-4 lg:col-span-3">
+      {/* ═══ LEFT COLUMN: Ticket Properties (order-2 on mobile, order-1 on desktop) ═══ */}
+      <div className="space-y-4 lg:col-span-3 order-2 lg:order-1">
         <div className="rounded-2xl border border-line bg-panel p-5 shadow-card">
           <div className="flex items-center justify-between border-b border-line pb-3">
             <div>
@@ -476,8 +476,8 @@ export function TicketWorkspace3Col({
         <TicketTimeline ticket={ticket} messages={messages} />
       </div>
 
-      {/* ═══ CENTER COLUMN: Complaint, Messages & Composer ═══ */}
-      <div className="space-y-4 lg:col-span-6">
+      {/* ═══ CENTER COLUMN: Complaint, Messages & Composer (order-1 on mobile, order-2 on desktop) ═══ */}
+      <div className="space-y-4 lg:col-span-6 order-1 lg:order-2">
         {/* Agent Collision Warning Banner */}
         {otherViewers.length > 0 && (
           <div className="flex items-center justify-between gap-3 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3.5 text-xs text-amber-900 shadow-xs animate-fadeIn">
@@ -828,7 +828,7 @@ export function TicketWorkspace3Col({
       </div>
 
       {/* ═══ RIGHT COLUMN: Customer CRM Card ═══ */}
-      <div className="lg:col-span-3">
+      <div className="lg:col-span-3 order-3">
         <CustomerProfileCard
           user={requester}
           currentTicket={ticket}

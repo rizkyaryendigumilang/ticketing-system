@@ -255,10 +255,36 @@ export function AdminSettingsPage() {
         </div>
       </div>
 
+      {/* Mobile Horizontal Pill Navigation (lg:hidden) */}
+      <div className="lg:hidden w-full overflow-x-auto no-scrollbar -mx-1 px-1 pb-1">
+        <div className="flex gap-1.5 min-w-max">
+          {navGroups.flatMap((g) => g.items).map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.key;
+            const label = t(item.labelKey) || item.defaultLabel;
+            return (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => handleTabChange(item.key)}
+                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-all active:scale-95 ${
+                  isActive
+                    ? 'bg-ink text-white font-semibold shadow-xs'
+                    : 'bg-panel border border-line text-ink-muted hover:text-ink hover:bg-subtle'
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                <span>{label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Main SaaS Two-Column Layout */}
       <div className="flex flex-col lg:flex-row gap-6 items-start">
-        {/* Left Column: Settings Sidebar Navigation */}
-        <aside className="w-full lg:w-64 shrink-0 space-y-4">
+        {/* Left Column: Settings Sidebar Navigation (Desktop only) */}
+        <aside className="hidden lg:block w-64 shrink-0 space-y-4">
           {/* Quick Search Settings Filter */}
           <div className="relative">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink-faint" />

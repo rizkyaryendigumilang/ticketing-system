@@ -9,6 +9,7 @@ import {
   Inbox,
   LayoutDashboard,
   LogOut,
+  Menu,
   Moon,
   PanelLeftClose,
   PanelLeftOpen,
@@ -16,6 +17,7 @@ import {
   Search,
   Settings,
   Sun,
+  X,
 } from 'lucide-react';
 import { VPS_APPS } from '../../config/vpsAppsConfig';
 import { useCrm } from '../../context/CrmContext';
@@ -44,10 +46,15 @@ export function AdminCrmLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [appsExpanded, setAppsExpanded] = useState(true);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(() => getNotifications().filter((n) => !n.read).length);
+
+  useEffect(() => {
+    setMobileDrawerOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     syncTicketAlerts(data.tickets);
@@ -71,7 +78,7 @@ export function AdminCrmLayout() {
   const navItems: NavItem[] = [
     { to: '/admin', end: true, icon: LayoutDashboard, label: t('nav.dashboard') },
     { to: '/admin/tickets', end: false, icon: Inbox, label: t('nav.tickets'), badgeKey: 'open' },
-    { to: '/admin/analytics', end: false, icon: BarChart3, label: 'Analitik & Laporan' },
+    { to: '/admin/analytics', end: false, icon: BarChart3, label: t('nav.analytics') },
     { to: '/admin/settings', end: false, icon: Settings, label: t('nav.settings') },
   ];
 
@@ -115,8 +122,8 @@ export function AdminCrmLayout() {
 
   return (
     <div className="flex min-h-screen bg-canvas text-ink">
-      {/* ═══ PRIMARY ICON RAIL (always visible, ~52px wide) ═══ */}
-      <aside className="flex w-13 shrink-0 flex-col items-center border-r border-rail-line bg-rail py-3 gap-1.5 select-none">
+      {/* ═══ PRIMARY ICON RAIL (hidden on mobile, visible md:flex, ~52px wide) ═══ */}
+      <aside className="hidden md:flex w-13 shrink-0 flex-col items-center border-r border-rail-line bg-rail py-3 gap-1.5 select-none">
           {/* Logo tile - Apple squircle */}
           <div
             title="Helpdesk App"
@@ -182,9 +189,9 @@ export function AdminCrmLayout() {
           </button>
         </aside>
 
-        {/* ═══ SECONDARY TEXT SIDEBAR (collapsible) ═══ */}
+        {/* ═══ SECONDARY TEXT SIDEBAR (desktop only, collapsible) ═══ */}
         {sidebarOpen && (
-          <aside className="flex w-56 shrink-0 flex-col border-r border-rail-line bg-rail overflow-hidden select-none">
+          <aside className="hidden md:flex w-56 shrink-0 flex-col border-r border-rail-line bg-rail overflow-hidden select-none">
             {/* Brand */}
             <div className="border-b border-rail-line px-4 py-3.5">
               <p className="text-sm font-semibold tracking-tight text-white">{t('nav.brand')}</p>
@@ -330,17 +337,151 @@ export function AdminCrmLayout() {
           </aside>
         )}
 
+        {/* ═══ MOBILE SLIDE-OVER DRAWER (md:hidden) ═══ */}
+        {mobileDrawerOpen && (
+          <div
+            className="fixed inset-0 z-50 flex md:hidden bg-black/60 backdrop-blur-xs animate-fade-in"
+            onClick={() => setMobileDrawerOpen(false)}
+          >
+            <div
+              className="w-72 max-w-[82vw] h-full bg-rail text-white flex flex-col shadow-2xl animate-slide-right select-none"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header / Brand */}
+              <div className="flex items-center justify-between border-b border-rail-line px-4 py-3.5">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-gradient-to-b from-white to-neutral-200 text-xs font-bold text-neutral-950">
+                    H
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold tracking-tight text-white">{t('nav.brand')}</p>
+                    <p className="text-[10px] text-neutral-400">{t('nav.crm')}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className="rounded-lg p-1.5 text-neutral-400 hover:text-white"
+                  aria-label="Tutup Menu"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              {/* Nav list */}
+              <nav className="flex-1 overflow-y-auto space-y-1 p-3">
+                {navItems.map(({ to, end, icon: Icon, label, badgeKey }) => {
+                  const badge = badgeKey ? badgeFor[badgeKey] : null;
+                  return (
+                    <NavLink
+                      key={to}
+                      to={to}
+                      end={end}
+                      onClick={() => setMobileDrawerOpen(false)}
+                      className={({ isActive }) =>
+                        `flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium transition-all ${
+                          isActive
+                            ? 'bg-white/15 text-white font-semibold'
+                            : 'text-neutral-400 hover:bg-rail-hover hover:text-white'
+                        }`
+                      }
+                    >
+                      <span className="inline-flex items-center gap-2.5">
+                        <Icon className="h-4 w-4 shrink-0" />
+                        {label}
+                      </span>
+                      {badge != null && (
+                        <span className="rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white tabular-nums">
+                          {badge}
+                        </span>
+                      )}
+                    </NavLink>
+                  );
+                })}
+
+                {/* Ecosystem Apps in Mobile Drawer */}
+                <div className="pt-3 border-t border-rail-line/60 mt-3">
+                  <span className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider block mb-2 px-1">
+                    {t('nav.ecosystem')}
+                  </span>
+                  <div className="space-y-1">
+                    {VPS_APPS.map((app) => {
+                      const count = openCounts[app.id] ?? 0;
+                      return (
+                        <button
+                          key={app.id}
+                          type="button"
+                          onClick={() => {
+                            navigate(`/admin/tickets?app=${app.id}`);
+                            setMobileDrawerOpen(false);
+                          }}
+                          className="flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-xs text-neutral-400 hover:bg-rail-hover hover:text-neutral-100"
+                        >
+                          <span className="flex min-w-0 items-center gap-2">
+                            <span
+                              className="h-2 w-2 shrink-0 rounded-full"
+                              style={{ backgroundColor: count > 0 ? '#EF4444' : app.color }}
+                            />
+                            <span className="truncate">{app.name}</span>
+                          </span>
+                          {count > 0 && (
+                            <span className="rounded-full bg-red-500/90 px-1.5 py-0.2 text-[9px] font-semibold text-white">
+                              {count}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </nav>
+
+              {/* Mobile Footer */}
+              <div className="border-t border-rail-line p-3 space-y-2">
+                <PwaInstallPrompt />
+                <SyncStatusIndicator />
+                <div className="flex items-center justify-between pt-1">
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-semibold text-white">{admin?.name ?? 'Admin'}</p>
+                    <p className="truncate font-mono text-[10px] text-neutral-400">{admin?.email ?? 'admin@crm.local'}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="rounded-lg p-1.5 text-neutral-400 hover:text-red-400"
+                    title="Keluar"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ═══ MAIN WORKSPACE WITH MODERN APPLE TOP TOOLBAR ═══ */}
         <div className="flex flex-1 flex-col min-w-0 h-screen overflow-hidden">
           {/* Top Header Toolbar */}
           <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between border-b border-line bg-panel/85 px-4 sm:px-6 backdrop-blur-md shadow-xs select-none">
-            {/* Left: Context Breadcrumb */}
-            <div className="flex items-center gap-2.5 min-w-0">
+            {/* Left: Mobile hamburger or Context Breadcrumb */}
+            <div className="flex items-center gap-2 min-w-0">
+              {/* Mobile Menu Button */}
+              <button
+                type="button"
+                onClick={() => setMobileDrawerOpen(true)}
+                className="md:hidden flex h-8 w-8 items-center justify-center rounded-lg border border-line text-ink-muted hover:text-ink hover:bg-subtle active:scale-95 transition-all shadow-2xs"
+                title="Buka Menu"
+                aria-label="Buka Menu"
+              >
+                <Menu className="h-4 w-4" />
+              </button>
+
+              {/* Desktop sidebar toggle when collapsed */}
               {!sidebarOpen && (
                 <button
                   type="button"
                   onClick={() => setSidebarOpen(true)}
-                  className="mr-1 flex h-8 w-8 items-center justify-center rounded-lg border border-line text-ink-muted hover:border-line-strong hover:text-ink hover:bg-subtle transition-all active:scale-95 shadow-2xs"
+                  className="hidden md:flex mr-1 h-8 w-8 items-center justify-center rounded-lg border border-line text-ink-muted hover:border-line-strong hover:text-ink hover:bg-subtle transition-all active:scale-95 shadow-2xs"
                   title="Buka sidebar"
                 >
                   <PanelLeftOpen className="h-4 w-4" />
@@ -434,9 +575,50 @@ export function AdminCrmLayout() {
           </header>
 
           {/* Main Workspace Body */}
-          <main className="flex-1 overflow-y-auto">
+          <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
             <Outlet />
           </main>
+
+          {/* Mobile Bottom Navigation Bar (md:hidden) */}
+          <nav
+            aria-label="Navigasi Bawah"
+            className="fixed bottom-0 inset-x-0 z-30 md:hidden h-14 bg-panel/95 backdrop-blur-xl border-t border-line safe-bottom flex items-center justify-around px-1 select-none shadow-lg"
+          >
+            {navItems.map(({ to, end, icon: Icon, label, badgeKey }) => {
+              const badge = badgeKey ? badgeFor[badgeKey] : null;
+              return (
+                <NavLink
+                  key={to}
+                  to={to}
+                  end={end}
+                  className={({ isActive }) =>
+                    `relative flex flex-col items-center justify-center gap-0.5 flex-1 py-1 text-[10px] font-medium transition-colors ${
+                      isActive ? 'text-ink font-semibold' : 'text-ink-muted hover:text-ink'
+                    }`
+                  }
+                >
+                  <div className="relative">
+                    <Icon className="h-4 w-4" />
+                    {badge != null && (
+                      <span className="absolute -top-1 -right-2 flex h-3.5 min-w-[14px] items-center justify-center rounded-full bg-red-500 px-0.5 text-[8px] font-bold text-white tabular-nums">
+                        {badge}
+                      </span>
+                    )}
+                  </div>
+                  <span className="truncate max-w-[64px]">{label.split(' ')[0]}</span>
+                </NavLink>
+              );
+            })}
+            {/* 5th item: More / Ecosystem menu */}
+            <button
+              type="button"
+              onClick={() => setMobileDrawerOpen(true)}
+              className="flex flex-col items-center justify-center gap-0.5 flex-1 py-1 text-[10px] font-medium text-ink-muted hover:text-ink transition-colors"
+            >
+              <Menu className="h-4 w-4" />
+              <span>Menu</span>
+            </button>
+          </nav>
         </div>
 
         {/* Global Command Palette */}

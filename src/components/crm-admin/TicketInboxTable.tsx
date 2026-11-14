@@ -318,8 +318,69 @@ export function TicketInboxTable({
           }
         />
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left text-xs">
+        <>
+          {/* Mobile Card List (sm:hidden) - Apple / Linear grade mobile inbox */}
+          <div className="divide-y divide-line/60 sm:hidden">
+            {filtered.map((ticket) => {
+              const isOpen = ticket.status === 'open';
+              return (
+                <div
+                  key={ticket.id}
+                  onClick={() => onTicketClick(ticket.id)}
+                  className={`p-4 space-y-2.5 active:bg-subtle/80 transition-colors cursor-pointer ${
+                    isOpen ? 'bg-rose-500/[0.02]' : ''
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      {isOpen && <span className="h-2 w-2 rounded-full bg-rose-500 shrink-0" />}
+                      <span className="font-mono text-xs font-bold text-ink">#{ticket.ticketNumber}</span>
+                      <AppBadge appId={ticket.appId} />
+                    </div>
+                    <SlaBadge ticket={ticket} />
+                  </div>
+
+                  <div>
+                    <h3 className="text-xs font-semibold text-ink line-clamp-2 leading-snug">
+                      {ticket.subject}
+                    </h3>
+                    <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-ink-muted">
+                      <span>{categoryLabel(ticket.category)}</span>
+                      <span>·</span>
+                      <span className="font-medium text-ink">{ticket.requesterName}</span>
+                      <span className="text-[10px]">({ticket.requesterRole})</span>
+                    </div>
+                    {ticket.tags && ticket.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {ticket.tags.map((tg) => (
+                          <span
+                            key={tg}
+                            className="inline-flex items-center rounded-sm bg-line/60 px-1.5 py-0 text-[10px] font-medium text-ink"
+                          >
+                            #{tg}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1 border-t border-line/40 text-[11px]">
+                    <div className="flex items-center gap-1.5">
+                      <StatusBadge status={ticket.status} />
+                      <PriorityBadge priority={ticket.priority} />
+                    </div>
+                    <span className="font-mono text-[10px] text-ink-muted tabular-nums">
+                      {timeAgo(ticket.createdAt)}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop Table View (hidden sm:block) */}
+          <div className="hidden sm:block overflow-x-auto">
+            <table className="w-full border-collapse text-left text-xs">
             <thead>
               <tr className="border-b border-line bg-subtle/70 text-[11px] font-semibold text-ink-muted">
                 <th className="py-2.5 pl-4 pr-2">{t('tickets.colTicket')}</th>
@@ -475,7 +536,8 @@ export function TicketInboxTable({
             </tbody>
           </table>
         </div>
-      )}
+      </>
+    )}
 
       {/* Keyboard Shortcuts Hint Bar */}
       <div className="flex flex-wrap items-center justify-between border-t border-line bg-subtle/30 px-4 py-2 text-[11px] text-ink-muted">

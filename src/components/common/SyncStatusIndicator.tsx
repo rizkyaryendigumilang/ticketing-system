@@ -50,15 +50,12 @@ export function SyncStatusIndicator({ variant = 'rail', className = '' }: Props)
       <div
         className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[11px] font-medium tracking-tight select-none shadow-2xs transition-colors ${
           isRail
-            ? 'border border-emerald-500/30 bg-emerald-500/15 text-emerald-300'
-            : 'border border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+            ? 'border border-white/10 bg-white/[0.05] text-neutral-200'
+            : 'border border-neutral-200/80 bg-neutral-100/70 text-neutral-700 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-200'
         } ${className}`}
         title="Terhubung ke server PocketBase secara realtime (SSE Aktif)"
       >
-        <span className="relative flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75 duration-1000" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-        </span>
+        <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.45)]" />
         <span className="truncate">Realtime Online</span>
       </div>
     );
@@ -72,8 +69,8 @@ export function SyncStatusIndicator({ variant = 'rail', className = '' }: Props)
         disabled={retrying}
         className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[11px] font-medium tracking-tight select-none transition-all active:scale-95 ${
           isRail
-            ? 'border border-amber-500/35 bg-amber-500/15 text-amber-300 hover:bg-amber-500/25'
-            : 'border border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20'
+            ? 'border border-amber-500/30 bg-amber-500/10 text-amber-200 hover:bg-amber-500/20'
+            : 'border border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-200 hover:bg-amber-500/20'
         } ${className}`}
         title="Klik untuk mencoba koneksi ulang sekarang"
       >
@@ -90,8 +87,8 @@ export function SyncStatusIndicator({ variant = 'rail', className = '' }: Props)
       disabled={retrying}
       className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[11px] font-medium tracking-tight select-none transition-all active:scale-95 ${
         isRail
-          ? 'border border-rose-500/35 bg-rose-500/15 text-rose-300 hover:bg-rose-500/25'
-          : 'border border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-300 hover:bg-rose-500/20'
+          ? 'border border-rose-500/30 bg-rose-500/10 text-rose-200 hover:bg-rose-500/20'
+          : 'border border-rose-500/30 bg-rose-500/10 text-rose-800 dark:text-rose-200 hover:bg-rose-500/20'
       } ${className}`}
       title="Mode Offline: perubahan disimpan di antrean outbox. Klik untuk mencoba sinkronisasi."
     >
