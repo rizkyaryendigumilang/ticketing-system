@@ -1,4 +1,5 @@
-import { FileDown, Search, SlidersHorizontal, X } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { FileDown, FileJson, Printer, Search, SlidersHorizontal, X } from 'lucide-react';
 import {
   CATEGORY_LABEL,
   PRIORITY_LABEL,
@@ -50,6 +51,9 @@ export function TicketInboxTable({
 }: Props) {
   const { t, statusLabel, priorityLabel, categoryLabel, adminActor } = useCrm();
 
+  const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
   const myCount = tickets.filter((t) => t.assignedTo === adminActor.id).length;
   const unassignedCount = tickets.filter((t) => !t.assignedTo).length;
 
@@ -64,6 +68,57 @@ export function TicketInboxTable({
       messages,
     }),
   );
+
+  // Keyboard navigation shortcuts: j (down), k (up), Enter (open), / (search)
+  useEffect(() => {
+    const handleTableKeys = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
+      if (
+        tag === 'input' ||
+        tag === 'textarea' ||
+        tag === 'select' ||
+        (e.target as HTMLElement)?.isContentEditable
+      ) {
+        return;
+      }
+      if (e.key === 'j' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        setHighlightedIndex((prev) => Math.min(prev + 1, filtered.length - 1));
+      } else if (e.key === 'k' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        setHighlightedIndex((prev) => Math.max(prev - 1, 0));
+      } else if (
+        e.key === 'Enter' &&
+        highlightedIndex >= 0 &&
+        highlightedIndex < filtered.length
+      ) {
+        e.preventDefault();
+        onTicketClick(filtered[highlightedIndex].id);
+      } else if (e.key === '/') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleTableKeys);
+    return () => window.removeEventListener('keydown', handleTableKeys);
+  }, [filtered, highlightedIndex, onTicketClick]);
+
+  const handleExportJson = () => {
+    const dataStr =
+      'data:text/json;charset=utf-8,' +
+      encodeURIComponent(JSON.stringify(filtered, null, 2));
+    const dlAnchor = document.createElement('a');
+    dlAnchor.setAttribute('href', dataStr);
+    dlAnchor.setAttribute(
+      'download',
+      `helpdesk-tickets-backup-${new Date().toISOString().slice(0, 10)}.json`,
+    );
+    dlAnchor.click();
+  };
+
+  const handlePrintSummary = () => {
+    window.print();
+  };
 
   const hasActiveFilter =
     selectedApp !== 'all' ||
@@ -126,10 +181,11 @@ export function TicketInboxTable({
           <div className="relative min-w-[220px] flex-1 sm:max-w-xs">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink-faint" />
             <input
+              ref={searchInputRef}
               type="search"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder={t('tickets.searchPlaceholder')}
+              placeholder={`${t('tickets.searchPlaceholder')} (Tekan /)`}
               className="w-full rounded border border-line bg-canvas py-1.5 pl-8 pr-3 text-xs text-ink placeholder:text-ink-faint focus:border-ink focus:bg-panel focus:outline-none"
             />
           </div>
@@ -196,18 +252,38 @@ export function TicketInboxTable({
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => downloadTicketsCsv(filtered)}
             disabled={filtered.length === 0}
-            className="inline-flex items-center gap-1.5 rounded border border-line bg-subtle px-2.5 py-1 text-xs font-medium text-ink hover:border-line-strong active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-[border-color,transform]"
+            className="inline-flex items-center gap-1 rounded border border-line bg-subtle px-2 py-1 text-xs font-medium text-ink hover:border-line-strong active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             title="Download CSV"
           >
-            <FileDown className="h-3.5 w-3.5 text-ink-muted" />
-            {t('tickets.exportCsv')}
+            <FileDown className="h-3 w-3 text-ink-muted" />
+            <span className="hidden sm:inline">CSV</span>
           </button>
-          <div className="font-mono text-xs text-ink-muted tabular-nums">
+          <button
+            type="button"
+            onClick={handleExportJson}
+            disabled={filtered.length === 0}
+            className="inline-flex items-center gap-1 rounded border border-line bg-subtle px-2 py-1 text-xs font-medium text-ink hover:border-line-strong active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            title="Ekspor Backup JSON"
+          >
+            <FileJson className="h-3 w-3 text-ink-muted" />
+            <span className="hidden sm:inline">JSON</span>
+          </button>
+          <button
+            type="button"
+            onClick={handlePrintSummary}
+            disabled={filtered.length === 0}
+            className="inline-flex items-center gap-1 rounded border border-line bg-subtle px-2 py-1 text-xs font-medium text-ink hover:border-line-strong active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            title="Cetak Ringkasan Tiket"
+          >
+            <Printer className="h-3 w-3 text-ink-muted" />
+            <span className="hidden sm:inline">Cetak</span>
+          </button>
+          <div className="ml-1 font-mono text-xs text-ink-muted tabular-nums">
             {filtered.length} / {tickets.length}
           </div>
         </div>
@@ -237,16 +313,19 @@ export function TicketInboxTable({
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
-              {filtered.map((ticket) => {
+              {filtered.map((ticket, idx) => {
                 const isOpen = ticket.status === 'open';
+                const isHighlighted = idx === highlightedIndex;
                 return (
                   <tr
                     key={ticket.id}
                     onClick={() => onTicketClick(ticket.id)}
                     className={`cursor-pointer transition-colors ${
-                      isOpen
-                        ? 'bg-red-50/35 hover:bg-red-50/70'
-                        : 'hover:bg-subtle/60'
+                      isHighlighted
+                        ? 'bg-ink/10 ring-1 ring-inset ring-ink/30'
+                        : isOpen
+                          ? 'bg-red-50/35 hover:bg-red-50/70'
+                          : 'hover:bg-subtle/60'
                     }`}
                   >
                     <td className="whitespace-nowrap py-3 pl-4 pr-2 font-mono font-semibold text-ink">
@@ -350,6 +429,26 @@ export function TicketInboxTable({
           </table>
         </div>
       )}
+
+      {/* Keyboard Shortcuts Hint Bar */}
+      <div className="flex flex-wrap items-center justify-between border-t border-line bg-subtle/30 px-4 py-2 text-[11px] text-ink-muted">
+        <div className="flex flex-wrap items-center gap-3">
+          <span>
+            <kbd className="rounded border border-line bg-panel px-1.5 py-0.5 font-mono text-[10px] text-ink shadow-2xs">j</kbd>
+            {' / '}
+            <kbd className="rounded border border-line bg-panel px-1.5 py-0.5 font-mono text-[10px] text-ink shadow-2xs">k</kbd> Navigasi baris
+          </span>
+          <span>
+            <kbd className="rounded border border-line bg-panel px-1.5 py-0.5 font-mono text-[10px] text-ink shadow-2xs">Enter</kbd> Buka tiket
+          </span>
+          <span>
+            <kbd className="rounded border border-line bg-panel px-1.5 py-0.5 font-mono text-[10px] text-ink shadow-2xs">/</kbd> Cari tiket
+          </span>
+        </div>
+        <span className="font-mono text-[10px] text-ink-faint">
+          Pintasan Keyboard Aktif · {filtered.length} dari {tickets.length}
+        </span>
+      </div>
     </div>
   );
 }

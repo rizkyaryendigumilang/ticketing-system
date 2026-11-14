@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Lock, Send } from 'lucide-react';
+import { CheckCircle2, Lock, Send, Sparkles } from 'lucide-react';
 import {
   CATEGORY_LABEL,
   getApp,
@@ -10,6 +10,7 @@ import {
 import type { CrmUser, TicketCategory, TicketPriority } from '../../types/crm';
 import type { NewTicketInput } from '../../services/ticketCrmService';
 import { ScreenshotUploader } from '../common/ScreenshotUploader';
+import { KB_ARTICLES } from '../support/KnowledgeBaseList';
 
 interface Props {
   user: CrmUser;
@@ -47,6 +48,23 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
   const [attachments, setAttachments] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [expandedArticleId, setExpandedArticleId] = useState<string | null>(null);
+
+  // Smart FAQ Deflection: automatically search solutions when subject is typed
+  const suggestedArticles = useMemo(() => {
+    const q = subject.trim().toLowerCase();
+    if (q.length < 3) return [];
+    const tokens = q.split(/\s+/).filter((w) => w.length > 2);
+    return KB_ARTICLES.filter((art) => {
+      const matchesToken = tokens.some(
+        (t) =>
+          art.title.toLowerCase().includes(t) ||
+          art.summary.toLowerCase().includes(t) ||
+          art.steps.some((s) => s.toLowerCase().includes(t)),
+      );
+      return matchesToken;
+    }).slice(0, 2);
+  }, [subject]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -196,6 +214,63 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
           placeholder="Contoh: Tombol Simpan di halaman Rekap Harian tidak merespons"
           className="mt-1.5 w-full rounded border border-line bg-canvas px-3 py-2 text-xs text-ink placeholder:text-ink-faint focus:border-ink focus:bg-panel focus:outline-none"
         />
+
+        {/* Smart FAQ Deflection Suggestion */}
+        {suggestedArticles.length > 0 && (
+          <div className="mt-2.5 rounded-lg border border-sky-300 bg-sky-50/90 p-3 text-xs text-sky-950 animate-fadeIn">
+            <div className="flex items-center gap-1.5 font-semibold text-sky-900">
+              <Sparkles className="h-4 w-4 text-sky-600" />
+              <span>Mungkin panduan ini dapat menyelesaikan kendala Anda sebelum membuat tiket:</span>
+            </div>
+            <div className="mt-2 space-y-2">
+              {suggestedArticles.map((art) => (
+                <div
+                  key={art.id}
+                  className="rounded border border-sky-200 bg-panel p-2.5 shadow-2xs text-xs"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-semibold text-ink">{art.title}</span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setExpandedArticleId(
+                          expandedArticleId === art.id ? null : art.id,
+                        )
+                      }
+                      className="text-[11px] font-medium text-sky-700 hover:underline shrink-0"
+                    >
+                      {expandedArticleId === art.id ? 'Tutup Panduan' : 'Buka Panduan'}
+                    </button>
+                  </div>
+                  <p className="mt-1 text-ink-muted text-[11px]">{art.summary}</p>
+
+                  {expandedArticleId === art.id && (
+                    <div className="mt-2.5 border-t border-sky-100 pt-2 space-y-1.5">
+                      <p className="font-semibold text-[11px] text-sky-900">
+                        Langkah Solusi Mandiri:
+                      </p>
+                      <ol className="list-decimal pl-4 space-y-1 text-[11px] text-ink">
+                        {art.steps.map((st, i) => (
+                          <li key={i}>{st}</li>
+                        ))}
+                      </ol>
+                      <div className="mt-2.5 flex justify-end border-t border-sky-100 pt-2">
+                        <button
+                          type="button"
+                          onClick={onCancel}
+                          className="inline-flex items-center gap-1.5 rounded bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-800 transition-colors shadow-2xs"
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          Masalah Terselesaikan (Batal Buat Tiket)
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Description */}

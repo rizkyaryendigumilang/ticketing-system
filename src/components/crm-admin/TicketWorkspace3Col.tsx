@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -7,9 +7,11 @@ import {
   Lock,
   MessageSquare,
   Monitor,
+  PenLine,
   Send,
   Sparkles,
   UserCheck,
+  Users,
 } from 'lucide-react';
 import {
   CATEGORY_LABEL,
@@ -35,10 +37,18 @@ import { StatusBadge } from '../common/StatusBadge';
 import { SlaBadge } from '../common/SlaBadge';
 import { MessageToolbar } from '../common/MessageToolbar';
 import { FormattedMessage } from '../common/FormattedMessage';
+import { TicketTimeline } from '../common/TicketTimeline';
 import { CannedResponsePicker } from './CannedResponsePicker';
 import { CustomerProfileCard } from './CustomerProfileCard';
 import { useToast } from '../../context/ToastContext';
 import { useCrm } from '../../context/CrmContext';
+import {
+  pingPresence,
+  leavePresence,
+  getTicketViewers,
+  subscribePresence,
+  type AgentPresence,
+} from '../../services/presenceService';
 
 interface Props {
   ticket: Ticket;
@@ -73,7 +83,7 @@ export function TicketWorkspace3Col({
   onSendMessage,
   onSolveTicket,
 }: Props) {
-  const { adminActor } = useCrm();
+  const { adminActor, cannedResponses } = useCrm();
   const toast = useToast();
   const [composerMode, setComposerMode] = useState<'public' | 'internal'>('public');
   const [body, setBody] = useState('');
@@ -81,6 +91,56 @@ export function TicketWorkspace3Col({
   const [submitting, setSubmitting] = useState(false);
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Presence & Collision detection state
+  const [otherViewers, setOtherViewers] = useState<AgentPresence[]>([]);
+
+  // Slash commands state
+  const [slashMenuOpen, setSlashMenuOpen] = useState(false);
+  const [slashQuery, setSlashQuery] = useState('');
+  const [slashIndex, setSlashIndex] = useState(0);
+
+  // Heartbeat presence: broadcasts every 4s and unmounts cleanly
+  useEffect(() => {
+    pingPresence(ticket.id, adminActor, false);
+    setOtherViewers(getTicketViewers(ticket.id, adminActor.id));
+
+    const interval = setInterval(() => {
+      pingPresence(ticket.id, adminActor, body.trim().length > 0);
+      setOtherViewers(getTicketViewers(ticket.id, adminActor.id));
+    }, 4000);
+
+    const unsubscribe = subscribePresence(() => {
+      setOtherViewers(getTicketViewers(ticket.id, adminActor.id));
+    });
+
+    return () => {
+      clearInterval(interval);
+      unsubscribe();
+      leavePresence(ticket.id, adminActor.id);
+    };
+  }, [ticket.id, adminActor, body]);
+
+  // Global keyboard shortcut 'r' to focus reply composer
+  useEffect(() => {
+    const handleGlobalKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
+      if (
+        tag === 'input' ||
+        tag === 'textarea' ||
+        tag === 'select' ||
+        (e.target as HTMLElement)?.isContentEditable
+      ) {
+        return;
+      }
+      if (e.key === 'r' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        textareaRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKey);
+    return () => window.removeEventListener('keydown', handleGlobalKey);
+  }, []);
 
   React.useEffect(() => {
     if (!lightboxImg) return;
@@ -96,6 +156,56 @@ export function TicketWorkspace3Col({
   const handleInsertCanned = (text: string) => {
     setBody((prev) => (prev.trim() ? `${prev}\n\n${text}` : text));
     toast.info('Template balasan cepat dimasukkan ke kolom teks');
+  };
+
+  const handleBodyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    setBody(val);
+
+    // Detect slash command at current cursor position
+    const cursorPos = e.target.selectionStart ?? val.length;
+    const textBefore = val.slice(0, cursorPos);
+    const match = textBefore.match(/\/([a-zA-Z0-9_-]*)$/);
+    if (match) {
+      setSlashQuery(match[1].toLowerCase());
+      setSlashMenuOpen(true);
+      setSlashIndex(0);
+    } else {
+      setSlashMenuOpen(false);
+    }
+  };
+
+  const filteredCanned = useMemo(() => {
+    if (!slashMenuOpen) return [];
+    const q = slashQuery.trim().toLowerCase();
+    if (!q) return cannedResponses.slice(0, 6);
+    return cannedResponses
+      .filter((cr) => cr.title.toLowerCase().includes(q) || cr.content.toLowerCase().includes(q))
+      .slice(0, 6);
+  }, [slashMenuOpen, slashQuery, cannedResponses]);
+
+  const selectCanned = (crText: string) => {
+    const cursorPos = textareaRef.current?.selectionStart ?? body.length;
+    const textBefore = body.slice(0, cursorPos);
+    const match = textBefore.match(/\/([a-zA-Z0-9_-]*)$/);
+    if (match && match.index !== undefined) {
+      const prefix = body.slice(0, match.index);
+      const suffix = body.slice(cursorPos);
+      const nextBody = `${prefix}${crText}${suffix}`;
+      setBody(nextBody);
+      setSlashMenuOpen(false);
+      toast.info('Template balasan cepat disisipkan');
+      setTimeout(() => {
+        if (textareaRef.current) {
+          const newPos = prefix.length + crText.length;
+          textareaRef.current.setSelectionRange(newPos, newPos);
+          textareaRef.current.focus();
+        }
+      }, 50);
+    } else {
+      handleInsertCanned(crText);
+      setSlashMenuOpen(false);
+    }
   };
 
   const handleStatusSelect = (st: TicketStatus) => {
@@ -129,12 +239,36 @@ export function TicketWorkspace3Col({
       );
       setBody('');
       setAttachments([]);
+      setSlashMenuOpen(false);
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (slashMenuOpen && filteredCanned.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSlashIndex((prev) => (prev + 1) % filteredCanned.length);
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSlashIndex((prev) => (prev - 1 + filteredCanned.length) % filteredCanned.length);
+        return;
+      }
+      if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault();
+        selectCanned(filteredCanned[slashIndex].content);
+        return;
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setSlashMenuOpen(false);
+        return;
+      }
+    }
+
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       e.preventDefault();
       handleReplySubmit();
@@ -337,10 +471,37 @@ export function TicketWorkspace3Col({
             </p>
           </div>
         )}
+
+        {/* Ticket Audit Timeline */}
+        <TicketTimeline ticket={ticket} messages={messages} />
       </div>
 
       {/* ═══ CENTER COLUMN: Complaint, Messages & Composer ═══ */}
       <div className="space-y-4 lg:col-span-6">
+        {/* Agent Collision Warning Banner */}
+        {otherViewers.length > 0 && (
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900 shadow-xs animate-fadeIn">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-amber-700" />
+              <div className="truncate">
+                <span className="font-semibold">Perhatian Tabrakan Agen:</span>{' '}
+                <span>
+                  {otherViewers.map((v) => v.actorName).join(', ')} juga sedang membuka tiket ini.
+                </span>
+                {otherViewers.some((v) => v.isTyping) && (
+                  <span className="ml-2 inline-flex items-center gap-1 font-semibold text-amber-800">
+                    <PenLine className="h-3 w-3 animate-bounce" />
+                    sedang mengetik balasan...
+                  </span>
+                )}
+              </div>
+            </div>
+            <span className="shrink-0 rounded bg-amber-200/80 px-1.5 py-0.5 font-mono text-[10px] text-amber-900">
+              Live Presence
+            </span>
+          </div>
+        )}
+
         {/* Initial Report Card */}
         <div className="rounded-lg border border-line bg-panel p-4 sm:p-5 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-2">
@@ -569,26 +730,64 @@ export function TicketWorkspace3Col({
             </div>
           )}
 
-          {/* Text Area with Formatting Toolbar */}
-          <div className="mt-3 overflow-hidden rounded border border-line focus-within:border-ink">
-            <MessageToolbar
-              textareaRef={textareaRef}
-              value={body}
-              onChange={setBody}
-            />
-            <textarea
-              ref={textareaRef}
-              rows={4}
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={
-                composerMode === 'internal'
-                  ? 'Tulis catatan teknis rahasia (hanya terlihat oleh Superadmin di CRM)... Tekan Ctrl+Enter untuk menyimpan.'
-                  : 'Tulis balasan atau instruksi untuk pelapor... Tekan Ctrl+Enter untuk mengirim.'
-              }
-              className="w-full bg-canvas p-3 text-xs leading-relaxed text-ink placeholder:text-ink-faint focus:bg-panel focus:outline-none"
-            />
+          {/* Text Area with Formatting Toolbar & Slash Autocomplete */}
+          <div className="relative mt-3 overflow-visible">
+            {/* Slash Command Autocomplete Popover */}
+            {slashMenuOpen && filteredCanned.length > 0 && (
+              <div className="absolute bottom-full left-0 mb-2 w-80 max-h-56 overflow-y-auto rounded-lg border border-line bg-panel p-1.5 shadow-xl z-30">
+                <div className="flex items-center justify-between border-b border-line px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-ink-muted">
+                  <span>Template Balasan Cepat</span>
+                  <span className="font-mono text-[9px]">↑/↓ navigasi · Enter</span>
+                </div>
+                <div className="mt-1 space-y-0.5">
+                  {filteredCanned.map((cr, idx) => (
+                    <button
+                      key={cr.id}
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        selectCanned(cr.content);
+                      }}
+                      className={`w-full rounded px-2.5 py-1.5 text-left text-xs transition-colors flex flex-col ${
+                        idx === slashIndex
+                          ? 'bg-ink text-white font-medium'
+                          : 'text-ink hover:bg-subtle'
+                      }`}
+                    >
+                      <span className="font-semibold">{cr.title}</span>
+                      <span
+                        className={`truncate text-[11px] ${
+                          idx === slashIndex ? 'text-white/80' : 'text-ink-muted'
+                        }`}
+                      >
+                        {cr.content}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="overflow-hidden rounded border border-line focus-within:border-ink">
+              <MessageToolbar
+                textareaRef={textareaRef}
+                value={body}
+                onChange={setBody}
+              />
+              <textarea
+                ref={textareaRef}
+                rows={4}
+                value={body}
+                onChange={handleBodyChange}
+                onKeyDown={handleKeyDown}
+                placeholder={
+                  composerMode === 'internal'
+                    ? 'Tulis catatan teknis rahasia... Ketik "/" untuk template cepat, Ctrl+Enter untuk menyimpan.'
+                    : 'Tulis balasan atau instruksi untuk pelapor... Ketik "/" untuk template cepat, Ctrl+Enter untuk mengirim.'
+                }
+                className="w-full bg-canvas p-3 text-xs leading-relaxed text-ink placeholder:text-ink-faint focus:bg-panel focus:outline-none"
+              />
+            </div>
           </div>
 
           <div className="mt-2.5">

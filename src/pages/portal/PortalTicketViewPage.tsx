@@ -11,6 +11,7 @@ import { ScreenshotUploader } from '../../components/common/ScreenshotUploader';
 import { StatusBadge } from '../../components/common/StatusBadge';
 import { FormattedMessage } from '../../components/common/FormattedMessage';
 import { MessageToolbar } from '../../components/common/MessageToolbar';
+import { TicketTimeline } from '../../components/common/TicketTimeline';
 import { useToast } from '../../context/ToastContext';
 
 const STEPS: TicketStatus[] = ['open', 'in_progress', 'waiting_on_user', 'solved'];
@@ -317,6 +318,9 @@ export function PortalTicketViewPage() {
           </div>
         )}
       </div>
+
+      {/* Ticket Audit Timeline */}
+      <TicketTimeline ticket={ticket} messages={messages} />
 
       {/* Discussion Timeline */}
       <div className="rounded-lg border border-line bg-panel shadow-sm overflow-hidden">

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Download, FileSpreadsheet, FileJson, Calendar } from 'lucide-react';
+import { Download, FileSpreadsheet, FileJson, Printer, Calendar } from 'lucide-react';
 import { formatTicketsCsv } from '../../services/crmLogic';
 import type { Ticket } from '../../types/crm';
 import { VPS_APPS } from '../../config/vpsAppsConfig';
@@ -55,6 +55,10 @@ export function ReportsExportPanel({ tickets }: ReportsExportPanelProps) {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     toast.success(`Ekspor JSON ${filteredTickets.length} tiket berhasil diunduh.`);
+  };
+
+  const handlePrint = () => {
+    window.print();
   };
 
   return (
@@ -116,6 +120,15 @@ export function ReportsExportPanel({ tickets }: ReportsExportPanelProps) {
             title="Ekspor JSON"
           >
             <FileJson className="h-3.5 w-3.5" />
+          </button>
+
+          <button
+            type="button"
+            onClick={handlePrint}
+            className="inline-flex items-center justify-center gap-1.5 rounded border border-line bg-subtle px-3 py-2 font-medium text-ink hover:border-line-strong active:scale-95 transition-all"
+            title="Cetak Ringkasan"
+          >
+            <Printer className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>

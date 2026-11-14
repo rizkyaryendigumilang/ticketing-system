@@ -22,6 +22,7 @@ import { flush, isSuperuser } from '../../services/pbClient';
 import { getNotifications, subscribeNotifications, syncTicketAlerts } from '../../services/notificationService';
 import { NotificationCenterDrawer } from '../notifications/NotificationCenterDrawer';
 import { CommandPalette } from '../common/CommandPalette';
+import { SyncStatusIndicator } from '../common/SyncStatusIndicator';
 
 type NavItem = {
   to: string;
@@ -310,6 +311,9 @@ export function AdminCrmLayout() {
 
             {/* Admin footer */}
             <div className="border-t border-rail-line p-3">
+              <div className="mb-2">
+                <SyncStatusIndicator />
+              </div>
               {pendingAdminChanges > 0 && (
                 <button
                   type="button"

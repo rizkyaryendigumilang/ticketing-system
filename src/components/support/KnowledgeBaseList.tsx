@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { BookOpen, Search, ExternalLink, ArrowRight } from 'lucide-react';
 import { VPS_APPS } from '../../config/vpsAppsConfig';
 
-interface KbArticle {
+export interface KbArticle {
   id: string;
   appId: string;
   title: string;
@@ -10,7 +10,7 @@ interface KbArticle {
   steps: string[];
 }
 
-const KB_ARTICLES: KbArticle[] = [
+export const KB_ARTICLES: KbArticle[] = [
   {
     id: 'kb-snk-01',
     appId: 'snackloop',

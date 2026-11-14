@@ -6,6 +6,7 @@ import { computeTrendMetrics, computeTicketSla } from '../../services/crmLogic';
 import { AnalyticsKpiCards } from '../../components/analytics/AnalyticsKpiCards';
 import { TicketVolumeTrendChart } from '../../components/analytics/TicketVolumeTrendChart';
 import { CategoryBreakdownChart } from '../../components/analytics/CategoryBreakdownChart';
+import { CsatAnalyticsCard } from '../../components/analytics/CsatAnalyticsCard';
 import { ReportsExportPanel } from '../../components/analytics/ReportsExportPanel';
 import type { TrendDataPoint, CategoryMetric, AppMetric } from '../../types/analytics';
 
@@ -138,7 +139,10 @@ export function AdminAnalyticsPage() {
       {/* 3. Category & App Distribution */}
       <CategoryBreakdownChart categories={metrics.categories} apps={metrics.apps} />
 
-      {/* 4. Reports & Export */}
+      {/* 4. CSAT Customer Satisfaction Dashboard */}
+      <CsatAnalyticsCard tickets={data.tickets} />
+
+      {/* 5. Reports & Export */}
       <ReportsExportPanel tickets={data.tickets} />
     </div>
   );

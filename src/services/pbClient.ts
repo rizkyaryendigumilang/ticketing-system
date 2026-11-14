@@ -38,8 +38,10 @@ export const PB_URL = resolvePbUrl();
 export const pb = new PocketBase(PB_URL);
 pb.autoCancellation(false);
 
-export type Connection = 'checking' | 'online' | 'offline';
+export type Connection = 'checking' | 'online' | 'reconnecting' | 'offline';
 let connection: Connection = 'checking';
+let reconnectAttempt = 0;
+let lastSyncAt: number | null = null;
 const connectionListeners = new Set<() => void>();
 
 export type SyncErrorHandler = (message: string, op: OutboxOp) => void;
@@ -53,12 +55,19 @@ export function onSyncError(fn: SyncErrorHandler) {
 }
 
 export const getConnection = () => connection;
+export const getDetailedConnection = () => ({
+  status: connection,
+  attempt: reconnectAttempt,
+  lastSyncAt,
+});
+
 export function subscribeConnection(fn: () => void) {
   connectionListeners.add(fn);
   return () => {
     connectionListeners.delete(fn);
   };
 }
+
 function setConnection(next: Connection) {
   if (next === connection) return;
   connection = next;
@@ -209,23 +218,58 @@ async function resync() {
 
 async function check() {
   const online = await probe();
-  if (online && connection !== 'online') {
+  if (online) {
+    const wasOffline = connection !== 'online';
+    reconnectAttempt = 0;
+    lastSyncAt = Date.now();
     setConnection('online');
-    await resync();
-  } else if (!online && connection !== 'offline') {
-    setConnection('offline');
+    if (wasOffline) {
+      await resync();
+    }
+  } else {
+    reconnectAttempt++;
     pb.realtime.unsubscribe().catch(() => {});
+    if (reconnectAttempt <= 3) {
+      setConnection('reconnecting');
+    } else {
+      setConnection('offline');
+    }
   }
 }
 
+export async function retryConnectionNow(): Promise<void> {
+  setConnection('checking');
+  await check();
+}
+
 let ready: Promise<void> | null = null;
+let pollTimer: ReturnType<typeof setTimeout> | null = null;
+
+function scheduleNextCheck() {
+  if (pollTimer) clearTimeout(pollTimer);
+  let delay = 12_000;
+  if (connection === 'reconnecting') {
+    delay = Math.min(25_000, 2000 * Math.pow(1.5, reconnectAttempt));
+  } else if (connection === 'offline') {
+    delay = 20_000;
+  }
+  pollTimer = setTimeout(async () => {
+    await check();
+    scheduleNextCheck();
+  }, delay);
+}
 
 /** Starts the connection watcher once. Resolves after the first PocketBase check (max ~2.5 s). */
 export function startSync(): Promise<void> {
   if (ready) return ready;
-  ready = check();
-  setInterval(check, 10_000);
-  if (typeof window !== 'undefined') window.addEventListener('online', check);
+  ready = check().then(() => {
+    scheduleNextCheck();
+  });
+  if (typeof window !== 'undefined') {
+    window.addEventListener('online', () => {
+      void check();
+    });
+  }
   pb.authStore.onChange(() => {
     if (connection === 'online') void resync();
   });
