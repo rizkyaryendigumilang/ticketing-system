@@ -132,6 +132,8 @@ export function ScreenshotUploader({ attachments, onChange, max = 5 }: Props) {
                   <img
                     src={src}
                     alt={`Lampiran ${i + 1}`}
+                    loading="lazy"
+                    decoding="async"
                     className="h-16 w-24 rounded-lg border border-line object-cover shadow-2xs"
                   />
                 ) : (

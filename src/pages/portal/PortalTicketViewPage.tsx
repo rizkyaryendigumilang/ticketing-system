@@ -311,7 +311,13 @@ export function PortalTicketViewPage() {
                   onClick={() => setLightboxImg(src)}
                   className="overflow-hidden rounded border border-line bg-subtle hover:border-ink transition-colors"
                 >
-                  <img src={src} alt={`Tangkapan Layar ${idx + 1}`} className="h-24 w-full object-cover" />
+                  <img
+                    src={src}
+                    alt={`Tangkapan Layar ${idx + 1}`}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-24 w-full object-cover"
+                  />
                 </button>
               ))}
             </div>
@@ -382,7 +388,13 @@ export function PortalTicketViewPage() {
                           onClick={() => setLightboxImg(src)}
                           className="overflow-hidden rounded border border-line hover:border-ink transition-colors"
                         >
-                          <img src={src} alt={`Lampiran ${i + 1}`} className="h-16 w-24 object-cover" />
+                          <img
+                            src={src}
+                            alt={`Lampiran ${i + 1}`}
+                            loading="lazy"
+                            decoding="async"
+                            className="h-16 w-24 object-cover"
+                          />
                         </button>
                       ))}
                     </div>
@@ -449,6 +461,7 @@ export function PortalTicketViewPage() {
           <img
             src={lightboxImg}
             alt="Lampiran diperbesar"
+            decoding="async"
             className="max-h-[88vh] max-w-full rounded border border-white/20 object-contain shadow-xl"
           />
         </div>

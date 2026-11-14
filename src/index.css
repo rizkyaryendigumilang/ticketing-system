@@ -114,4 +114,18 @@
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Hardware-friendly: skips layout & painting of off-screen list items */
+  .content-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 120px;
+  }
+
+  /* Safe area insets for notched phones & gestures */
+  .safe-bottom {
+    padding-bottom: max(0.35rem, env(safe-area-inset-bottom, 0px));
+  }
+  .safe-top {
+    padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+  }
 }

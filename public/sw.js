@@ -1,10 +1,10 @@
 /**
  * Service Worker for Helpdesk VPS CRM PWA.
- * Provides offline caching for the application shell, assets, and icons,
+ * Provides offline caching for the application shell, assets, icons, and web fonts,
  * while passing PocketBase API requests and Realtime SSE directly to network.
  */
 
-const CACHE_NAME = 'helpdesk-pwa-v1';
+const CACHE_NAME = 'helpdesk-pwa-v2';
 
 const STATIC_PRECACHE = [
   './',
@@ -26,7 +26,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// 2. ACTIVATE
+// 2. ACTIVATE (Delete old cache versions to free up storage)
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches
@@ -58,8 +58,26 @@ self.addEventListener('fetch', (event) => {
   if (
     url.pathname.includes('/helpdesk-pb/') ||
     url.pathname.includes('/api/realtime') ||
-    url.pathname.includes(':8090')
+    url.pathname.includes(':8090') ||
+    url.pathname.includes(':8094')
   ) {
+    return;
+  }
+
+  // Google Fonts & Web Fonts: Cache-First (Hardware & Network friendly)
+  if (url.origin.includes('fonts.googleapis.com') || url.origin.includes('fonts.gstatic.com')) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        if (cached) return cached;
+        return fetch(request).then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        });
+      }),
+    );
     return;
   }
 
@@ -69,7 +87,7 @@ self.addEventListener('fetch', (event) => {
       caches.match(request).then((cached) => {
         if (cached) return cached;
         return fetch(request).then((response) => {
-          if (response && response.status === 200 && response.type === 'basic') {
+          if (response && response.status === 200 && (response.type === 'basic' || response.type === 'cors')) {
             const clone = response.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
           }

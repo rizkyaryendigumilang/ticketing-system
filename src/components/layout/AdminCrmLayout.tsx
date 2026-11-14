@@ -575,14 +575,14 @@ export function AdminCrmLayout() {
           </header>
 
           {/* Main Workspace Body */}
-          <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
+          <main className="flex-1 overflow-y-auto pb-[calc(4rem+env(safe-area-inset-bottom,0px))] md:pb-0">
             <Outlet />
           </main>
 
           {/* Mobile Bottom Navigation Bar (md:hidden) */}
           <nav
             aria-label="Navigasi Bawah"
-            className="fixed bottom-0 inset-x-0 z-30 md:hidden h-14 bg-panel/95 backdrop-blur-xl border-t border-line safe-bottom flex items-center justify-around px-1 select-none shadow-lg"
+            className="fixed bottom-0 inset-x-0 z-30 md:hidden bg-panel/95 backdrop-blur-xl border-t border-line safe-bottom flex items-center justify-around px-1 select-none shadow-lg pt-1"
           >
             {navItems.map(({ to, end, icon: Icon, label, badgeKey }) => {
               const badge = badgeKey ? badgeFor[badgeKey] : null;

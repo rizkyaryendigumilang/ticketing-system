@@ -561,6 +561,8 @@ export function TicketWorkspace3Col({
                     <img
                       src={src}
                       alt={`Screenshot ${idx + 1}`}
+                      loading="lazy"
+                      decoding="async"
                       className="h-24 w-full object-cover"
                     />
                   </button>
@@ -666,6 +668,8 @@ export function TicketWorkspace3Col({
                             <img
                               src={src}
                               alt={`Lampiran ${i + 1}`}
+                              loading="lazy"
+                              decoding="async"
                               className="h-16 w-24 object-cover"
                             />
                           </button>
@@ -846,6 +850,7 @@ export function TicketWorkspace3Col({
           <img
             src={lightboxImg}
             alt="Lampiran diperbesar"
+            decoding="async"
             className="max-h-[88vh] max-w-full rounded border border-white/20 object-contain shadow-xl"
           />
         </div>

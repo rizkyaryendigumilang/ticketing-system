@@ -25,7 +25,13 @@ export function AttachmentGrid({ urls, size = 'md' }: { urls: string[]; size?: '
             className="overflow-hidden rounded-md border border-line hover:border-ink"
             aria-label={`Perbesar lampiran ${i + 1}`}
           >
-            <img src={src} alt="" className={size === 'sm' ? 'h-14 w-20 object-cover' : 'h-24 w-36 object-cover'} />
+            <img
+              src={src}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className={size === 'sm' ? 'h-14 w-20 object-cover' : 'h-24 w-36 object-cover'}
+            />
           </button>
         ))}
       </div>
@@ -41,7 +47,12 @@ export function AttachmentGrid({ urls, size = 'md' }: { urls: string[]; size?: '
           <button type="button" className="absolute right-4 top-4 rounded-md p-2 text-white hover:bg-white/10" aria-label="Tutup">
             <X className="h-5 w-5" />
           </button>
-          <img src={open} alt="Lampiran" className="max-h-full max-w-full rounded-md object-contain" />
+          <img
+            src={open}
+            alt="Lampiran"
+            decoding="async"
+            className="max-h-full max-w-full rounded-md object-contain"
+          />
         </div>
       )}
     </>

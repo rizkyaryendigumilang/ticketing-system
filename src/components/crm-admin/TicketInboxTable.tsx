@@ -327,7 +327,7 @@ export function TicketInboxTable({
                 <div
                   key={ticket.id}
                   onClick={() => onTicketClick(ticket.id)}
-                  className={`p-4 space-y-2.5 active:bg-subtle/80 transition-colors cursor-pointer ${
+                  className={`content-auto p-4 space-y-2.5 active:bg-subtle/80 transition-colors cursor-pointer ${
                     isOpen ? 'bg-rose-500/[0.02]' : ''
                   }`}
                 >

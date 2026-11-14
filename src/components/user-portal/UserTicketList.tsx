@@ -190,7 +190,7 @@ export function UserTicketList({
             <div
               key={ticket.id}
               onClick={() => onTicketClick(ticket.id)}
-              className="flex cursor-pointer items-start justify-between gap-4 p-4 sm:p-5 transition-colors hover:bg-subtle/50"
+              className="content-auto flex cursor-pointer items-start justify-between gap-4 p-4 sm:p-5 transition-colors hover:bg-subtle/50"
             >
               <div className="min-w-0 flex-1 space-y-1.5">
                 <div className="flex flex-wrap items-center gap-2">

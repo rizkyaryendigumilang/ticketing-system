@@ -4,10 +4,36 @@
   "description": "Sistem CRM & Tiket Helpdesk Multi-Aplikasi VPS",
   "start_url": "./",
   "scope": "./",
+  "id": "vps-helpdesk-crm",
   "display": "standalone",
   "background_color": "#0B0F17",
   "theme_color": "#0B0F17",
   "orientation": "any",
+  "categories": ["business", "productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Kotak Masuk Tiket",
+      "short_name": "Tiket",
+      "description": "Buka daftar antrean tiket aktif",
+      "url": "./admin/tickets",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Buat Tiket Baru",
+      "short_name": "Buat Tiket",
+      "description": "Kirim tiket keluhan baru di portal",
+      "url": "./portal/new",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Buka ringkasan operasional",
+      "url": "./admin",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "icon.svg",
