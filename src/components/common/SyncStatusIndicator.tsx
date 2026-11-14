@@ -7,6 +7,7 @@ import {
 } from '../../services/pbClient';
 import { getOutbox, subscribeStore } from '../../services/storageService';
 import { useToast } from '../../context/ToastContext';
+import { useCrm } from '../../context/CrmContext';
 
 interface Props {
   variant?: 'rail' | 'light';
@@ -15,6 +16,7 @@ interface Props {
 
 export function SyncStatusIndicator({ variant = 'rail', className = '' }: Props) {
   const toast = useToast();
+  const { t } = useCrm();
   const [details, setDetails] = useState(getDetailedConnection);
   const [pendingCount, setPendingCount] = useState(() => getOutbox().length);
   const [retrying, setRetrying] = useState(false);
@@ -36,7 +38,7 @@ export function SyncStatusIndicator({ variant = 'rail', className = '' }: Props)
     setRetrying(true);
     try {
       await retryConnectionNow();
-      toast.info('Memeriksa koneksi server PocketBase...');
+      toast.info(t('nav.checkingConnection'));
     } finally {
       setTimeout(() => setRetrying(false), 800);
     }
@@ -53,10 +55,10 @@ export function SyncStatusIndicator({ variant = 'rail', className = '' }: Props)
             ? 'border border-white/10 bg-white/[0.05] text-neutral-200'
             : 'border border-neutral-200/80 bg-neutral-100/70 text-neutral-700 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-200'
         } ${className}`}
-        title="Terhubung ke server PocketBase secara realtime (SSE Aktif)"
+        title={t('nav.connectedSseTooltip')}
       >
-        <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.45)]" />
-        <span className="truncate">Realtime Online</span>
+        <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500 dark:bg-emerald-400" />
+        <span className="truncate">{t('nav.realtimeOnline')}</span>
       </div>
     );
   }
@@ -72,10 +74,10 @@ export function SyncStatusIndicator({ variant = 'rail', className = '' }: Props)
             ? 'border border-amber-500/30 bg-amber-500/10 text-amber-200 hover:bg-amber-500/20'
             : 'border border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-200 hover:bg-amber-500/20'
         } ${className}`}
-        title="Klik untuk mencoba koneksi ulang sekarang"
+        title={t('nav.clickToRetryTooltip')}
       >
         <RefreshCw className={`h-3 w-3 text-amber-400 ${retrying ? 'animate-spin' : ''}`} />
-        <span className="truncate">Menghubungkan ({attempt})...</span>
+        <span className="truncate">{t('nav.reconnecting', { attempt })}</span>
       </button>
     );
   }
@@ -90,10 +92,14 @@ export function SyncStatusIndicator({ variant = 'rail', className = '' }: Props)
           ? 'border border-rose-500/30 bg-rose-500/10 text-rose-200 hover:bg-rose-500/20'
           : 'border border-rose-500/30 bg-rose-500/10 text-rose-800 dark:text-rose-200 hover:bg-rose-500/20'
       } ${className}`}
-      title="Mode Offline: perubahan disimpan di antrean outbox. Klik untuk mencoba sinkronisasi."
+      title={t('nav.offlineTooltip')}
     >
       <WifiOff className="h-3 w-3 text-rose-400" />
-      <span className="truncate">Offline {pendingCount > 0 ? `(${pendingCount} antrean)` : ''}</span>
+      <span className="truncate">
+        {pendingCount > 0
+          ? t('nav.offlineQueue', { count: pendingCount })
+          : t('nav.offline')}
+      </span>
     </button>
   );
 }

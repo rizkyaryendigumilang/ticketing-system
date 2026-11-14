@@ -285,7 +285,7 @@ export function LoginPage() {
             >
               <span
                 className={`h-2 w-2 rounded-full ${
-                  connection === 'online' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+                  connection === 'online' ? 'bg-emerald-500' : 'bg-amber-500'
                 }`}
               />
               <span className="text-[11px] font-mono">

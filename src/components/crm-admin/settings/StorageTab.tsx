@@ -176,7 +176,7 @@ export function StorageTab() {
             >
               <span
                 className={`h-1.5 w-1.5 rounded-full ${
-                  backupConfig.autoSyncEnabled ? 'bg-emerald-500 animate-pulse' : 'bg-neutral-400'
+                  backupConfig.autoSyncEnabled ? 'bg-emerald-500' : 'bg-neutral-400'
                 }`}
               />
               <span>
