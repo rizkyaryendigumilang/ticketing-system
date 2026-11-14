@@ -5,6 +5,7 @@ import {
   Bell,
   ChevronDown,
   ExternalLink,
+  Globe,
   Inbox,
   LayoutDashboard,
   LogOut,
@@ -37,7 +38,7 @@ type NavItem = {
 };
 
 export function AdminCrmLayout() {
-  const { data, admin, logoutAdmin, pendingAdminChanges, connection, t } = useCrm();
+  const { data, admin, logoutAdmin, pendingAdminChanges, connection, t, lang, setLanguage } = useCrm();
   const { isDark, toggleTheme } = useTheme();
   const toast = useToast();
   const navigate = useNavigate();
@@ -107,7 +108,7 @@ export function AdminCrmLayout() {
     const p = location.pathname;
     if (p === '/admin') return t('nav.dashboard');
     if (p.startsWith('/admin/tickets')) return t('nav.tickets');
-    if (p.startsWith('/admin/analytics')) return 'Analitik & Laporan';
+    if (p.startsWith('/admin/analytics')) return t('nav.analytics');
     if (p.startsWith('/admin/settings')) return t('nav.settings');
     return t('nav.crm');
   })();
@@ -360,7 +361,7 @@ export function AdminCrmLayout() {
               <span className="flex items-center gap-2 min-w-0">
                 <Search className="h-3.5 w-3.5 text-ink-faint group-hover:text-ink transition-colors shrink-0" />
                 <span className="truncate text-ink-faint group-hover:text-ink-muted transition-colors">
-                  Cari tiket, pelapor, atau aksi...
+                  {t('nav.searchPlaceholder')}
                 </span>
               </span>
               <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded-md border border-line bg-panel px-1.5 py-0.5 text-[10px] font-medium text-ink-muted shadow-2xs shrink-0">
@@ -396,6 +397,18 @@ export function AdminCrmLayout() {
                 {isDark ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4" />}
               </button>
 
+              {/* Quick Language Toggle Button (ID / EN) */}
+              <button
+                type="button"
+                onClick={() => setLanguage(lang === 'id' ? 'en' : 'id')}
+                className="flex h-9 items-center gap-1.5 rounded-xl border border-line bg-panel px-2.5 text-xs font-semibold text-ink-muted shadow-2xs hover:border-line-strong hover:bg-subtle hover:text-ink active:scale-95 transition-all duration-150"
+                title={lang === 'id' ? 'Switch interface to English' : 'Ganti antarmuka ke Bahasa Indonesia'}
+                aria-label={lang === 'id' ? 'Switch interface to English' : 'Ganti antarmuka ke Bahasa Indonesia'}
+              >
+                <Globe className="h-3.5 w-3.5 text-ink-faint" />
+                <span className="font-mono text-[11px] font-bold text-ink uppercase">{lang}</span>
+              </button>
+
               {/* Quick Link to Portal */}
               <a
                 href={portalUrl}
@@ -405,7 +418,7 @@ export function AdminCrmLayout() {
                 className="hidden md:inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 dark:bg-emerald-500/20 hover:bg-emerald-500/15 dark:hover:bg-emerald-500/30 active:scale-95 transition-all duration-150 shadow-2xs"
               >
                 <ExternalLink className="h-3.5 w-3.5" />
-                <span>Portal Pelapor</span>
+                <span>{t('nav.portalShort')}</span>
               </a>
 
               {/* Admin Avatar Chip */}

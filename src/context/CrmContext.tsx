@@ -48,6 +48,7 @@ interface CrmContextValue {
   settings: SystemSettings;
   updateSettings: (next: SystemSettings) => void;
   lang: Language;
+  setLanguage: (lang: Language) => void;
   t: (key: TranslationKey, params?: Record<string, string | number>) => string;
   statusLabel: (status: TicketStatus) => string;
   priorityLabel: (priority: TicketPriority) => string;
@@ -177,6 +178,10 @@ export function CrmProvider({ children }: { children: React.ReactNode }) {
   const requester = data.users.find((u) => u.id === requesterId) ?? null;
 
   const lang: Language = settings.language ?? 'id';
+  const setLanguage = useCallback((nextLang: Language) => {
+    saveSettings({ ...settings, language: nextLang });
+  }, [settings]);
+
   const t = useCallback(
     (key: TranslationKey, params?: Record<string, string | number>) => translate(lang, key, params),
     [lang],
@@ -196,6 +201,7 @@ export function CrmProvider({ children }: { children: React.ReactNode }) {
     settings,
     updateSettings,
     lang,
+    setLanguage,
     t,
     statusLabel,
     priorityLabel,

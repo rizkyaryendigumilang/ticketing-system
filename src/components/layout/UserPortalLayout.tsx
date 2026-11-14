@@ -1,10 +1,10 @@
 import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ExternalLink, LogOut, Plus, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Globe, LogOut, Plus, ShieldCheck } from 'lucide-react';
 import { getApp } from '../../config/vpsAppsConfig';
 import { useCrm } from '../../context/CrmContext';
 
 export function UserPortalLayout() {
-  const { data, admin, requester, logoutRequester, t } = useCrm();
+  const { data, admin, requester, logoutRequester, t, lang, setLanguage } = useCrm();
   const navigate = useNavigate();
 
   const app = getApp(requester?.appId);
@@ -45,29 +45,41 @@ export function UserPortalLayout() {
             <div>
               <div className="flex items-center gap-2">
                 <Link to="/portal" className="text-sm sm:text-base font-bold tracking-tight text-ink hover:text-ink/80 transition-colors">
-                  {requester ? `Pusat Bantuan ${app?.name ?? 'Aplikasi'}` : 'Pusat Bantuan Ekosistem VPS'}
+                  {requester ? (lang === 'en' ? `Help Center · ${app?.name ?? 'App'}` : `Pusat Bantuan ${app?.name ?? 'Aplikasi'}`) : 'VPS Helpdesk'}
                 </Link>
                 {activeCount > 0 && (
                   <span className="rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-700 text-[10px] font-semibold px-2 py-0.5 tabular-nums">
-                    {activeCount} aktif
+                    {activeCount} {lang === 'en' ? 'active' : 'aktif'}
                   </span>
                 )}
               </div>
               {requester ? (
                 <p className="text-[11px] sm:text-xs text-ink-muted">
-                  Pelapor: <span className="font-semibold text-ink">{requester.name}</span>{' '}
+                  {lang === 'en' ? 'Requester: ' : 'Pelapor: '}<span className="font-semibold text-ink">{requester.name}</span>{' '}
                   (<span className="font-mono text-[10px] sm:text-[11px]">{requester.externalUid}</span> ·{' '}
                   <span className="text-ink">{requester.appRole}</span>)
                 </p>
               ) : (
                 <p className="text-[11px] sm:text-xs text-ink-muted">
-                  Layanan Bantuan Terpadu 7 Aplikasi VPS (43.156.236.102)
+                  {lang === 'en' ? 'Unified Support Hub for 7 VPS Apps' : 'Layanan Bantuan Terpadu 7 Aplikasi VPS (43.156.236.102)'}
                 </p>
               )}
             </div>
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Quick Language Toggle */}
+            <button
+              type="button"
+              onClick={() => setLanguage(lang === 'id' ? 'en' : 'id')}
+              className="inline-flex items-center gap-1 rounded-lg border border-line bg-panel px-2 py-1 text-xs font-semibold text-ink-muted hover:text-ink hover:bg-subtle active:scale-95 transition-all shadow-2xs"
+              title={lang === 'id' ? 'Switch to English' : 'Ganti ke Bahasa Indonesia'}
+              aria-label={lang === 'id' ? 'Switch to English' : 'Ganti ke Bahasa Indonesia'}
+            >
+              <Globe className="h-3 w-3 text-ink-faint" />
+              <span className="font-mono text-[10px] uppercase font-bold text-ink">{lang}</span>
+            </button>
+
             {admin && (
               <Link
                 to="/admin"
@@ -75,7 +87,7 @@ export function UserPortalLayout() {
                 title="Buka Meja Kerja Superadmin CRM"
               >
                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-                Meja Kerja Admin
+                {lang === 'en' ? 'Admin Workspace' : 'Meja Kerja Admin'}
               </Link>
             )}
 
@@ -87,7 +99,7 @@ export function UserPortalLayout() {
                 className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-subtle/80 px-3 py-1.5 text-xs font-medium text-ink shadow-xs transition-all hover:border-line-strong hover:bg-subtle active:scale-[0.98]"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
-                Kembali ke {app?.name ?? 'Aplikasi'}
+                {lang === 'en' ? 'Back to' : 'Kembali ke'} {app?.name ?? 'Aplikasi'}
                 <ExternalLink className="h-3 w-3 text-ink-muted" />
               </a>
             )}
@@ -118,7 +130,7 @@ export function UserPortalLayout() {
                 to="/login"
                 className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:opacity-90 transition-all active:scale-[0.98]"
               >
-                Masuk
+                {t('login.submit')}
               </Link>
             )}
           </div>
