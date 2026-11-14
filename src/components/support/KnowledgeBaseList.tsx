@@ -1,62 +1,10 @@
 import React, { useState } from 'react';
 import { BookOpen, Search, ExternalLink, ArrowRight } from 'lucide-react';
 import { VPS_APPS } from '../../config/vpsAppsConfig';
+import { KB_ARTICLES, type KbArticle } from '../../config/knowledgeBaseData';
 
-export interface KbArticle {
-  id: string;
-  appId: string;
-  title: string;
-  summary: string;
-  steps: string[];
-}
-
-export const KB_ARTICLES: KbArticle[] = [
-  {
-    id: 'kb-snk-01',
-    appId: 'snackloop',
-    title: 'Troubleshooting Printer Bluetooth Kasir POS Tidak Merespons',
-    summary: 'Langkah mendiagnosis kegagalan cetak struk kasir saat transaksi sedang padat.',
-    steps: [
-      'Pastikan modul Bluetooth pada tablet POS aktif dan terhubung ke perangkat printer.',
-      'Matikan printer kasir selama 5 detik, lalu nyalakan kembali.',
-      'Buka Pengaturan SnackLoop POS > Perangkat Keras > Uji Cetak Struk Uji Coba.',
-      'Jika struk tetap tidak keluar, periksa ketersediaan kertas thermal.',
-    ],
-  },
-  {
-    id: 'kb-rec-01',
-    appId: 'recruiter',
-    title: 'Mengatasi Gagal Unggah Berkas Resume/CV Kandidat (>5MB)',
-    summary: 'Standar format dan pembatasan ukuran berkas lamaran pada platform rekrutmen.',
-    steps: [
-      'Format yang diterima sistem adalah PDF, DOCX, dan RTF.',
-      'Ukuran maksimal per dokumen yang diizinkan sistem VPS adalah 5.0 MB.',
-      'Kompres file PDF melalui alat kompresi sebelum mengunggah kembali.',
-    ],
-  },
-  {
-    id: 'kb-kpt-01',
-    appId: 'kept',
-    title: 'Prosedur Pemulihan Kunci Enkripsi Dokumen KEPT Vault',
-    summary: 'Langkah aman memulihkan akses berkas saat frase sandi cadangan hilang.',
-    steps: [
-      'Gunakan berkas kunci darurat (.key) yang diunduh saat inisialisasi brankas pertama kali.',
-      'Unggah kunci cadangan melalui menu Pengaturan Vault > Pulihkan Kunci.',
-      'Jangan pernah membagikan frase kunci ke pihak ketiga melalui chat atau tiket publik.',
-    ],
-  },
-  {
-    id: 'kb-wed-01',
-    appId: 'wedding',
-    title: 'Sinkronisasi Buku Tamu Digital & QR Code Check-in',
-    summary: 'Memastikan daftar tamu undangan terbarui saat lokasi memiliki koneksi lambat.',
-    steps: [
-      'Sebelum acara dimulai, lakukan sinkronisasi data offline di menu Buku Tamu.',
-      'Gunakan pemindai kamera web lokal untuk verifikasi QR tamu tanpa akses internet.',
-      'Setelah acara selesai dan koneksi tersedia, tekan tombol "Kirim Data Offline".',
-    ],
-  },
-];
+export type { KbArticle };
+export { KB_ARTICLES };
 
 export function KnowledgeBaseList() {
   const [search, setSearch] = useState('');

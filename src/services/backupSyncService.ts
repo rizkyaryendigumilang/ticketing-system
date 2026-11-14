@@ -7,6 +7,7 @@
 import { formatTicketsCsv } from './crmLogic.ts';
 import { flush, isSuperuser } from './pbClient.ts';
 import { getData, subscribeStore, type CrmData } from './storageService.ts';
+import { logAuditEvent } from './auditLogService.ts';
 import type { Ticket, TicketMessage } from '../types/crm.ts';
 
 export interface BackupConfig {
@@ -162,6 +163,15 @@ export async function generateLatestBackup({
   saveBackupConfig({
     lastBackupAt: Date.now(),
     lastBackupCount: targetTickets.length,
+  });
+
+  logAuditEvent({
+    actorId: adminId || requesterId || 'system',
+    actorName: adminId ? 'Admin Helpdesk' : requesterId ? 'Pelapor' : 'Sistem Auto-Sync',
+    actorRole: adminId ? 'admin' : requesterId ? 'requester' : 'system',
+    action: 'backup_export',
+    target: filename,
+    details: `Mengekspor cadangan data (${scopeLabel}, format ${format.toUpperCase()}) berisi ${targetTickets.length} tiket.`,
   });
 
   return {

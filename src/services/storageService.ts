@@ -16,6 +16,7 @@ export interface SystemSettings {
   outboundWebhookUrl: string;
   autoCloseDays: number;
   autoCloseEnabled: boolean;
+  autoEscalateSla?: boolean;
   language: 'id' | 'en';
   timezone: string;
   uiDensity: 'comfortable' | 'compact';
@@ -36,6 +37,7 @@ export const DEFAULT_SETTINGS: SystemSettings = {
   outboundWebhookUrl: '',
   autoCloseDays: 7,
   autoCloseEnabled: true,
+  autoEscalateSla: true,
   language: 'id',
   timezone: 'Asia/Jakarta',
   uiDensity: 'comfortable',

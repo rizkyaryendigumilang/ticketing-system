@@ -209,14 +209,14 @@ export function PortalTicketViewPage() {
 
       {/* CSAT Satisfaction Feedback Card */}
       {isSolved && (
-        <div className="rounded-lg border border-line bg-panel p-4 sm:p-5 shadow-sm">
+        <div className="rounded-2xl border border-line bg-panel p-5 sm:p-6 shadow-card">
           <div className="flex items-center justify-between gap-2 border-b border-line pb-3">
             <span className="flex items-center gap-1.5 text-xs font-bold text-ink">
               <Star className="h-4 w-4 fill-amber-400 text-amber-500" />
               Penilaian Layanan &amp; Kepuasan Solusi (CSAT)
             </span>
             {ticket.satisfactionRating ? (
-              <span className="rounded bg-amber-50 px-2 py-0.5 font-mono text-xs font-bold text-amber-800 border border-amber-200">
+              <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-800 border border-amber-500/20 tabular-nums">
                 ⭐ {ticket.satisfactionRating} / 5 Bintang
               </span>
             ) : null}
@@ -252,7 +252,7 @@ export function PortalTicketViewPage() {
                     />
                   </button>
                 ))}
-                <span className="ml-2 font-mono text-xs font-bold text-ink">
+                <span className="ml-2 text-xs font-bold text-ink tabular-nums">
                   {csatRating > 0 ? `${csatRating}/5 Bintang` : 'Pilih bintang'}
                 </span>
               </div>
@@ -261,13 +261,13 @@ export function PortalTicketViewPage() {
                 value={csatComment}
                 onChange={(e) => setCsatComment(e.target.value)}
                 placeholder="Tuliskan komentar tambahan (opsional)..."
-                className="w-full rounded border border-line bg-canvas px-3 py-1.5 text-xs text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none"
+                className="w-full rounded-lg border border-line bg-canvas px-3.5 py-2 text-xs text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none transition-colors"
               />
               <button
                 type="button"
                 disabled={csatRating === 0 || submitting}
                 onClick={handleSubmitCsat}
-                className="inline-flex items-center gap-1.5 rounded bg-ink px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90 active:scale-95 disabled:opacity-40 transition-[opacity,transform]"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-4 py-2 text-xs font-semibold text-white shadow-xs hover:opacity-95 active:scale-95 disabled:opacity-40 transition-all"
               >
                 Kirim Penilaian
               </button>
@@ -277,7 +277,7 @@ export function PortalTicketViewPage() {
       )}
 
       {/* Initial Complaint Card */}
-      <div className="rounded-lg border border-line bg-panel p-5 shadow-sm">
+      <div className="rounded-2xl border border-line bg-panel p-5 sm:p-6 shadow-card">
         <h1 className="text-base font-semibold text-ink">{ticket.subject}</h1>
         <div className="mt-2.5 whitespace-pre-wrap rounded border border-line bg-canvas p-3.5 text-xs leading-relaxed text-ink font-sans">
           {ticket.description}
@@ -323,10 +323,10 @@ export function PortalTicketViewPage() {
       <TicketTimeline ticket={ticket} messages={messages} />
 
       {/* Discussion Timeline */}
-      <div className="rounded-lg border border-line bg-panel shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-line bg-panel shadow-card overflow-hidden">
         <div className="flex items-center justify-between border-b border-line bg-subtle/60 px-4 py-3 text-xs font-semibold text-ink">
           <span>Riwayat Diskusi dengan Superadmin</span>
-          <span className="rounded-full bg-subtle px-2 py-0.5 font-mono text-[11px] text-ink-muted">
+          <span className="rounded-full bg-subtle px-2.5 py-0.5 text-[11px] font-medium text-ink-muted tabular-nums">
             {messages.length} pesan
           </span>
         </div>
@@ -340,14 +340,14 @@ export function PortalTicketViewPage() {
             messages.map((m) => {
               if (m.senderRole === 'system') {
                 return (
-                  <div key={m.id} className="bg-subtle/40 px-4 py-2 text-center font-mono text-[11px] text-ink-muted">
+                  <div key={m.id} className="bg-subtle/40 px-4 py-2 text-center text-[11px] text-ink-muted tabular-nums">
                     {m.body} · {timeAgo(m.createdAt)}
                   </div>
                 );
               }
               const isFromAdmin = m.senderRole === 'admin';
               return (
-                <div key={m.id} className={`p-4 transition-colors ${isFromAdmin ? 'bg-sky-50/40 border-l-2 border-l-sky-500' : 'bg-panel'}`}>
+                <div key={m.id} className={`p-4 transition-colors ${isFromAdmin ? 'bg-sky-500/[0.04] border-l-2 border-l-sky-500' : 'bg-panel'}`}>
                   <div className="flex items-center justify-between gap-2 text-xs">
                     <div className="flex items-center gap-2">
                       <span
@@ -359,9 +359,9 @@ export function PortalTicketViewPage() {
                       </span>
                       <span className="font-semibold text-ink">{m.senderName}</span>
                       <span
-                        className={`rounded border px-1.5 py-0.5 text-[10px] font-medium ${
+                        className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${
                           isFromAdmin
-                            ? 'border-sky-200 bg-sky-100 text-sky-900 font-semibold'
+                            ? 'border-sky-500/20 bg-sky-500/10 text-sky-900 font-semibold'
                             : 'border-line bg-subtle text-ink-muted'
                         }`}
                       >
@@ -395,7 +395,7 @@ export function PortalTicketViewPage() {
       </div>
 
       {/* Reply Form */}
-      <form onSubmit={handleReply} className="space-y-3.5 rounded-lg border border-line bg-panel p-5 shadow-sm">
+      <form onSubmit={handleReply} className="space-y-3.5 rounded-2xl border border-line bg-panel p-5 sm:p-6 shadow-card">
         <div className="flex items-center justify-between">
           <label htmlFor="portal-reply" className="flex items-center gap-1.5 text-xs font-semibold text-ink">
             <MessageSquare className="h-3.5 w-3.5" />
@@ -405,7 +405,7 @@ export function PortalTicketViewPage() {
           </label>
         </div>
 
-        <div className="overflow-hidden rounded border border-line focus-within:border-ink">
+        <div className="overflow-hidden rounded-xl border border-line focus-within:border-ink transition-colors">
           <MessageToolbar
             textareaRef={textareaRef}
             value={replyBody}
@@ -419,20 +419,20 @@ export function PortalTicketViewPage() {
             onChange={(e) => setReplyBody(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Tulis balasan untuk Superadmin... Tekan Ctrl+Enter untuk langsung mengirim."
-            className="w-full bg-canvas p-3 text-xs leading-relaxed text-ink placeholder:text-ink-faint focus:bg-panel focus:outline-none"
+            className="w-full bg-canvas p-3 text-xs leading-relaxed text-ink placeholder:text-ink-faint focus:bg-panel focus:outline-none transition-colors"
           />
         </div>
 
         <ScreenshotUploader attachments={attachments} onChange={setAttachments} />
 
-        <div className="flex items-center justify-between pt-1 border-t border-line/60">
-          <span className="hidden font-mono text-[10px] text-ink-faint sm:inline">
+        <div className="flex items-center justify-between pt-2 border-t border-line/60">
+          <span className="hidden text-[10px] text-ink-faint sm:inline">
             (Bisa tekan Ctrl+Enter untuk kirim cepat)
           </span>
           <button
             type="submit"
             disabled={submitting || (!replyBody.trim() && attachments.length === 0)}
-            className="inline-flex items-center gap-1.5 rounded bg-ink px-4 py-2 text-xs font-semibold text-white hover:opacity-90 shadow-sm disabled:opacity-40 transition-opacity"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-4 py-2 text-xs font-semibold text-white hover:opacity-95 shadow-xs active:scale-95 disabled:opacity-40 transition-all"
           >
             <Send className="h-3.5 w-3.5" />
             {isSolved ? 'Kirim & Buka Kembali Tiket' : 'Kirim Balasan'}

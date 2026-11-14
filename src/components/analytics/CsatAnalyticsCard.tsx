@@ -86,15 +86,15 @@ export function CsatAnalyticsCard({ tickets }: Props) {
       {/* CSAT Metric Summary Cards */}
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
         {/* Average Score */}
-        <div className="rounded-lg border border-line bg-canvas p-4 text-center sm:text-left flex flex-col justify-between">
-          <span className="text-[11px] font-medium uppercase tracking-wider text-ink-muted">
+        <div className="rounded-xl border border-line bg-subtle/50 p-4 text-center sm:text-left flex flex-col justify-between shadow-xs">
+          <span className="text-xs font-medium text-ink-muted">
             Rata-rata Skor CSAT
           </span>
-          <div className="my-2 flex items-baseline gap-2 justify-center sm:justify-start">
-            <span className="text-3xl font-bold tracking-tight text-ink font-mono">
+          <div className="my-2.5 flex items-baseline gap-2 justify-center sm:justify-start">
+            <span className="text-3xl font-bold tracking-tight text-ink tabular-nums">
               {stats.avgRating}
             </span>
-            <span className="text-xs text-ink-muted">/ 5.0</span>
+            <span className="text-xs text-ink-muted tabular-nums">/ 5.0</span>
           </div>
           <div className="flex items-center justify-center sm:justify-start gap-1">
             {[1, 2, 3, 4, 5].map((star) => (
@@ -107,48 +107,48 @@ export function CsatAnalyticsCard({ tickets }: Props) {
                 }`}
               />
             ))}
-            <span className="ml-1 text-[11px] text-ink-muted">
+            <span className="ml-1 text-xs text-ink-muted tabular-nums">
               ({stats.totalReviews} penilaian)
             </span>
           </div>
         </div>
 
         {/* Satisfaction Rate */}
-        <div className="rounded-lg border border-line bg-canvas p-4 flex flex-col justify-between">
-          <span className="text-[11px] font-medium uppercase tracking-wider text-ink-muted">
+        <div className="rounded-xl border border-line bg-subtle/50 p-4 flex flex-col justify-between shadow-xs">
+          <span className="text-xs font-medium text-ink-muted">
             Tingkat Kepuasan (Rating 4-5)
           </span>
-          <div className="my-2 flex items-baseline gap-1.5">
-            <span className="text-3xl font-bold tracking-tight text-emerald-600 font-mono">
+          <div className="my-2.5 flex items-baseline gap-1.5">
+            <span className="text-3xl font-bold tracking-tight text-emerald-600 tabular-nums">
               {stats.satisfiedPercent}%
             </span>
             <ThumbsUp className="h-4 w-4 text-emerald-600" />
           </div>
-          <p className="text-[11px] text-ink-muted">
-            {stats.counts[5] + stats.counts[4]} dari {stats.totalReviews || 1} pelapor puas dengan solusi helpdesk.
+          <p className="text-xs text-ink-muted leading-relaxed">
+            {stats.counts[5] + stats.counts[4]} dari {stats.totalReviews || 1} pelapor puas dengan penyelesaian tiket.
           </p>
         </div>
 
         {/* Rating Distribution Bar */}
-        <div className="rounded-lg border border-line bg-canvas p-4 space-y-1.5 text-xs">
-          <span className="text-[11px] font-medium uppercase tracking-wider text-ink-muted block mb-1">
+        <div className="rounded-xl border border-line bg-subtle/50 p-4 space-y-2 text-xs shadow-xs">
+          <span className="text-xs font-medium text-ink-muted block mb-1">
             Distribusi Bintang
           </span>
           {[5, 4, 3, 2, 1].map((rating) => {
             const count = stats.counts[rating] || 0;
             const pct = stats.totalReviews > 0 ? (count / stats.totalReviews) * 100 : 0;
             return (
-              <div key={rating} className="flex items-center gap-2 text-[11px]">
-                <span className="w-5 font-mono text-ink-muted flex items-center gap-0.5">
+              <div key={rating} className="flex items-center gap-2 text-xs">
+                <span className="w-5 text-ink-muted flex items-center gap-0.5 tabular-nums">
                   {rating}★
                 </span>
-                <div className="flex-1 h-2 rounded-full bg-subtle overflow-hidden">
+                <div className="flex-1 h-2 rounded-full bg-line/60 overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-amber-400"
+                    className="h-full rounded-full bg-amber-400 transition-all duration-300"
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-                <span className="w-6 font-mono text-right text-ink-muted tabular-nums">
+                <span className="w-6 text-right text-ink-muted tabular-nums">
                   {count}
                 </span>
               </div>

@@ -1,6 +1,8 @@
 // Ticket actions. Each one writes to the local store immediately and queues the change for PocketBase.
 import { getApp, STATUS_LABEL } from '../config/vpsAppsConfig.ts';
 import { describeDevice, newId, nextTicketNumber, safeHttpUrl, statusAfterRequesterReply } from './crmLogic.ts';
+import { sanitizeTicketInput } from './sanitizer.ts';
+import { logAuditEvent } from './auditLogService.ts';
 import { saveRecord } from './pbClient.ts';
 import { getData } from './storageService.ts';
 import type { CrmUser, Ticket, TicketCategory, TicketMessage, TicketPriority, TicketStatus } from '../types/crm';
@@ -23,7 +25,7 @@ function postMessage(ticketId: string, actor: Actor | 'system', body: string, ex
     id: newId(),
     ticketId,
     ...sender,
-    body: body.trim(),
+    body: sanitizeTicketInput(body),
     attachments: [],
     isInternalNote: false,
     createdAt: now(),
@@ -57,8 +59,8 @@ export function createTicket(user: CrmUser, input: NewTicketInput): Ticket {
     requesterName: user.name,
     requesterUid: user.externalUid,
     requesterRole: user.appRole,
-    subject: (input.subject || 'Laporan Kendala Baru').trim(),
-    description: (input.description || input.subject || 'Tidak ada deskripsi tambahan.').trim(),
+    subject: sanitizeTicketInput(input.subject || 'Laporan Kendala Baru'),
+    description: sanitizeTicketInput(input.description || input.subject || 'Tidak ada deskripsi tambahan.'),
     category: input.category,
     priority: input.priority,
     status: 'open',
@@ -72,11 +74,23 @@ export function createTicket(user: CrmUser, input: NewTicketInput): Ticket {
   return ticket;
 }
 
-/** Admin edits from the properties panel, the inbox table and the Kanban board. */
-export function changeTicket(ticket: Ticket, patch: Partial<Pick<Ticket, 'status' | 'priority' | 'category'>>, actor: Actor) {
+/** Admin edits from the properties panel, the inbox table, Kanban board, and quick peek drawer. */
+export function changeTicket(ticket: Ticket, patch: Partial<Pick<Ticket, 'status' | 'priority' | 'category' | 'tags'>>, actor: Actor) {
   const statusChanged = patch.status && patch.status !== ticket.status;
   patchTicket(ticket, statusChanged && patch.status === 'solved' ? { ...patch, solvedAt: now() } : patch, actor);
-  if (statusChanged) postMessage(ticket.id, 'system', `${actor.name} mengubah status ke ${STATUS_LABEL[patch.status!]}.`);
+  if (statusChanged) {
+    postMessage(ticket.id, 'system', `${actor.name} mengubah status ke ${STATUS_LABEL[patch.status!]}.`);
+    if (actor.role === 'admin') {
+      logAuditEvent({
+        actorId: actor.id,
+        actorName: actor.name,
+        actorRole: actor.role,
+        action: 'ticket_status_change',
+        target: ticket.ticketNumber,
+        details: `${actor.name} mengubah status ${ticket.ticketNumber} ke ${STATUS_LABEL[patch.status!]}.`,
+      });
+    }
+  }
 }
 
 /** Assigns or reassigns a ticket to a support agent. */
@@ -95,6 +109,18 @@ export function assignTicket(
     ? `${actor.name} menugaskan tiket ke ${assignee.name}.`
     : `${actor.name} membatalkan penugasan tiket.`;
   postMessage(ticket.id, 'system', logMsg);
+  if (actor.role === 'admin') {
+    logAuditEvent({
+      actorId: actor.id,
+      actorName: actor.name,
+      actorRole: actor.role,
+      action: 'ticket_assignment',
+      target: ticket.ticketNumber,
+      details: assignee?.name
+        ? `${actor.name} menugaskan tiket ${ticket.ticketNumber} ke ${assignee.name}.`
+        : `${actor.name} membatalkan penugasan tiket ${ticket.ticketNumber}.`,
+    });
+  }
 }
 
 export function replyToTicket(
@@ -121,6 +147,16 @@ export function solveTicket(ticket: Ticket, actor: Actor, resolution: string, at
   postMessage(ticket.id, actor, resolution, { attachments });
   patchTicket(ticket, { status: 'solved', solvedAt: now(), resolutionSummary: resolution.trim() }, actor);
   postMessage(ticket.id, 'system', `${actor.name} menyelesaikan tiket ini.`);
+  if (actor.role === 'admin') {
+    logAuditEvent({
+      actorId: actor.id,
+      actorName: actor.name,
+      actorRole: actor.role,
+      action: 'ticket_resolution',
+      target: ticket.ticketNumber,
+      details: `${actor.name} menyelesaikan tiket ${ticket.ticketNumber}.`,
+    });
+  }
 }
 
 export function markSolvedByRequester(ticket: Ticket, actor: Actor) {

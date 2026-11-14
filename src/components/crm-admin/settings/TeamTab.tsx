@@ -45,7 +45,7 @@ export function TeamTab() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
         <div>
-          <h2 className="text-sm font-semibold text-ink">Tim & Otoritas (Helpdesk Team & Roles)</h2>
+          <h2 className="text-sm font-semibold tracking-tight text-ink">Tim & Otoritas</h2>
           <p className="text-xs text-ink-muted mt-0.5">
             Kelola operator helpdesk, supervisor divisi, hak akses RBAC, dan undangan staf baru.
           </p>
@@ -53,7 +53,7 @@ export function TeamTab() {
         <button
           type="button"
           onClick={() => setInviteModalOpen(true)}
-          className="inline-flex items-center gap-1.5 rounded bg-ink px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:opacity-90 active:scale-95 transition-all"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:opacity-95 active:scale-95 transition-all"
         >
           <UserPlus className="h-3.5 w-3.5" />
           <span>Undang Anggota</span>

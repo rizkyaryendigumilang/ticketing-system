@@ -55,16 +55,16 @@ export function TicketKanbanBoard({
             }}
             onDragLeave={() => setDragOverCol(null)}
             onDrop={(e) => handleDrop(e, col.status)}
-            className={`flex min-h-[460px] flex-col rounded border border-t-4 bg-subtle/50 transition-colors ${
-              col.accent
-            } ${isOver ? 'border-ink bg-subtle' : 'border-line'}`}
+            className={`flex min-h-[480px] flex-col rounded-2xl border bg-subtle/30 transition-all duration-150 shadow-xs overflow-hidden ${
+              isOver ? 'border-ink bg-subtle' : 'border-line'
+            }`}
           >
             {/* Column Header */}
-            <div className="flex items-center justify-between border-b border-line bg-panel px-3.5 py-2.5">
+            <div className={`flex items-center justify-between border-b border-line border-t-2 bg-panel px-4 py-3 ${col.accent.replace('border-t-4', 'border-t-2')}`}>
               <span className="text-xs font-semibold text-ink">
                 {STATUS_LABEL[col.status]}
               </span>
-              <span className="rounded bg-subtle px-2 py-0.5 font-mono text-xs font-semibold text-ink tabular-nums">
+              <span className="rounded-full bg-subtle px-2.5 py-0.5 text-xs font-semibold text-ink tabular-nums">
                 {items.length}
               </span>
             </div>
@@ -72,7 +72,7 @@ export function TicketKanbanBoard({
             {/* Cards */}
             <div className="flex-1 space-y-2.5 p-2.5">
               {items.length === 0 ? (
-                <div className="flex h-32 items-center justify-center rounded border border-dashed border-line text-xs text-ink-faint">
+                <div className="flex h-32 items-center justify-center rounded-xl border border-dashed border-line text-xs text-ink-faint">
                   Tarik tiket ke kolom ini
                 </div>
               ) : (
@@ -82,7 +82,7 @@ export function TicketKanbanBoard({
                     draggable
                     onDragStart={(e) => handleDragStart(e, ticket.id)}
                     onClick={() => onTicketClick(ticket.id)}
-                    className="cursor-grab rounded border border-line bg-panel p-3 transition-[border-color,box-shadow,transform] duration-100 ease-out hover:border-line-strong hover:shadow-sm active:cursor-grabbing active:scale-[0.98]"
+                    className="cursor-grab rounded-xl border border-line bg-panel p-3.5 shadow-card transition-all duration-150 hover:border-line-strong hover:shadow-md active:cursor-grabbing active:scale-[0.98]"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-mono text-xs font-semibold text-ink">
@@ -97,7 +97,7 @@ export function TicketKanbanBoard({
 
                     <div className="mt-2.5 flex items-center justify-between gap-2">
                       <AppBadge appId={ticket.appId} />
-                      <span className="font-mono text-[10px] text-ink-faint">
+                      <span className="text-[10px] text-ink-faint tabular-nums">
                         {timeAgo(ticket.createdAt)}
                       </span>
                     </div>
@@ -111,7 +111,7 @@ export function TicketKanbanBoard({
                             e.stopPropagation();
                             onStatusChange(ticket.id, col.next!);
                           }}
-                          className="inline-flex shrink-0 items-center gap-1 rounded border border-line bg-subtle px-1.5 py-0.5 text-[10px] font-medium text-ink hover:border-line-strong"
+                          className="inline-flex shrink-0 items-center gap-1 rounded-md border border-line bg-subtle px-2 py-0.5 text-[10px] font-medium text-ink hover:bg-line transition-all active:scale-95"
                         >
                           {col.next === 'solved' ? (
                             <>

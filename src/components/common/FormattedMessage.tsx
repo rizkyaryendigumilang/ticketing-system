@@ -1,4 +1,5 @@
 import React from 'react';
+import { stripControlCharacters } from '../../services/sanitizer';
 
 interface Props {
   text: string;
@@ -12,7 +13,8 @@ interface Props {
 export function FormattedMessage({ text, className = '' }: Props) {
   if (!text) return null;
 
-  const lines = text.split('\n');
+  const sanitized = stripControlCharacters(text);
+  const lines = sanitized.split('\n');
   const elements: React.ReactNode[] = [];
   let inCodeBlock = false;
   let codeBlockLines: string[] = [];

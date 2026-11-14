@@ -48,6 +48,7 @@ export interface Ticket {
   resolutionSummary?: string; // Catatan solusi saat di-set Solved
   satisfactionRating?: number; // Nilai kepuasan pelapor: 1 - 5 bintang
   satisfactionComment?: string; // Komentar balik pelapor
+  tags?: string[]; // Tag kustom agen (misal: "VIP", "Bug UI", "Payment", "Follow-up")
   createdAt: string;
   updatedAt: string;
   solvedAt?: string;

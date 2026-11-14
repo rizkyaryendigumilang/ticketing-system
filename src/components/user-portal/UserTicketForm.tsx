@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { CheckCircle2, Lock, Send, Sparkles } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { AlertTriangle, ArrowRight, CheckCircle2, Lock, Send, Sparkles } from 'lucide-react';
 import {
   CATEGORY_LABEL,
   getApp,
@@ -10,7 +10,9 @@ import {
 import type { CrmUser, TicketCategory, TicketPriority } from '../../types/crm';
 import type { NewTicketInput } from '../../services/ticketCrmService';
 import { ScreenshotUploader } from '../common/ScreenshotUploader';
-import { KB_ARTICLES } from '../support/KnowledgeBaseList';
+import { findSuggestedSolutions, checkDuplicateTicket } from '../../services/deflectionService';
+import { useCrm } from '../../context/CrmContext';
+import { useToast } from '../../context/ToastContext';
 
 interface Props {
   user: CrmUser;
@@ -40,6 +42,8 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
       ? rawPriority
       : 'medium',
   );
+  const { data, statusLabel } = useCrm();
+  const toast = useToast();
   const [subject, setSubject] = useState(searchParams.get('subject') ?? '');
   const [description, setDescription] = useState(searchParams.get('description') ?? '');
   const [sourcePageUrl, setSourcePageUrl] = useState(
@@ -50,21 +54,20 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [expandedArticleId, setExpandedArticleId] = useState<string | null>(null);
 
-  // Smart FAQ Deflection: automatically search solutions when subject is typed
-  const suggestedArticles = useMemo(() => {
-    const q = subject.trim().toLowerCase();
-    if (q.length < 3) return [];
-    const tokens = q.split(/\s+/).filter((w) => w.length > 2);
-    return KB_ARTICLES.filter((art) => {
-      const matchesToken = tokens.some(
-        (t) =>
-          art.title.toLowerCase().includes(t) ||
-          art.summary.toLowerCase().includes(t) ||
-          art.steps.some((s) => s.toLowerCase().includes(t)),
-      );
-      return matchesToken;
-    }).slice(0, 2);
-  }, [subject]);
+  // Smart Solution Deflection: automatically search solutions when subject or description is typed
+  const suggestions = useMemo(() => {
+    return findSuggestedSolutions(user.appId, subject, description);
+  }, [user.appId, subject, description]);
+
+  // Duplicate Ticket Detection
+  const duplicateTicket = useMemo(() => {
+    return checkDuplicateTicket(data.tickets, user.appId, user.externalUid, subject);
+  }, [data.tickets, user.appId, user.externalUid, subject]);
+
+  const handleDeflected = (articleTitle: string) => {
+    toast.success(`Senang bisa membantu! Solusi "${articleTitle}" telah menyelesaikan masalah Anda.`);
+    onCancel();
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,61 +96,61 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-5 rounded border border-line bg-panel p-5 sm:p-6"
+      className="space-y-6 rounded-2xl border border-line bg-panel p-5 sm:p-7 shadow-card"
     >
       {/* Locked Handoff Identity Section */}
-      <div className="rounded border border-line bg-subtle/70 p-3.5">
+      <div className="rounded-xl border border-line bg-subtle/50 p-4">
         <div className="flex items-center justify-between gap-2 text-xs font-semibold text-ink">
           <span className="inline-flex items-center gap-1.5">
             <Lock className="h-3.5 w-3.5 text-ink-muted" />
             Identitas Pelapor (Terkunci Otomatis dari Tombol Help)
           </span>
-          <span className="rounded border border-line bg-panel px-2 py-0.5 font-mono text-[11px] text-ink-muted">
+          <span className="rounded-full border border-line bg-panel px-2.5 py-0.5 font-mono text-[10px] text-ink-muted shadow-xs">
             {user.compositeKey}
           </span>
         </div>
 
-        <div className="mt-2.5 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div>
-            <label className="block text-[11px] text-ink-muted">
+            <label className="block text-[11px] font-medium text-ink-muted">
               Aplikasi Asal
             </label>
             <input
               type="text"
               disabled
               value={app ? `${app.name} [${app.prefix}]` : user.appId}
-              className="mt-1 w-full cursor-not-allowed rounded border border-line bg-panel/70 px-2.5 py-1.5 text-xs font-medium text-ink"
+              className="mt-1 w-full cursor-not-allowed rounded-lg border border-line bg-panel/70 px-2.5 py-1.5 text-xs font-medium text-ink shadow-xs"
             />
           </div>
 
           <div>
-            <label className="block text-[11px] text-ink-muted">
+            <label className="block text-[11px] font-medium text-ink-muted">
               Username / Email
             </label>
             <input
               type="text"
               disabled
               value={`${user.name} (${user.externalUid})`}
-              className="mt-1 w-full cursor-not-allowed rounded border border-line bg-panel/70 px-2.5 py-1.5 font-mono text-xs text-ink"
+              className="mt-1 w-full cursor-not-allowed rounded-lg border border-line bg-panel/70 px-2.5 py-1.5 font-mono text-xs text-ink shadow-xs"
             />
           </div>
 
           <div>
-            <label className="block text-[11px] text-ink-muted">
+            <label className="block text-[11px] font-medium text-ink-muted">
               Peran (Role)
             </label>
             <input
               type="text"
               disabled
               value={user.appRole}
-              className="mt-1 w-full cursor-not-allowed rounded border border-line bg-panel/70 px-2.5 py-1.5 text-xs text-ink"
+              className="mt-1 w-full cursor-not-allowed rounded-lg border border-line bg-panel/70 px-2.5 py-1.5 text-xs text-ink shadow-xs"
             />
           </div>
         </div>
       </div>
 
       {error && (
-        <div className="rounded border border-red-200 bg-red-50 px-3.5 py-2.5 text-xs font-medium text-red-700">
+        <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-xs font-medium text-rose-700">
           {error}
         </div>
       )}
@@ -165,7 +168,7 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
             id="portal-category"
             value={category}
             onChange={(e) => setCategory(e.target.value as TicketCategory)}
-            className="mt-1.5 w-full rounded border border-line bg-canvas px-3 py-2 text-xs text-ink focus:border-ink focus:bg-panel focus:outline-none"
+            className="mt-1.5 w-full rounded-lg border border-line bg-panel px-3 py-2 text-xs text-ink shadow-xs focus:border-ink focus:ring-2 focus:ring-ink/5 focus:outline-none transition-all"
           >
             {CATEGORIES.map((c) => (
               <option key={c} value={c}>
@@ -186,7 +189,7 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
             id="portal-priority"
             value={priority}
             onChange={(e) => setPriority(e.target.value as TicketPriority)}
-            className="mt-1.5 w-full rounded border border-line bg-canvas px-3 py-2 text-xs text-ink focus:border-ink focus:bg-panel focus:outline-none"
+            className="mt-1.5 w-full rounded-lg border border-line bg-panel px-3 py-2 text-xs text-ink shadow-xs focus:border-ink focus:ring-2 focus:ring-ink/5 focus:outline-none transition-all"
           >
             {PRIORITY_ORDER.map((p) => (
               <option key={p} value={p}>
@@ -212,21 +215,21 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
           placeholder="Contoh: Tombol Simpan di halaman Rekap Harian tidak merespons"
-          className="mt-1.5 w-full rounded border border-line bg-canvas px-3 py-2 text-xs text-ink placeholder:text-ink-faint focus:border-ink focus:bg-panel focus:outline-none"
+          className="mt-1.5 w-full rounded-lg border border-line bg-panel px-3 py-2 text-xs text-ink placeholder:text-ink-faint shadow-xs focus:border-ink focus:ring-2 focus:ring-ink/5 focus:outline-none transition-all"
         />
 
-        {/* Smart FAQ Deflection Suggestion */}
-        {suggestedArticles.length > 0 && (
-          <div className="mt-2.5 rounded-lg border border-sky-300 bg-sky-50/90 p-3 text-xs text-sky-950 animate-fadeIn">
-            <div className="flex items-center gap-1.5 font-semibold text-sky-900">
-              <Sparkles className="h-4 w-4 text-sky-600" />
-              <span>Mungkin panduan ini dapat menyelesaikan kendala Anda sebelum membuat tiket:</span>
+        {/* Smart Deflection Suggestion */}
+        {suggestions.length > 0 && (
+          <div className="mt-2.5 rounded-xl border border-emerald-500/25 bg-emerald-500/[0.04] p-3.5 text-xs text-ink animate-fadeIn shadow-xs">
+            <div className="flex items-center gap-1.5 font-semibold text-emerald-800 dark:text-emerald-300">
+              <Sparkles className="h-4 w-4 text-emerald-600" />
+              <span>Solusi Mandiri Cepat: Kami menemukan artikel panduan yang mungkin cocok:</span>
             </div>
             <div className="mt-2 space-y-2">
-              {suggestedArticles.map((art) => (
+              {suggestions.map(({ article: art }) => (
                 <div
                   key={art.id}
-                  className="rounded border border-sky-200 bg-panel p-2.5 shadow-2xs text-xs"
+                  className="rounded-lg border border-emerald-500/20 bg-panel p-3 shadow-xs text-xs"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-semibold text-ink">{art.title}</span>
@@ -237,16 +240,16 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
                           expandedArticleId === art.id ? null : art.id,
                         )
                       }
-                      className="text-[11px] font-medium text-sky-700 hover:underline shrink-0"
+                      className="text-[11px] font-medium text-emerald-600 hover:text-emerald-700 underline shrink-0"
                     >
-                      {expandedArticleId === art.id ? 'Tutup Panduan' : 'Buka Panduan'}
+                      {expandedArticleId === art.id ? 'Tutup Panduan' : 'Lihat Solusi'}
                     </button>
                   </div>
                   <p className="mt-1 text-ink-muted text-[11px]">{art.summary}</p>
 
                   {expandedArticleId === art.id && (
-                    <div className="mt-2.5 border-t border-sky-100 pt-2 space-y-1.5">
-                      <p className="font-semibold text-[11px] text-sky-900">
+                    <div className="mt-2.5 border-t border-line pt-2.5 space-y-2">
+                      <p className="font-semibold text-[11px] text-emerald-900 dark:text-emerald-300">
                         Langkah Solusi Mandiri:
                       </p>
                       <ol className="list-decimal pl-4 space-y-1 text-[11px] text-ink">
@@ -254,14 +257,14 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
                           <li key={i}>{st}</li>
                         ))}
                       </ol>
-                      <div className="mt-2.5 flex justify-end border-t border-sky-100 pt-2">
+                      <div className="mt-3 flex justify-end border-t border-line pt-2">
                         <button
                           type="button"
-                          onClick={onCancel}
-                          className="inline-flex items-center gap-1.5 rounded bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-800 transition-colors shadow-2xs"
+                          onClick={() => handleDeflected(art.title)}
+                          className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 active:scale-95 transition-all shadow-xs"
                         >
                           <CheckCircle2 className="h-3.5 w-3.5" />
-                          Masalah Terselesaikan (Batal Buat Tiket)
+                          Masalah Selesai (Batal Buat Tiket)
                         </button>
                       </div>
                     </div>
@@ -288,7 +291,7 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Jelaskan apa yang sedang Anda kerjakan, langkah yang dilakukan, dan pesan error yang muncul..."
-          className="mt-1.5 w-full rounded border border-line bg-canvas p-3 text-xs leading-relaxed text-ink placeholder:text-ink-faint focus:border-ink focus:bg-panel focus:outline-none"
+          className="mt-1.5 w-full rounded-lg border border-line bg-panel p-3 text-xs leading-relaxed text-ink placeholder:text-ink-faint shadow-xs focus:border-ink focus:ring-2 focus:ring-ink/5 focus:outline-none transition-all"
         />
       </div>
 
@@ -306,27 +309,50 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
           value={sourcePageUrl}
           onChange={(e) => setSourcePageUrl(e.target.value)}
           placeholder="https://43.156.236.102/..."
-          className="mt-1.5 w-full rounded border border-line bg-canvas px-3 py-2 font-mono text-xs text-ink placeholder:text-ink-faint focus:border-ink focus:bg-panel focus:outline-none"
+          className="mt-1.5 w-full rounded-lg border border-line bg-panel px-3 py-2 font-mono text-xs text-ink placeholder:text-ink-faint shadow-xs focus:border-ink focus:ring-2 focus:ring-ink/5 focus:outline-none transition-all"
         />
       </div>
 
-      {/* Screenshot Uploader */}
+      {/* Attachments Uploader */}
       <div>
         <label className="mb-1.5 block text-xs font-semibold text-ink">
-          Lampiran Screenshot Layar (Bisa langsung tekan Ctrl+V)
+          Lampiran Berkas / Screenshot Layar (Bisa langsung tekan Ctrl+V)
         </label>
         <ScreenshotUploader
           attachments={attachments}
           onChange={setAttachments}
-         
         />
       </div>
+
+      {/* Duplicate Ticket Detection Warning */}
+      {duplicateTicket && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs text-amber-900 shadow-xs animate-fadeIn">
+          <div className="flex items-start gap-2.5">
+            <AlertTriangle className="h-4 w-4 shrink-0 text-amber-700 mt-0.5" />
+            <div className="space-y-1">
+              <p className="font-semibold text-amber-950">
+                Peringatan: Anda sudah memiliki tiket terbuka untuk kendala serupa
+              </p>
+              <p className="text-amber-900/90 leading-relaxed">
+                Tiket <strong>#{duplicateTicket.ticketNumber}</strong> (&ldquo;{duplicateTicket.subject}&rdquo;) saat ini berstatus <strong>{statusLabel(duplicateTicket.status)}</strong>. Disarankan untuk mengecek atau membalas di tiket tersebut.
+              </p>
+              <Link
+                to={`/portal/ticket/${duplicateTicket.id}`}
+                className="inline-flex items-center gap-1 font-semibold text-amber-950 underline hover:text-black mt-1"
+              >
+                <span>Buka tiket #{duplicateTicket.ticketNumber} yang sudah ada</span>
+                <ArrowRight className="h-3 w-3" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex items-center justify-end gap-2.5 border-t border-line pt-4">
         <button
           type="button"
           onClick={onCancel}
-          className="rounded border border-line bg-subtle px-4 py-2 text-xs font-medium text-ink hover:border-line-strong"
+          className="btn px-4 py-2 text-xs font-medium"
         >
           Batal
         </button>
@@ -334,7 +360,7 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
         <button
           type="submit"
           disabled={submitting}
-          className="inline-flex items-center gap-1.5 rounded bg-ink px-4 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
+          className="btn-primary px-5 py-2 text-xs font-semibold"
         >
           <Send className="h-3.5 w-3.5" />
           {submitting ? 'Mengirim Laporan...' : 'Kirim Laporan Tiket'}

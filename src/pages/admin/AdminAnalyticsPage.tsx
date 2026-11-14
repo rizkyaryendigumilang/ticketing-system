@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { BarChart3, TrendingUp, Download } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { BarChart3, TrendingUp, Download, Printer } from 'lucide-react';
 import { useCrm } from '../../context/CrmContext';
 import { VPS_APPS } from '../../config/vpsAppsConfig';
 import { computeTrendMetrics, computeTicketSla } from '../../services/crmLogic';
@@ -8,10 +8,12 @@ import { TicketVolumeTrendChart } from '../../components/analytics/TicketVolumeT
 import { CategoryBreakdownChart } from '../../components/analytics/CategoryBreakdownChart';
 import { CsatAnalyticsCard } from '../../components/analytics/CsatAnalyticsCard';
 import { ReportsExportPanel } from '../../components/analytics/ReportsExportPanel';
+import { ExecutiveReportModal } from '../../components/analytics/ExecutiveReportModal';
 import type { TrendDataPoint, CategoryMetric, AppMetric } from '../../types/analytics';
 
 export function AdminAnalyticsPage() {
   const { data } = useCrm();
+  const [isReportOpen, setIsReportOpen] = useState(false);
 
   const metrics = useMemo(() => {
     const tickets = data.tickets;
@@ -121,6 +123,14 @@ export function AdminAnalyticsPage() {
             Pantau metrik volume tiket, kepatuhan target SLA, tren penyelesaian, dan kepuasan pelapor.
           </p>
         </div>
+        <button
+          type="button"
+          onClick={() => setIsReportOpen(true)}
+          className="inline-flex items-center gap-2 rounded-xl bg-ink px-4 py-2 text-xs font-semibold text-canvas shadow-xs hover:bg-ink/90 active:scale-95 transition-all"
+        >
+          <Printer className="h-4 w-4" />
+          <span>Ringkasan Eksekutif (PDF)</span>
+        </button>
       </div>
 
       {/* 1. KPI Cards */}
@@ -144,6 +154,13 @@ export function AdminAnalyticsPage() {
 
       {/* 5. Reports & Export */}
       <ReportsExportPanel tickets={data.tickets} />
+
+      {/* Executive Report Modal */}
+      <ExecutiveReportModal
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+        tickets={data.tickets}
+      />
     </div>
   );
 }

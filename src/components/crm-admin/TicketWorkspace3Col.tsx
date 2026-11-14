@@ -294,11 +294,11 @@ export function TicketWorkspace3Col({
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
       {/* ═══ LEFT COLUMN: Ticket Properties ═══ */}
       <div className="space-y-4 lg:col-span-3">
-        <div className="rounded-lg border border-line bg-panel p-4 shadow-sm">
+        <div className="rounded-2xl border border-line bg-panel p-5 shadow-card">
           <div className="flex items-center justify-between border-b border-line pb-3">
             <div>
               <span className="text-[11px] font-medium text-ink-muted">Nomor Tiket</span>
-              <div className="font-mono text-base font-bold text-ink">
+              <div className="font-mono text-base font-bold text-ink tracking-tight">
                 {ticket.ticketNumber}
               </div>
             </div>
@@ -311,7 +311,7 @@ export function TicketWorkspace3Col({
               <button
                 type="button"
                 onClick={() => handleStatusSelect('in_progress')}
-                className="inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-amber-500/15 border border-amber-400/40 px-3 py-1.5 text-xs font-semibold text-amber-900 transition-colors hover:bg-amber-500/25"
+                className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-amber-500/15 border border-amber-500/30 px-3 py-1.5 text-xs font-semibold text-amber-900 transition-all hover:bg-amber-500/25 active:scale-95 shadow-xs"
               >
                 <Clock className="h-3.5 w-3.5 text-amber-700" />
                 Mulai Kerjakan
@@ -437,20 +437,20 @@ export function TicketWorkspace3Col({
             <div className="border-t border-line pt-3 space-y-1.5 text-[11px] text-ink-muted">
               <div className="flex justify-between">
                 <span>Dilaporkan</span>
-                <span className="font-mono text-ink">
+                <span className="text-ink tabular-nums">
                   {timeAgo(ticket.createdAt)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>Diperbarui</span>
-                <span className="font-mono text-ink">
+                <span className="text-ink tabular-nums">
                   {timeAgo(ticket.updatedAt)}
                 </span>
               </div>
               {ticket.solvedAt && (
                 <div className="flex justify-between text-emerald-800">
                   <span>Diselesaikan</span>
-                  <span className="font-mono font-medium">
+                  <span className="font-medium text-emerald-800 tabular-nums">
                     {timeAgo(ticket.solvedAt)}
                   </span>
                 </div>
@@ -461,7 +461,7 @@ export function TicketWorkspace3Col({
 
         {/* Solved Summary Card */}
         {ticket.resolutionSummary && (
-          <div className="rounded-lg border border-emerald-300 bg-emerald-50/80 p-3.5 text-xs shadow-sm">
+          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-xs shadow-card">
             <div className="flex items-center gap-1.5 font-semibold text-emerald-900">
               <CheckCircle2 className="h-4 w-4 text-emerald-700" />
               Catatan Solusi Penyelesaian
@@ -480,7 +480,7 @@ export function TicketWorkspace3Col({
       <div className="space-y-4 lg:col-span-6">
         {/* Agent Collision Warning Banner */}
         {otherViewers.length > 0 && (
-          <div className="flex items-center justify-between gap-3 rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900 shadow-xs animate-fadeIn">
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3.5 text-xs text-amber-900 shadow-xs animate-fadeIn">
             <div className="flex min-w-0 items-center gap-2.5">
               <AlertTriangle className="h-4 w-4 shrink-0 text-amber-700" />
               <div className="truncate">
@@ -496,16 +496,16 @@ export function TicketWorkspace3Col({
                 )}
               </div>
             </div>
-            <span className="shrink-0 rounded bg-amber-200/80 px-1.5 py-0.5 font-mono text-[10px] text-amber-900">
+            <span className="shrink-0 rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-semibold text-amber-900 shadow-xs">
               Live Presence
             </span>
           </div>
         )}
 
         {/* Initial Report Card */}
-        <div className="rounded-lg border border-line bg-panel p-4 sm:p-5 shadow-sm">
+        <div className="rounded-2xl border border-line bg-panel p-5 sm:p-6 shadow-card">
           <div className="flex flex-wrap items-start justify-between gap-2">
-            <h2 className="text-base font-semibold text-ink">
+            <h2 className="text-base font-semibold text-ink tracking-tight">
               {ticket.subject}
             </h2>
             <PriorityBadge priority={ticket.priority} />
@@ -516,7 +516,7 @@ export function TicketWorkspace3Col({
             <span>·</span>
             <span className="font-mono text-[11px]">{ticket.requesterUid}</span>
             <span>·</span>
-            <span className="rounded bg-subtle px-1.5 py-0.5 text-[10px]">{ticket.requesterRole}</span>
+            <span className="rounded-full bg-subtle px-2 py-0.5 text-[10px] font-medium text-ink-muted">{ticket.requesterRole}</span>
           </div>
 
           <div className="mt-3.5 rounded border border-line bg-canvas p-3.5 text-xs leading-relaxed text-ink whitespace-pre-wrap font-sans">
@@ -571,10 +571,10 @@ export function TicketWorkspace3Col({
         </div>
 
         {/* Conversation Thread */}
-        <div className="rounded-lg border border-line bg-panel shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-line bg-panel shadow-card overflow-hidden">
           <div className="flex items-center justify-between border-b border-line bg-subtle/60 px-4 py-2.5 text-xs font-semibold text-ink">
             <span>Riwayat Percakapan & Catatan Internal</span>
-            <span className="rounded-full bg-subtle px-2 py-0.5 font-mono text-[11px] text-ink-muted">
+            <span className="rounded-full bg-subtle px-2.5 py-0.5 text-[11px] font-medium text-ink-muted tabular-nums">
               {messages.length} pesan
             </span>
           </div>
@@ -590,7 +590,7 @@ export function TicketWorkspace3Col({
                   return (
                     <div
                       key={m.id}
-                      className="bg-subtle/40 px-4 py-2 text-center font-mono text-[11px] text-ink-muted"
+                      className="bg-subtle/40 px-4 py-2 text-center text-[11px] text-ink-muted tabular-nums"
                     >
                       {m.body} · {timeAgo(m.createdAt)}
                     </div>
@@ -605,7 +605,7 @@ export function TicketWorkspace3Col({
                     key={m.id}
                     className={`p-4 transition-colors ${
                       isInternal
-                        ? 'bg-amber-50/60 border-l-2 border-l-amber-500'
+                        ? 'bg-amber-500/[0.04] border-l-2 border-l-amber-500'
                         : isAdminMsg
                           ? 'bg-panel'
                           : 'bg-canvas/50'
@@ -631,21 +631,21 @@ export function TicketWorkspace3Col({
                         </span>
 
                         {isInternal ? (
-                          <span className="inline-flex items-center gap-1 rounded border border-amber-300 bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-900">
+                          <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-900">
                             <Lock className="h-2.5 w-2.5" />
                             Internal Admin Note (Rahasia)
                           </span>
                         ) : isAdminMsg ? (
-                          <span className="rounded border border-line bg-subtle px-1.5 py-0.5 text-[10px] font-medium text-ink-muted">
+                          <span className="rounded-full border border-line bg-subtle px-2 py-0.5 text-[10px] font-medium text-ink-muted">
                             Superadmin
                           </span>
                         ) : (
-                          <span className="rounded border border-line bg-subtle px-1.5 py-0.5 text-[10px] font-medium text-ink-muted">
+                          <span className="rounded-full border border-line bg-subtle px-2 py-0.5 text-[10px] font-medium text-ink-muted">
                             Pelapor ({ticket.requesterRole})
                           </span>
                         )}
                       </div>
-                      <span className="font-mono text-[11px] text-ink-faint">
+                      <span className="text-[11px] text-ink-faint tabular-nums">
                         {timeAgo(m.createdAt)}
                       </span>
                     </div>
@@ -682,22 +682,22 @@ export function TicketWorkspace3Col({
         {/* Reply & Solve Composer */}
         <form
           onSubmit={handleReplySubmit}
-          className={`rounded-lg border p-4 shadow-sm transition-colors ${
+          className={`rounded-2xl border p-5 shadow-card transition-colors ${
             composerMode === 'internal'
-              ? 'border-amber-300/80 bg-amber-50/40'
+              ? 'border-amber-500/30 bg-amber-500/[0.03]'
               : 'border-line bg-panel'
           }`}
         >
           {/* Composer Mode Tabs & Canned Picker */}
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-2.5">
-            <div className="flex items-center gap-1">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-3">
+            <div className="flex items-center gap-1.5">
               <button
                 type="button"
                 onClick={() => setComposerMode('public')}
-                className={`inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-semibold transition-colors ${
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all active:scale-95 ${
                   composerMode === 'public'
-                    ? 'bg-ink text-white'
-                    : 'text-ink-muted hover:bg-subtle'
+                    ? 'bg-ink text-white shadow-xs'
+                    : 'text-ink-muted hover:bg-subtle hover:text-ink'
                 }`}
               >
                 <MessageSquare className="h-3.5 w-3.5" />
@@ -706,10 +706,10 @@ export function TicketWorkspace3Col({
               <button
                 type="button"
                 onClick={() => setComposerMode('internal')}
-                className={`inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-semibold transition-colors ${
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all active:scale-95 ${
                   composerMode === 'internal'
-                    ? 'bg-amber-600 text-white'
-                    : 'text-ink-muted hover:bg-subtle'
+                    ? 'bg-amber-600 text-white shadow-xs'
+                    : 'text-ink-muted hover:bg-subtle hover:text-ink'
                 }`}
               >
                 <Lock className="h-3.5 w-3.5" />
@@ -722,7 +722,7 @@ export function TicketWorkspace3Col({
 
           {/* Internal Note Banner Warning */}
           {composerMode === 'internal' && (
-            <div className="mt-2.5 flex items-center gap-2 rounded bg-amber-100/80 border border-amber-300/80 px-3 py-1.5 text-[11px] text-amber-900">
+            <div className="mt-3 flex items-center gap-2 rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-2 text-[11px] text-amber-900">
               <Lock className="h-3.5 w-3.5 shrink-0 text-amber-800" />
               <span>
                 <strong>Catatan Internal:</strong> Catatan ini hanya tersimpan di CRM dan <strong>tidak dapat dilihat</strong> oleh pelapor.
@@ -797,19 +797,19 @@ export function TicketWorkspace3Col({
             />
           </div>
 
-          <div className="mt-3.5 flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-line/60">
+          <div className="mt-3.5 flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-line/60">
             <div className="flex items-center gap-2">
               <button
                 type="submit"
                 disabled={submitting || (!body.trim() && attachments.length === 0)}
-                className="inline-flex items-center gap-1.5 rounded border border-line-strong bg-subtle px-3.5 py-2 text-xs font-semibold text-ink hover:bg-line disabled:opacity-40"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-subtle px-4 py-2 text-xs font-semibold text-ink hover:bg-line disabled:opacity-40 shadow-xs active:scale-95 transition-all"
               >
                 <Send className="h-3.5 w-3.5" />
                 {composerMode === 'internal'
                   ? 'Simpan Catatan Internal'
                   : 'Kirim Balasan'}
               </button>
-              <span className="hidden font-mono text-[10px] text-ink-faint sm:inline">
+              <span className="hidden text-[10px] text-ink-faint sm:inline">
                 (Ctrl+Enter)
               </span>
             </div>
@@ -818,7 +818,7 @@ export function TicketWorkspace3Col({
               type="button"
               onClick={handleSolveClick}
               disabled={submitting}
-              className="inline-flex items-center gap-1.5 rounded bg-emerald-700 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-800 shadow-sm disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700 shadow-xs active:scale-95 transition-all disabled:opacity-50"
             >
               <CheckCircle2 className="h-4 w-4" />
               Kirim Solusi & Selesaikan

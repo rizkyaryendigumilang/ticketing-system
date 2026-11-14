@@ -23,13 +23,13 @@ export function TicketTimeline({ ticket, messages = [] }: Props) {
   const publicReplies = messages.filter((m) => !m.isInternalNote && m.senderRole !== 'system');
 
   return (
-    <div className="rounded-lg border border-line bg-panel p-4 text-xs shadow-xs">
+    <div className="rounded-xl border border-line bg-panel p-4 text-xs shadow-card">
       <div className="flex items-center gap-2 border-b border-line pb-2.5">
         <Clock className="h-4 w-4 text-ink-muted" />
         <h3 className="font-semibold text-ink">Garis Waktu & Jejak Audit (Timeline)</h3>
       </div>
 
-      <div className="mt-3.5 relative border-l border-line pl-4 ml-2 space-y-4">
+      <div className="mt-3.5 relative border-l border-line/80 pl-4 ml-2 space-y-4">
         {/* Milestone 1: Tiket Dibuat */}
         <div className="relative">
           <span className="absolute -left-[21px] top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-ink text-white">
@@ -38,7 +38,7 @@ export function TicketTimeline({ ticket, messages = [] }: Props) {
           <div>
             <div className="flex items-center justify-between">
               <span className="font-semibold text-ink">Tiket Dilaporkan</span>
-              <span className="font-mono text-[10px] text-ink-muted">{timeAgo(ticket.createdAt)}</span>
+              <span className="text-[10px] text-ink-muted tabular-nums">{timeAgo(ticket.createdAt)}</span>
             </div>
             <p className="mt-0.5 text-[11px] text-ink-muted">
               Oleh <strong className="text-ink">{ticket.requesterName}</strong> ({ticket.requesterRole}) dari aplikasi{' '}
@@ -81,7 +81,7 @@ export function TicketTimeline({ ticket, messages = [] }: Props) {
             <div>
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-ink">Aktivitas Diskusi</span>
-                <span className="font-mono text-[10px] text-ink-muted">
+                <span className="text-[10px] text-ink-muted tabular-nums">
                   {timeAgo(publicReplies[publicReplies.length - 1].createdAt)}
                 </span>
               </div>
@@ -97,7 +97,7 @@ export function TicketTimeline({ ticket, messages = [] }: Props) {
           <span
             className={`absolute -left-[21px] top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full ${
               sla.status === 'breached'
-                ? 'bg-red-600 text-white'
+                ? 'bg-rose-600 text-white'
                 : sla.status === 'warning'
                   ? 'bg-amber-500 text-white'
                   : 'bg-emerald-600 text-white'
@@ -114,7 +114,7 @@ export function TicketTimeline({ ticket, messages = [] }: Props) {
               <span className="font-semibold text-ink">
                 Target SLA ({Math.round(sla.durationMs / 3600000)} Jam)
               </span>
-              <span className="font-mono text-[10px] text-ink-muted">{sla.label}</span>
+              <span className="text-[10px] text-ink-muted tabular-nums">{sla.label}</span>
             </div>
             <p className="mt-0.5 text-[11px] text-ink-muted">
               {sla.status === 'achieved' && 'Penyelesaian tepat waktu sesuai standar SLA.'}
@@ -133,13 +133,13 @@ export function TicketTimeline({ ticket, messages = [] }: Props) {
             </span>
             <div>
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-emerald-800">Tiket Diselesaikan</span>
+                <span className="font-semibold text-emerald-800 dark:text-emerald-300">Tiket Diselesaikan</span>
                 {ticket.solvedAt && (
-                  <span className="font-mono text-[10px] text-emerald-700">{timeAgo(ticket.solvedAt)}</span>
+                  <span className="text-[10px] text-emerald-700 tabular-nums">{timeAgo(ticket.solvedAt)}</span>
                 )}
               </div>
               {ticket.resolutionSummary && (
-                <p className="mt-1 rounded bg-emerald-50 border border-emerald-200 p-2 text-[11px] text-emerald-950 font-sans leading-relaxed">
+                <p className="mt-1.5 rounded-xl bg-emerald-500/[0.05] border border-emerald-500/20 p-2.5 text-[11px] text-ink font-sans leading-relaxed shadow-xs">
                   {ticket.resolutionSummary}
                 </p>
               )}

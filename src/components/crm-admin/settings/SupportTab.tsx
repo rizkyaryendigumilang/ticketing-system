@@ -12,7 +12,7 @@ export function SupportTab() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
         <div>
-          <h2 className="text-sm font-semibold text-ink">Bantuan & FAQ (Help & Support)</h2>
+          <h2 className="text-sm font-semibold tracking-tight text-ink">Bantuan & FAQ</h2>
           <p className="text-xs text-ink-muted mt-0.5">
             Tanya jawab umum, basis pengetahuan panduan solusi per aplikasi, eskalasi darurat DevOps, dan umpan balik.
           </p>

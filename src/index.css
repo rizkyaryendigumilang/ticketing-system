@@ -3,18 +3,51 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --canvas-rgb: 248 250 252;
+    --panel-rgb: 255 255 255;
+    --subtle-rgb: 241 245 249;
+    --line-rgb: 226 232 240;
+    --line-strong-rgb: 203 213 225;
+    --ink-rgb: 15 23 42;
+    --ink-muted-rgb: 71 85 105;
+    --ink-faint-rgb: 148 163 184;
+    --rail-rgb: 11 15 23;
+  }
+
+  .dark {
+    --canvas-rgb: 15 23 42;       /* slate-900 */
+    --panel-rgb: 30 41 59;        /* slate-800 */
+    --subtle-rgb: 51 65 85;       /* slate-700 */
+    --line-rgb: 51 65 85;         /* slate-700 */
+    --line-strong-rgb: 71 85 105;  /* slate-600 */
+    --ink-rgb: 248 250 252;       /* slate-50 */
+    --ink-muted-rgb: 203 213 225; /* slate-300 */
+    --ink-faint-rgb: 148 163 184; /* slate-400 */
+    --rail-rgb: 8 12 19;          /* obsidian */
+  }
+
   body {
     @apply bg-canvas font-sans text-ink antialiased;
     font-variant-numeric: tabular-nums;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   :focus-visible {
-    outline: 2px solid #16202b;
+    outline: 2px solid #0F172A;
     outline-offset: 2px;
   }
 
-  /* Optical typography scaling (WWDC 2020) */
-  h1, h2, h3 {
+  /* Optical typography scaling (WWDC / Apple Human Interface Guidelines) */
+  h1 {
+    letter-spacing: -0.025em;
+  }
+  h2 {
+    letter-spacing: -0.02em;
+  }
+  h3 {
     letter-spacing: -0.015em;
   }
 
@@ -30,17 +63,29 @@
 }
 
 @layer components {
+  /* Apple-inspired clean form field */
   .field {
-    @apply w-full rounded border border-line bg-panel px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none transition-colors duration-150;
+    @apply w-full rounded-lg border border-line bg-panel px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:border-ink focus:ring-2 focus:ring-ink/5 focus:outline-none transition-all duration-150;
   }
+
+  /* Secondary tactile button with instant response */
   .btn {
-    @apply inline-flex items-center justify-center gap-1.5 rounded border border-line bg-panel px-3 py-1.5 text-sm font-medium text-ink hover:border-line-strong hover:bg-subtle active:scale-[0.98] transition-[background-color,border-color,transform] duration-100 ease-out disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-line bg-panel px-3 py-1.5 text-xs sm:text-sm font-medium text-ink shadow-xs hover:border-line-strong hover:bg-subtle active:scale-[0.98] transition-all duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100;
   }
+
+  /* Primary solid button */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-1.5 rounded bg-ink px-3 py-1.5 text-sm font-semibold text-white hover:bg-ink/90 active:scale-[0.98] transition-[background-color,transform] duration-100 ease-out disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg bg-ink px-3 py-1.5 text-xs sm:text-sm font-medium text-white shadow-xs hover:bg-ink/90 active:scale-[0.98] transition-all duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100;
   }
+
+  /* Elevated card panel */
   .panel {
-    @apply rounded border border-line bg-panel;
+    @apply rounded-xl border border-line bg-panel shadow-card;
+  }
+
+  /* Clean pill badge */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium tracking-tight;
   }
 }
 

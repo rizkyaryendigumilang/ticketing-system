@@ -6,6 +6,7 @@ import {
   ExternalLink,
   Globe,
   HelpCircle,
+  History,
   Inbox,
   LayoutDashboard,
   Search,
@@ -133,6 +134,17 @@ export function CommandPalette({ open, onClose }: Props) {
         icon: HelpCircle,
         action: () => {
           navigate('/admin/settings?tab=support');
+          onClose();
+        },
+      },
+      {
+        id: 'nav-audit',
+        category: 'Navigasi',
+        title: 'Log Audit & Kepatuhan',
+        subtitle: 'Riwayat mutasi tiket, peran tim, dan ekspor data (Pengaturan)',
+        icon: History,
+        action: () => {
+          navigate('/admin/settings?tab=audit');
           onClose();
         },
       },

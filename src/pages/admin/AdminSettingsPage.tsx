@@ -6,6 +6,7 @@ import {
   Database,
   Globe,
   HelpCircle,
+  History,
   Info,
   MessageSquareQuote,
   Search,
@@ -17,6 +18,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useCrm } from '../../context/CrmContext';
+import type { TranslationKey } from '../../i18n/translations';
 import { AccountTab } from '../../components/crm-admin/settings/AccountTab';
 import { PreferencesTab } from '../../components/crm-admin/settings/PreferencesTab';
 import { AppearanceTab } from '../../components/crm-admin/settings/AppearanceTab';
@@ -30,6 +32,7 @@ import { AboutSystemTab } from '../../components/crm-admin/settings/AboutSystemT
 import { TeamTab } from '../../components/crm-admin/settings/TeamTab';
 import { ContactsTab } from '../../components/crm-admin/settings/ContactsTab';
 import { SupportTab } from '../../components/crm-admin/settings/SupportTab';
+import { AuditLogTab } from '../../components/crm-admin/settings/AuditLogTab';
 
 export type TabKey =
   | 'account'
@@ -39,6 +42,7 @@ export type TabKey =
   | 'team'
   | 'contacts'
   | 'security'
+  | 'audit'
   | 'integrations'
   | 'storage'
   | 'automation'
@@ -48,14 +52,14 @@ export type TabKey =
 
 interface NavItemDef {
   key: TabKey;
-  labelKey: string;
+  labelKey: TranslationKey;
   defaultLabel: string;
   icon: React.ComponentType<{ className?: string }>;
   description: string;
 }
 
 interface NavGroupDef {
-  titleKey: string;
+  titleKey: TranslationKey;
   defaultTitle: string;
   items: NavItemDef[];
 }
@@ -135,6 +139,13 @@ export function AdminSettingsPage() {
             defaultLabel: 'Keamanan & Handoff',
             icon: ShieldCheck,
             description: 'Kunci rahasia HMAC dan domain yang diizinkan',
+          },
+          {
+            key: 'audit',
+            labelKey: 'settings.tabAudit',
+            defaultLabel: 'Log Audit & Kepatuhan',
+            icon: History,
+            description: 'Riwayat mutasi status tiket, peran tim, dan ekspor data',
           },
           {
             key: 'integrations',
@@ -265,18 +276,19 @@ export function AdminSettingsPage() {
             {filteredNavGroups.map((group, gIdx) => (
               <div key={gIdx} className="space-y-1">
                 <p className="px-2.5 text-[10px] font-bold uppercase tracking-wider text-ink-muted/80">
-                  {group.defaultTitle}
+                  {t(group.titleKey) || group.defaultTitle}
                 </p>
                 <div className="space-y-0.5">
                   {group.items.map((item) => {
                     const Icon = item.icon;
                     const isActive = activeTab === item.key;
+                    const label = t(item.labelKey) || item.defaultLabel;
                     return (
                       <button
                         key={item.key}
                         type="button"
                         onClick={() => handleTabChange(item.key)}
-                        className={`group flex w-full items-center justify-between rounded-md px-2.5 py-2 text-left transition-colors ${
+                        className={`group flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left transition-all duration-150 active:scale-[0.98] ${
                           isActive
                             ? 'bg-ink font-semibold text-white shadow-xs'
                             : 'text-ink-muted hover:bg-subtle hover:text-ink'
@@ -284,11 +296,11 @@ export function AdminSettingsPage() {
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <Icon
-                            className={`h-4 w-4 shrink-0 ${
+                            className={`h-4 w-4 shrink-0 transition-transform duration-150 group-hover:scale-105 ${
                               isActive ? 'text-white' : 'text-ink-muted group-hover:text-ink'
                             }`}
                           />
-                          <span className="truncate">{item.defaultLabel}</span>
+                          <span className="truncate">{label}</span>
                         </div>
                         {item.key === 'notifications' && settings.telegramEnabled && (
                           <span
@@ -315,6 +327,7 @@ export function AdminSettingsPage() {
           {activeTab === 'team' && <TeamTab />}
           {activeTab === 'contacts' && <ContactsTab />}
           {activeTab === 'security' && <SecurityTab />}
+          {activeTab === 'audit' && <AuditLogTab />}
           {activeTab === 'integrations' && <IntegrationsTab />}
           {activeTab === 'storage' && <StorageTab />}
           {activeTab === 'automation' && <AutomationsTab />}

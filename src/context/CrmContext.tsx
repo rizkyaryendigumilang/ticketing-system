@@ -24,6 +24,7 @@ import {
 } from '../services/storageService';
 import { useToast } from './ToastContext';
 const ADMIN_SENDER_ID = 'system:admin';
+import { runSlaAutomation } from '../services/slaEscalationService';
 import type { Actor } from '../services/ticketCrmService';
 import type { CannedResponse, CrmUser, HandoffParams, TicketCategory, TicketPriority, TicketStatus } from '../types/crm';
 import {
@@ -140,6 +141,25 @@ export function CrmProvider({ children }: { children: React.ReactNode }) {
     }
     knownTickets.current = ids;
   }, [data.tickets, admin, notify, settings]);
+
+  // SLA Escalation & Auto-close Daemon
+  useEffect(() => {
+    if (!admin) return;
+
+    const checkAutomation = () => {
+      if (settings.autoEscalateSla !== false || settings.autoCloseEnabled) {
+        const thresholdMs = (settings.autoCloseDays || 7) * 24 * 60 * 60 * 1000;
+        const result = runSlaAutomation(data.tickets, Date.now(), thresholdMs);
+        if (result.escalatedTicketIds.length > 0) {
+          notify(`🚨 ${result.escalatedTicketIds.length} tiket otomatis dieskalasi ke Darurat karena melewati batas SLA.`);
+        }
+      }
+    };
+
+    checkAutomation();
+    const interval = setInterval(checkAutomation, 60_000);
+    return () => clearInterval(interval);
+  }, [admin, data.tickets, settings.autoEscalateSla, settings.autoCloseEnabled, settings.autoCloseDays, notify]);
 
   const requestDesktopNotification = useCallback(async (): Promise<NotificationPermission | null> => {
     if (typeof window === 'undefined' || !('Notification' in window)) return null;

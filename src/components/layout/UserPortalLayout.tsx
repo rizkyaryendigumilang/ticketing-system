@@ -26,41 +26,41 @@ export function UserPortalLayout() {
 
   return (
     <div className="min-h-screen bg-canvas text-ink">
-      <header className="border-b border-line bg-panel shadow-sm">
+      <header className="sticky top-0 z-30 border-b border-line/80 bg-panel/85 backdrop-blur-md shadow-xs">
         {/* App identity color stripe */}
-        <div className="h-1 w-full" style={{ backgroundColor: app?.color ?? '#141413' }} />
+        <div className="h-1 w-full" style={{ backgroundColor: app?.color ?? '#0F172A' }} />
 
-        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
+        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 px-4 py-3.5 sm:px-6">
           <div className="flex items-center gap-3">
             <span
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border font-mono text-xs font-bold shadow-sm"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border font-mono text-xs font-bold shadow-xs select-none"
               style={{
-                backgroundColor: `${app?.color ?? '#141413'}14`,
-                borderColor: `${app?.color ?? '#141413'}35`,
-                color: app?.color ?? '#141413',
+                backgroundColor: `${app?.color ?? '#0F172A'}14`,
+                borderColor: `${app?.color ?? '#0F172A'}30`,
+                color: app?.color ?? '#0F172A',
               }}
             >
               {app?.prefix ?? 'APP'}
             </span>
             <div>
               <div className="flex items-center gap-2">
-                <Link to="/portal" className="text-base font-bold tracking-tight text-ink hover:underline">
+                <Link to="/portal" className="text-sm sm:text-base font-bold tracking-tight text-ink hover:text-ink/80 transition-colors">
                   {requester ? `Pusat Bantuan ${app?.name ?? 'Aplikasi'}` : 'Pusat Bantuan Ekosistem VPS'}
                 </Link>
                 {activeCount > 0 && (
-                  <span className="rounded-full bg-red-100 text-red-700 font-mono text-[10px] font-bold px-2 py-0.5 shadow-sm">
+                  <span className="rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-700 text-[10px] font-semibold px-2 py-0.5 tabular-nums">
                     {activeCount} aktif
                   </span>
                 )}
               </div>
               {requester ? (
-                <p className="text-xs text-ink-muted">
+                <p className="text-[11px] sm:text-xs text-ink-muted">
                   Pelapor: <span className="font-semibold text-ink">{requester.name}</span>{' '}
-                  (<span className="font-mono text-[11px]">{requester.externalUid}</span> ·{' '}
+                  (<span className="font-mono text-[10px] sm:text-[11px]">{requester.externalUid}</span> ·{' '}
                   <span className="text-ink">{requester.appRole}</span>)
                 </p>
               ) : (
-                <p className="text-xs text-ink-muted">
+                <p className="text-[11px] sm:text-xs text-ink-muted">
                   Layanan Bantuan Terpadu 7 Aplikasi VPS (43.156.236.102)
                 </p>
               )}
@@ -71,7 +71,7 @@ export function UserPortalLayout() {
             {admin && (
               <Link
                 to="/admin"
-                className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition-colors hover:bg-neutral-800"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white shadow-xs transition-all hover:bg-neutral-800 active:scale-[0.98]"
                 title="Buka Meja Kerja Superadmin CRM"
               >
                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
@@ -84,7 +84,7 @@ export function UserPortalLayout() {
                 href={returnUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-md border border-line bg-subtle px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:border-line-strong hover:bg-line/40"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-subtle/80 px-3 py-1.5 text-xs font-medium text-ink shadow-xs transition-all hover:border-line-strong hover:bg-subtle active:scale-[0.98]"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 Kembali ke {app?.name ?? 'Aplikasi'}
@@ -97,8 +97,8 @@ export function UserPortalLayout() {
                 <button
                   type="button"
                   onClick={() => navigate('/portal/new')}
-                  className="inline-flex items-center gap-1.5 rounded-md px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition-[opacity,transform] hover:opacity-90 active:scale-95"
-                  style={{ backgroundColor: app?.color ?? '#141413' }}
+                  className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition-all hover:opacity-90 active:scale-[0.98]"
+                  style={{ backgroundColor: app?.color ?? '#0F172A' }}
                 >
                   <Plus className="h-3.5 w-3.5" />
                   {t('portal.newTicket')}
@@ -108,7 +108,7 @@ export function UserPortalLayout() {
                   type="button"
                   onClick={handleLogout}
                   title={t('portal.logout')}
-                  className="inline-flex items-center gap-1 rounded-md border border-line px-2.5 py-1.5 text-xs text-ink-muted transition-colors hover:border-line-strong hover:text-ink hover:bg-subtle"
+                  className="inline-flex items-center gap-1 rounded-lg border border-line px-2.5 py-1.5 text-xs text-ink-muted transition-colors hover:border-line-strong hover:text-ink hover:bg-subtle active:scale-95"
                 >
                   <LogOut className="h-3.5 w-3.5" />
                 </button>
@@ -116,7 +116,7 @@ export function UserPortalLayout() {
             ) : (
               <Link
                 to="/login"
-                className="inline-flex items-center gap-1.5 rounded-md bg-ink px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90 transition-all"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:opacity-90 transition-all active:scale-[0.98]"
               >
                 Masuk
               </Link>

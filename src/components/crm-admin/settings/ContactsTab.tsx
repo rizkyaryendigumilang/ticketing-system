@@ -60,7 +60,7 @@ export function ContactsTab() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
         <div>
-          <h2 className="text-sm font-semibold text-ink">Kontak Pelapor (Requester Contacts)</h2>
+          <h2 className="text-sm font-semibold tracking-tight text-ink">Kontak Pelapor</h2>
           <p className="text-xs text-ink-muted mt-0.5">
             Daftar seluruh identitas pengguna yang terdaftar secara otomatis via SSO Handoff dari 7 aplikasi VPS.
           </p>
@@ -69,32 +69,32 @@ export function ContactsTab() {
 
       {/* KPI Stats Strip */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div className="rounded-lg border border-line bg-panel p-4 shadow-2xs">
+        <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-all duration-150">
           <div className="flex items-center justify-between text-xs text-ink-muted">
             <span>Total Pelapor Terdaftar</span>
             <Users className="h-4 w-4 text-ink-muted" />
           </div>
-          <div className="mt-1 font-mono text-2xl font-bold text-ink tabular-nums">
+          <div className="mt-1 text-2xl font-bold tracking-tight text-ink tabular-nums">
             {contacts.length}
           </div>
         </div>
 
-        <div className="rounded-lg border border-line bg-panel p-4 shadow-2xs">
+        <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-all duration-150">
           <div className="flex items-center justify-between text-xs text-ink-muted">
             <span>Total Tiket Terhubung</span>
             <KeyRound className="h-4 w-4 text-ink-muted" />
           </div>
-          <div className="mt-1 font-mono text-2xl font-bold text-ink tabular-nums">
+          <div className="mt-1 text-2xl font-bold tracking-tight text-ink tabular-nums">
             {totalUserTickets}
           </div>
         </div>
 
-        <div className="rounded-lg border border-line bg-panel p-4 shadow-2xs">
+        <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-all duration-150">
           <div className="flex items-center justify-between text-xs text-ink-muted">
             <span>Pelapor Bertiket Baru</span>
-            <span className="h-2 w-2 rounded-full bg-red-600" />
+            <span className="h-2 w-2 rounded-full bg-red-500" />
           </div>
-          <div className="mt-1 font-mono text-2xl font-bold text-red-600 tabular-nums">
+          <div className="mt-1 text-2xl font-bold tracking-tight text-red-500 tabular-nums">
             {contactsWithOpenTickets}
           </div>
         </div>
@@ -109,14 +109,14 @@ export function ContactsTab() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cari nama, externalUid, composite key, role..."
-            className="w-full rounded border border-line bg-canvas py-1.5 pl-9 pr-3 text-xs text-ink placeholder:text-ink-muted focus:border-ink focus:outline-none"
+            className="w-full rounded-lg border border-line bg-panel py-1.5 pl-9 pr-3 text-xs text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none transition-colors"
           />
         </div>
 
         <select
           value={selectedApp}
           onChange={(e) => setSelectedApp(e.target.value)}
-          className="rounded border border-line bg-canvas px-2.5 py-1.5 text-xs text-ink focus:border-ink focus:outline-none"
+          className="rounded-lg border border-line bg-panel px-3 py-1.5 text-xs text-ink focus:border-ink focus:outline-none transition-colors"
         >
           <option value="all">Semua Aplikasi ({contacts.length})</option>
           {VPS_APPS.map((a) => {
@@ -131,7 +131,7 @@ export function ContactsTab() {
       </div>
 
       {/* Contacts Table */}
-      <div className="overflow-x-auto rounded-lg border border-line bg-panel shadow-xs">
+      <div className="overflow-x-auto rounded-xl border border-line bg-panel shadow-card">
         <table className="w-full text-left text-xs">
           <thead className="border-b border-line bg-subtle/50 text-[11px] font-semibold text-ink-muted">
             <tr>
@@ -176,7 +176,7 @@ export function ContactsTab() {
                       <button
                         type="button"
                         onClick={() => handleCopyKey(c.compositeKey)}
-                        className="group inline-flex items-center gap-1.5 rounded bg-subtle px-2 py-1 font-mono text-[11px] text-ink hover:bg-subtle/80"
+                        className="group inline-flex items-center gap-1.5 rounded-md bg-subtle px-2 py-1 font-mono text-[11px] text-ink hover:bg-line transition-all active:scale-95"
                         title="Klik untuk menyalin"
                       >
                         <span className="truncate max-w-[150px]">{c.compositeKey}</span>
@@ -192,14 +192,14 @@ export function ContactsTab() {
                       {c.appRole}
                     </td>
 
-                    <td className="px-4 py-3 font-mono text-[11px] text-ink-muted">
+                    <td className="px-4 py-3 text-[11px] text-ink-muted tabular-nums">
                       {timeAgo(c.lastActiveAt)}
                     </td>
 
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
                         {openCount > 0 && (
-                          <span className="rounded bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300 px-1.5 py-0.5 font-mono text-[10px] font-bold">
+                          <span className="rounded-full bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/20 px-2 py-0.5 text-[10px] font-semibold tabular-nums shadow-xs">
                             {openCount} baru
                           </span>
                         )}
@@ -207,7 +207,7 @@ export function ContactsTab() {
                           href={getHandoffUrl(c)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-ink hover:underline"
+                          className="inline-flex items-center gap-1 rounded-md border border-line bg-subtle px-2 py-1 text-[11px] font-semibold text-ink hover:bg-line transition-all active:scale-95"
                           title="Buka portal sebagai pelapor ini"
                         >
                           <span>Portal</span>

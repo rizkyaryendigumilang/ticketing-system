@@ -7,7 +7,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "pb:init": "node scripts/init-pocketbase.mjs",
-    "test": "node --test src/services/crmLogic.test.ts src/services/ticketCrmService.test.ts src/i18n/translations.test.ts src/services/notificationService.test.ts src/services/backupSyncService.test.ts"
+    "test": "node --test src/services/crmLogic.test.ts src/services/ticketCrmService.test.ts src/i18n/translations.test.ts src/services/notificationService.test.ts src/services/backupSyncService.test.ts src/services/sanitizer.test.ts src/services/auditLogService.test.ts src/services/deflectionService.test.ts src/services/slaEscalationService.test.ts src/services/apiKeyService.test.ts"
   },
   "dependencies": {
     "lucide-react": "^0.460.0",

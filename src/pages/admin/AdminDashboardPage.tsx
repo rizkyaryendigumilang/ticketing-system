@@ -123,7 +123,7 @@ export function AdminDashboardPage() {
             <select
               value={selectedAppId}
               onChange={(e) => setSelectedAppId(e.target.value)}
-              className="rounded-md border border-line bg-panel px-3 py-1.5 text-xs font-medium text-ink shadow-xs focus:border-ink focus:outline-none"
+              className="rounded-lg border border-line bg-panel px-3 py-1.5 text-xs font-medium text-ink shadow-xs focus:border-ink focus:ring-2 focus:ring-ink/5 focus:outline-none transition-all"
             >
               <option value="all">{t('dash.allApps')} (7)</option>
               {VPS_APPS.map((app) => (
@@ -135,7 +135,7 @@ export function AdminDashboardPage() {
           </div>
 
           {/* Time Range Selector */}
-          <div className="inline-flex rounded-md border border-line bg-subtle p-0.5 text-xs font-medium">
+          <div className="inline-flex rounded-lg border border-line bg-subtle/80 p-0.5 text-xs font-medium">
             {(['7d', '14d', '30d', 'all'] as const).map((r) => {
               const label =
                 r === '7d'
@@ -150,7 +150,7 @@ export function AdminDashboardPage() {
                   key={r}
                   type="button"
                   onClick={() => setTimeRange(r)}
-                  className={`rounded px-2.5 py-1 transition-colors ${
+                  className={`rounded-md px-2.5 py-1 transition-all ${
                     timeRange === r
                       ? 'bg-panel font-semibold text-ink shadow-xs'
                       : 'text-ink-muted hover:text-ink'
@@ -167,7 +167,7 @@ export function AdminDashboardPage() {
             type="button"
             onClick={handleExportCsv}
             title={t('dash.exportCsv')}
-            className="inline-flex items-center gap-1.5 rounded-md border border-line bg-panel px-3 py-1.5 text-xs font-medium text-ink shadow-xs hover:border-line-strong active:scale-95 transition-all"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel px-3 py-1.5 text-xs font-medium text-ink shadow-xs hover:border-line-strong active:scale-95 transition-all"
           >
             <Download className="h-3.5 w-3.5 text-ink-muted" />
             <span className="hidden sm:inline">{t('dash.exportCsv')}</span>
@@ -176,11 +176,11 @@ export function AdminDashboardPage() {
           {/* Inbox Link */}
           <Link
             to="/admin/tickets"
-            className="inline-flex items-center gap-1.5 rounded-md bg-ink px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:opacity-90 active:scale-95 transition-all"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:opacity-90 active:scale-95 transition-all"
           >
             <Inbox className="h-3.5 w-3.5" />
             <span>{t('dash.inboxBtn')}</span>
-            <span className="ml-0.5 rounded bg-white/20 px-1 py-0.2 text-[10px] tabular-nums">
+            <span className="ml-0.5 rounded-full bg-white/20 px-1.5 py-0.2 text-[10px] font-semibold tabular-nums">
               {metrics.openCount}
             </span>
           </Link>
@@ -190,7 +190,7 @@ export function AdminDashboardPage() {
       {/* ═══ Informative KPI Metrics Strip ═══ */}
       <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-6">
         {/* 1. Total Inflow */}
-        <div className="rounded-lg border border-line bg-panel p-4 shadow-xs">
+        <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-all duration-150">
           <div className="flex items-center justify-between text-xs text-ink-muted">
             <span className="font-medium">{t('dash.totalTickets')}</span>
             <TrendingUp className="h-4 w-4 text-blue-600" />
@@ -204,7 +204,7 @@ export function AdminDashboardPage() {
         </div>
 
         {/* 2. Active Backlog */}
-        <div className="rounded-lg border border-line bg-panel p-4 shadow-xs">
+        <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-all duration-150">
           <div className="flex items-center justify-between text-xs text-ink-muted">
             <span className="font-medium">{t('dash.activeBacklog')}</span>
             <Clock className="h-4 w-4 text-amber-600" />
@@ -218,7 +218,7 @@ export function AdminDashboardPage() {
         </div>
 
         {/* 3. Resolution Rate */}
-        <div className="rounded-lg border border-line bg-panel p-4 shadow-xs">
+        <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-all duration-150">
           <div className="flex items-center justify-between text-xs text-ink-muted">
             <span className="font-medium">{t('dash.resolutionRate')}</span>
             <CheckCircle2 className="h-4 w-4 text-emerald-600" />
@@ -232,7 +232,7 @@ export function AdminDashboardPage() {
         </div>
 
         {/* 4. MTTR */}
-        <div className="rounded-lg border border-line bg-panel p-4 shadow-xs">
+        <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-all duration-150">
           <div className="text-xs font-medium text-ink-muted">{t('dash.avgResolutionTime')}</div>
           <div className="mt-2 text-2xl font-bold tracking-tight text-ink tabular-nums">
             {metrics.avgResolutionMs > 0 ? formatDuration(metrics.avgResolutionMs) : '—'}
@@ -243,7 +243,7 @@ export function AdminDashboardPage() {
         </div>
 
         {/* 5. CSAT */}
-        <div className="rounded-lg border border-line bg-panel p-4 shadow-xs">
+        <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-all duration-150">
           <div className="flex items-center justify-between text-xs text-ink-muted">
             <span className="font-medium">{t('dash.csat')}</span>
             <Star className="h-4 w-4 fill-amber-400 text-amber-500" />
@@ -257,17 +257,17 @@ export function AdminDashboardPage() {
         </div>
 
         {/* 6. Critical & Urgent Alert */}
-        <div className={`rounded-lg border p-4 shadow-xs ${
+        <div className={`rounded-xl border p-4 shadow-card transition-all duration-150 ${
           metrics.urgentOpenCount > 0
-            ? 'border-red-300 bg-red-50/40'
-            : 'border-line bg-panel'
+            ? 'border-rose-500/30 bg-rose-500/[0.04]'
+            : 'border-line bg-panel hover:border-line-strong'
         }`}>
           <div className="flex items-center justify-between text-xs text-ink-muted">
             <span className="font-medium">{t('dash.urgentAlert')}</span>
-            <ShieldAlert className={`h-4 w-4 ${metrics.urgentOpenCount > 0 ? 'text-red-600' : 'text-ink-muted'}`} />
+            <ShieldAlert className={`h-4 w-4 ${metrics.urgentOpenCount > 0 ? 'text-rose-600' : 'text-ink-muted'}`} />
           </div>
           <div className={`mt-2 text-2xl font-bold tracking-tight tabular-nums ${
-            metrics.urgentOpenCount > 0 ? 'text-red-600' : 'text-ink'
+            metrics.urgentOpenCount > 0 ? 'text-rose-600' : 'text-ink'
           }`}>
             {metrics.urgentOpenCount}
           </div>
@@ -328,10 +328,10 @@ export function AdminDashboardPage() {
       </section>
 
       {/* ═══ Actionable Priority Queue ═══ */}
-      <section className="rounded-lg border border-line bg-panel shadow-xs overflow-hidden">
-        <div className="flex items-center justify-between border-b border-line px-4 py-3 bg-subtle/40">
+      <section className="rounded-2xl border border-line bg-panel shadow-card overflow-hidden">
+        <div className="flex items-center justify-between border-b border-line px-5 py-3.5 bg-subtle/50">
           <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-red-600" />
+            <span className="h-2 w-2 rounded-full bg-rose-500" />
             <h2 className="text-sm font-semibold text-ink">
               {t('dash.openQueueTitle')} ({priorityQueue.length})
             </h2>
@@ -350,12 +350,12 @@ export function AdminDashboardPage() {
             {t('dash.emptyQueue')}
           </div>
         ) : (
-          <div className="divide-y divide-line">
+          <div className="divide-y divide-line/70">
             {priorityQueue.map((ticket) => (
               <div
                 key={ticket.id}
                 onClick={() => navigate(`/admin/tickets/${ticket.id}`)}
-                className="flex cursor-pointer flex-wrap items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-subtle/60"
+                className="flex cursor-pointer flex-wrap items-center justify-between gap-3 px-5 py-3.5 transition-colors hover:bg-subtle/50"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
@@ -372,8 +372,8 @@ export function AdminDashboardPage() {
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
-                  <span className="font-mono text-[11px] text-ink-muted">{timeAgo(ticket.createdAt)}</span>
-                  <span className="rounded border border-line bg-subtle px-2.5 py-1 text-xs font-medium text-ink">
+                  <span className="text-xs text-ink-muted tabular-nums">{timeAgo(ticket.createdAt)}</span>
+                  <span className="rounded-lg border border-line bg-subtle px-2.5 py-1 text-xs font-medium text-ink shadow-xs hover:border-line-strong hover:bg-panel transition-all active:scale-95">
                     {t('dash.viewTickets')} →
                   </span>
                 </div>

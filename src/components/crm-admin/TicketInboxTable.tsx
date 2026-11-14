@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FileDown, FileJson, Printer, Search, SlidersHorizontal, X } from 'lucide-react';
+import { Eye, FileDown, FileJson, Printer, Search, SlidersHorizontal, Tag, X } from 'lucide-react';
 import {
   CATEGORY_LABEL,
   PRIORITY_LABEL,
@@ -14,6 +14,8 @@ import { AppBadge } from '../common/AppBadge';
 import { PriorityBadge } from '../common/PriorityBadge';
 import { StatusBadge } from '../common/StatusBadge';
 import { SlaBadge } from '../common/SlaBadge';
+import { EmptyState } from '../common/EmptyState';
+import { TicketPeekDrawer } from './TicketPeekDrawer';
 import { useCrm } from '../../context/CrmContext';
 
 interface Props {
@@ -52,6 +54,7 @@ export function TicketInboxTable({
   const { t, statusLabel, priorityLabel, categoryLabel, adminActor } = useCrm();
 
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
+  const [peekingTicket, setPeekingTicket] = useState<Ticket | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const myCount = tickets.filter((t) => t.assignedTo === adminActor.id).length;
@@ -94,6 +97,13 @@ export function TicketInboxTable({
       ) {
         e.preventDefault();
         onTicketClick(filtered[highlightedIndex].id);
+      } else if (
+        e.key === ' ' &&
+        highlightedIndex >= 0 &&
+        highlightedIndex < filtered.length
+      ) {
+        e.preventDefault();
+        setPeekingTicket(filtered[highlightedIndex]);
       } else if (e.key === '/') {
         e.preventDefault();
         searchInputRef.current?.focus();
@@ -198,7 +208,7 @@ export function TicketInboxTable({
             <select
               value={selectedApp}
               onChange={(e) => onAppChange(e.target.value)}
-              className="rounded border border-line bg-canvas px-2.5 py-1.5 text-xs text-ink focus:border-ink focus:outline-none"
+              className="rounded-lg border border-line bg-panel px-2.5 py-1.5 text-xs text-ink shadow-xs focus:border-ink focus:ring-2 focus:ring-ink/5 focus:outline-none transition-all"
             >
               <option value="all">{t('tickets.filterAllApps')} (7)</option>
               {VPS_APPS.map((app) => (
@@ -213,7 +223,7 @@ export function TicketInboxTable({
               onChange={(e) =>
                 onStatusChange(e.target.value as TicketStatus | 'active' | 'all')
               }
-              className="rounded border border-line bg-canvas px-2.5 py-1.5 text-xs text-ink focus:border-ink focus:outline-none"
+              className="rounded-lg border border-line bg-panel px-2.5 py-1.5 text-xs text-ink shadow-xs focus:border-ink focus:ring-2 focus:ring-ink/5 focus:outline-none transition-all"
             >
               <option value="all">{t('tickets.filterAllStatus')}</option>
               <option value="active">{t('tickets.filterActiveOnly')}</option>
@@ -229,7 +239,7 @@ export function TicketInboxTable({
               onChange={(e) =>
                 onPriorityChange(e.target.value as TicketPriority | 'all')
               }
-              className="rounded border border-line bg-canvas px-2.5 py-1.5 text-xs text-ink focus:border-ink focus:outline-none"
+              className="rounded-lg border border-line bg-panel px-2.5 py-1.5 text-xs text-ink shadow-xs focus:border-ink focus:ring-2 focus:ring-ink/5 focus:outline-none transition-all"
             >
               <option value="all">{t('tickets.filterAllPriority')}</option>
               {PRIORITY_ORDER.map((pr) => (
@@ -243,7 +253,7 @@ export function TicketInboxTable({
               <button
                 type="button"
                 onClick={resetFilters}
-                className="inline-flex items-center gap-1 rounded border border-line px-2 py-1.5 text-xs text-ink-muted hover:border-line-strong hover:text-ink"
+                className="inline-flex items-center gap-1 rounded-lg border border-line bg-panel px-2.5 py-1.5 text-xs text-ink-muted shadow-xs hover:border-line-strong hover:text-ink active:scale-95 transition-all"
               >
                 <X className="h-3 w-3" />
                 Reset
@@ -257,33 +267,33 @@ export function TicketInboxTable({
             type="button"
             onClick={() => downloadTicketsCsv(filtered)}
             disabled={filtered.length === 0}
-            className="inline-flex items-center gap-1 rounded border border-line bg-subtle px-2 py-1 text-xs font-medium text-ink hover:border-line-strong active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            className="inline-flex items-center gap-1 rounded-lg border border-line bg-panel px-2.5 py-1.5 text-xs font-medium text-ink shadow-xs hover:border-line-strong hover:bg-subtle active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             title="Download CSV"
           >
-            <FileDown className="h-3 w-3 text-ink-muted" />
+            <FileDown className="h-3.5 w-3.5 text-ink-muted" />
             <span className="hidden sm:inline">CSV</span>
           </button>
           <button
             type="button"
             onClick={handleExportJson}
             disabled={filtered.length === 0}
-            className="inline-flex items-center gap-1 rounded border border-line bg-subtle px-2 py-1 text-xs font-medium text-ink hover:border-line-strong active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            className="inline-flex items-center gap-1 rounded-lg border border-line bg-panel px-2.5 py-1.5 text-xs font-medium text-ink shadow-xs hover:border-line-strong hover:bg-subtle active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             title="Ekspor Backup JSON"
           >
-            <FileJson className="h-3 w-3 text-ink-muted" />
+            <FileJson className="h-3.5 w-3.5 text-ink-muted" />
             <span className="hidden sm:inline">JSON</span>
           </button>
           <button
             type="button"
             onClick={handlePrintSummary}
             disabled={filtered.length === 0}
-            className="inline-flex items-center gap-1 rounded border border-line bg-subtle px-2 py-1 text-xs font-medium text-ink hover:border-line-strong active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            className="inline-flex items-center gap-1 rounded-lg border border-line bg-panel px-2.5 py-1.5 text-xs font-medium text-ink shadow-xs hover:border-line-strong hover:bg-subtle active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             title="Cetak Ringkasan Tiket"
           >
-            <Printer className="h-3 w-3 text-ink-muted" />
+            <Printer className="h-3.5 w-3.5 text-ink-muted" />
             <span className="hidden sm:inline">Cetak</span>
           </button>
-          <div className="ml-1 font-mono text-xs text-ink-muted tabular-nums">
+          <div className="ml-1 text-xs font-medium text-ink-muted tabular-nums">
             {filtered.length} / {tickets.length}
           </div>
         </div>
@@ -291,11 +301,22 @@ export function TicketInboxTable({
 
       {/* Table */}
       {filtered.length === 0 ? (
-        <div className="px-6 py-12 text-center">
-          <p className="text-sm font-medium text-ink">
-            {t('tickets.empty')}
-          </p>
-        </div>
+        <EmptyState
+          title={hasActiveFilter ? 'Tidak ada tiket yang cocok dengan filter' : t('tickets.empty')}
+          description={
+            hasActiveFilter
+              ? 'Coba ubah kata kunci pencarian, filter aplikasi, atau status tiket.'
+              : 'Semua tiket telah ditangani atau belum ada tiket baru yang masuk.'
+          }
+          action={
+            hasActiveFilter
+              ? {
+                  label: 'Reset Filter',
+                  onClick: resetFilters,
+                }
+              : undefined
+          }
+        />
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left text-xs">
@@ -312,7 +333,7 @@ export function TicketInboxTable({
                 <th className="py-2.5 pl-2 pr-4 text-right">{t('tickets.colTime')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-line">
+            <tbody className="divide-y divide-line/70">
               {filtered.map((ticket, idx) => {
                 const isOpen = ticket.status === 'open';
                 const isHighlighted = idx === highlightedIndex;
@@ -320,23 +341,37 @@ export function TicketInboxTable({
                   <tr
                     key={ticket.id}
                     onClick={() => onTicketClick(ticket.id)}
-                    className={`cursor-pointer transition-colors ${
+                    className={`group cursor-pointer transition-colors ${
                       isHighlighted
                         ? 'bg-ink/10 ring-1 ring-inset ring-ink/30'
                         : isOpen
-                          ? 'bg-red-50/35 hover:bg-red-50/70'
-                          : 'hover:bg-subtle/60'
+                          ? 'bg-rose-500/[0.03] hover:bg-rose-500/[0.07]'
+                          : 'hover:bg-subtle/50'
                     }`}
                   >
                     <td className="whitespace-nowrap py-3 pl-4 pr-2 font-mono font-semibold text-ink">
-                      <div className="flex items-center gap-1.5">
-                        {isOpen && (
+                      <div className="flex items-center gap-2">
+                        {isOpen ? (
                           <span
-                            className="h-2 w-2 rounded-full bg-red-600"
+                            className="h-1.5 w-1.5 rounded-full bg-rose-500 shrink-0"
                             title="Open"
                           />
+                        ) : (
+                          <span className="h-1.5 w-1.5 shrink-0" />
                         )}
                         <span>{ticket.ticketNumber}</span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPeekingTicket(ticket);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 hover:opacity-100 p-1 rounded hover:bg-subtle text-ink-muted hover:text-ink transition-opacity"
+                          title="Pratinjau Cepat (Spasi)"
+                          aria-label={`Pratinjau cepat ${ticket.ticketNumber}`}
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                        </button>
                       </div>
                     </td>
 
@@ -348,15 +383,27 @@ export function TicketInboxTable({
                       <div className="font-medium text-ink line-clamp-1">
                         {ticket.subject}
                       </div>
-                      <div className="mt-0.5 flex items-center gap-2 text-[11px] text-ink-muted">
+                      <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] text-ink-muted">
                         <span>{categoryLabel(ticket.category)}</span>
                         {ticket.sourcePageUrl && (
                           <>
                             <span>·</span>
-                            <span className="truncate font-mono text-[10px] text-ink-faint max-w-[200px]">
+                            <span className="truncate font-mono text-[10px] text-ink-faint max-w-[180px]">
                               {ticket.sourcePageUrl}
                             </span>
                           </>
+                        )}
+                        {ticket.tags && ticket.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 ml-1">
+                            {ticket.tags.map((tg) => (
+                              <span
+                                key={tg}
+                                className="inline-flex items-center rounded-sm bg-line/60 px-1.5 py-0 text-[10px] font-medium text-ink"
+                              >
+                                #{tg}
+                              </span>
+                            ))}
+                          </div>
                         )}
                       </div>
                     </td>
@@ -439,7 +486,10 @@ export function TicketInboxTable({
             <kbd className="rounded border border-line bg-panel px-1.5 py-0.5 font-mono text-[10px] text-ink shadow-2xs">k</kbd> Navigasi baris
           </span>
           <span>
-            <kbd className="rounded border border-line bg-panel px-1.5 py-0.5 font-mono text-[10px] text-ink shadow-2xs">Enter</kbd> Buka tiket
+            <kbd className="rounded border border-line bg-panel px-1.5 py-0.5 font-mono text-[10px] text-ink shadow-2xs">Spasi</kbd> Pratinjau cepat
+          </span>
+          <span>
+            <kbd className="rounded border border-line bg-panel px-1.5 py-0.5 font-mono text-[10px] text-ink shadow-2xs">Enter</kbd> Buka penuh
           </span>
           <span>
             <kbd className="rounded border border-line bg-panel px-1.5 py-0.5 font-mono text-[10px] text-ink shadow-2xs">/</kbd> Cari tiket
@@ -449,6 +499,14 @@ export function TicketInboxTable({
           Pintasan Keyboard Aktif · {filtered.length} dari {tickets.length}
         </span>
       </div>
+
+      {/* Quick Peek Drawer */}
+      {peekingTicket && (
+        <TicketPeekDrawer
+          ticket={peekingTicket}
+          onClose={() => setPeekingTicket(null)}
+        />
+      )}
     </div>
   );
 }

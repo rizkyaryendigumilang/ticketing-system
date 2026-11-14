@@ -12,25 +12,25 @@ interface Props {
 export function SlaBadge({ ticket, className = '', showIcon = true }: Props) {
   const sla = computeTicketSla(ticket);
 
-  let style = 'bg-subtle text-ink-muted border-line';
+  let style = 'bg-subtle text-ink-muted border-line/80';
   let Icon = Clock;
 
   switch (sla.status) {
     case 'achieved':
-      style = 'bg-emerald-50 text-emerald-800 border-emerald-200';
+      style = 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20';
       Icon = CheckCircle2;
       break;
     case 'warning':
-      style = 'bg-amber-50 text-amber-800 border-amber-300 font-semibold';
+      style = 'bg-amber-500/10 text-amber-700 border-amber-500/25 font-medium';
       Icon = AlertTriangle;
       break;
     case 'breached':
-      style = 'bg-red-50 text-red-700 border-red-300 font-semibold';
+      style = 'bg-rose-500/10 text-rose-700 border-rose-500/25 font-medium';
       Icon = AlertTriangle;
       break;
     case 'on_track':
     default:
-      style = 'bg-subtle text-ink-muted border-line';
+      style = 'bg-subtle text-ink-muted border-line/80';
       Icon = Clock;
       break;
   }
@@ -43,7 +43,7 @@ export function SlaBadge({ ticket, className = '', showIcon = true }: Props) {
   return (
     <span
       title={`Target SLA: ${deadlineFormatted} (${ticket.priority.toUpperCase()})`}
-      className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-mono tabular-nums select-none ${style} ${className}`}
+      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium tabular-nums select-none transition-colors ${style} ${className}`}
     >
       {showIcon && <Icon className="h-3 w-3 shrink-0" />}
       <span>{sla.label}</span>

@@ -1,4 +1,5 @@
 import type { TeamMember, PermissionDefinition, InvitationInput, UserRole } from '../types/team';
+import { logAuditEvent } from './auditLogService.ts';
 
 const TEAM_KEY = 'vps-crm:team_members';
 
@@ -149,13 +150,32 @@ export function addTeamMember(input: InvitationInput): TeamMember {
 
   teamCache = [...teamCache, newMember];
   writeTeam(teamCache);
+  logAuditEvent({
+    actorId: 'superadmin',
+    actorName: 'Superadmin',
+    actorRole: 'superadmin',
+    action: 'team_invite',
+    target: newMember.email,
+    details: `Mengundang anggota tim baru ${newMember.name} (${newMember.email}) dengan peran ${newMember.role}.`,
+  });
   notify();
   return newMember;
 }
 
 export function updateMemberRole(id: string, role: UserRole): void {
+  const member = teamCache.find((m) => m.id === id);
   teamCache = teamCache.map((m) => (m.id === id ? { ...m, role } : m));
   writeTeam(teamCache);
+  if (member) {
+    logAuditEvent({
+      actorId: 'superadmin',
+      actorName: 'Superadmin',
+      actorRole: 'superadmin',
+      action: 'team_role_change',
+      target: member.name,
+      details: `Mengubah peran ${member.name} (${member.email}) menjadi ${role}.`,
+    });
+  }
   notify();
 }
 

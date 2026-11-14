@@ -14,26 +14,26 @@ export function TeamMembersTable({ members, onRoleChange, onRemove }: TeamMember
     switch (role) {
       case 'superadmin':
         return (
-          <span className="inline-flex items-center gap-1 rounded bg-neutral-900 text-neutral-100 dark:bg-neutral-100 dark:text-neutral-900 px-2 py-0.5 font-mono text-[10px] font-bold">
+          <span className="inline-flex items-center gap-1 rounded-full bg-neutral-900 text-neutral-100 dark:bg-neutral-100 dark:text-neutral-900 px-2.5 py-0.5 text-[10px] font-semibold shadow-xs">
             <Shield className="h-3 w-3 text-emerald-400" />
             Superadmin
           </span>
         );
       case 'supervisor':
         return (
-          <span className="inline-flex items-center gap-1 rounded bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300 px-2 py-0.5 font-mono text-[10px] font-bold">
+          <span className="inline-flex items-center gap-1 rounded-full bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/20 px-2.5 py-0.5 text-[10px] font-semibold">
             Supervisor
           </span>
         );
       case 'agent':
         return (
-          <span className="inline-flex items-center gap-1 rounded bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 px-2 py-0.5 font-mono text-[10px] font-bold">
+          <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20 px-2.5 py-0.5 text-[10px] font-semibold">
             Helpdesk Agent
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 rounded bg-subtle px-2 py-0.5 font-mono text-[10px]">
+          <span className="inline-flex items-center gap-1 rounded-full border border-line bg-subtle px-2.5 py-0.5 text-[10px] font-medium text-ink-muted">
             Pelapor
           </span>
         );
@@ -41,9 +41,9 @@ export function TeamMembersTable({ members, onRoleChange, onRemove }: TeamMember
   };
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-line bg-panel shadow-xs">
+    <div className="overflow-x-auto rounded-xl border border-line bg-panel shadow-card">
       <table className="w-full text-left text-xs">
-        <thead className="border-b border-line bg-subtle/40 text-[11px] font-semibold text-ink-muted">
+        <thead className="border-b border-line bg-subtle/50 text-[11px] font-semibold text-ink-muted">
           <tr>
             <th className="px-4 py-3">Nama Anggota</th>
             <th className="px-4 py-3">Peran (Role)</th>
@@ -54,10 +54,10 @@ export function TeamMembersTable({ members, onRoleChange, onRemove }: TeamMember
         </thead>
         <tbody className="divide-y divide-line/60">
           {members.map((m) => (
-            <tr key={m.id} className="hover:bg-subtle/30 transition-colors">
+            <tr key={m.id} className="hover:bg-subtle/40 transition-colors">
               <td className="px-4 py-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-subtle font-mono text-xs font-bold text-ink">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-subtle text-xs font-semibold text-ink">
                     {m.name
                       .split(' ')
                       .slice(0, 2)
