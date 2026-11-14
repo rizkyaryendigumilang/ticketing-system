@@ -402,7 +402,7 @@ export function AdminCrmLayout() {
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Buka Portal Pelapor di Tab Baru"
-                className="hidden md:inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-500/15 active:scale-95 transition-all duration-150 shadow-2xs"
+                className="hidden md:inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 dark:bg-emerald-500/20 hover:bg-emerald-500/15 dark:hover:bg-emerald-500/30 active:scale-95 transition-all duration-150 shadow-2xs"
               >
                 <ExternalLink className="h-3.5 w-3.5" />
                 <span>Portal Pelapor</span>
