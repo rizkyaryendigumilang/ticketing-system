@@ -138,13 +138,13 @@ export function LoginPage() {
 
       // 3. Fallback: coba autentikasi superadmin PocketBase
       await loginAdmin(cleanIdentity, password);
-      toast.success('Berhasil masuk ke meja kerja CRM.');
+      toast.success('Berhasil masuk.');
       navigate('/admin');
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
-          : 'Identitas atau kata sandi tidak cocok. Silakan periksa kembali atau gunakan opsi Masuk Cepat.',
+          : 'Email atau kata sandi tidak sesuai. Silakan periksa kembali.',
       );
     } finally {
       setLoading(false);
@@ -156,7 +156,7 @@ export function LoginPage() {
     setIdentity(DEMO_ADMIN.email);
     setPassword(DEMO_ADMIN.password);
     setError(null);
-    toast.info('Kredensial Superadmin demo terisi otomatis.');
+    toast.info('Akun admin demo terisi otomatis.');
   };
 
   // Komponen 2: Alur Lupa Kata Sandi
@@ -328,7 +328,7 @@ export function LoginPage() {
               >
                 <AlertCircle className="h-4 w-4 shrink-0 text-red-600 mt-0.5" />
                 <div className="flex-1">
-                  <p className="font-semibold">Gagal Melakukan Autentikasi</p>
+                  <p className="font-semibold">Gagal Masuk</p>
                   <p className="mt-0.5 text-red-700 leading-relaxed">{error}</p>
                 </div>
               </div>
@@ -356,7 +356,7 @@ export function LoginPage() {
                     disabled={loading}
                     value={identity}
                     onChange={(e) => setIdentity(e.target.value)}
-                    placeholder="Email or username"
+                    placeholder="admin@crm.local"
                     className="w-full rounded-lg border border-line bg-panel pl-9 pr-3 py-2 text-xs sm:text-sm text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none transition-colors disabled:opacity-50"
                   />
                 </div>

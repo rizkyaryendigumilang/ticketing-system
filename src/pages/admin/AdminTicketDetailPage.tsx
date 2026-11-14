@@ -23,7 +23,7 @@ export function AdminTicketDetailPage() {
             className="mt-3 inline-flex items-center gap-1.5 rounded bg-ink px-3 py-1.5 text-xs font-semibold text-white"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            Kembali ke Inbox
+            Kembali ke Kotak Masuk
           </Link>
         </div>
       </div>

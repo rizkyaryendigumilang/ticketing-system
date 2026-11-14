@@ -464,7 +464,7 @@ export function TicketWorkspace3Col({
           <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-xs shadow-card">
             <div className="flex items-center gap-1.5 font-semibold text-emerald-900">
               <CheckCircle2 className="h-4 w-4 text-emerald-700" />
-              Catatan Solusi Penyelesaian
+              Ringkasan Solusi
             </div>
             <p className="mt-1.5 whitespace-pre-wrap text-emerald-950 leading-relaxed font-sans">
               {ticket.resolutionSummary}
@@ -484,20 +484,20 @@ export function TicketWorkspace3Col({
             <div className="flex min-w-0 items-center gap-2.5">
               <AlertTriangle className="h-4 w-4 shrink-0 text-amber-700" />
               <div className="truncate">
-                <span className="font-semibold">Perhatian Tabrakan Agen:</span>{' '}
+                <span className="font-semibold">Peringatan Kolaborasi:</span>{' '}
                 <span>
-                  {otherViewers.map((v) => v.actorName).join(', ')} juga sedang membuka tiket ini.
+                  {otherViewers.map((v) => v.actorName).join(', ')} juga sedang melihat tiket ini.
                 </span>
                 {otherViewers.some((v) => v.isTyping) && (
                   <span className="ml-2 inline-flex items-center gap-1 font-semibold text-amber-800">
                     <PenLine className="h-3 w-3 animate-bounce" />
-                    sedang mengetik balasan...
+                    sedang mengetik...
                   </span>
                 )}
               </div>
             </div>
             <span className="shrink-0 rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-semibold text-amber-900 shadow-xs">
-              Live Presence
+              Agen Aktif
             </span>
           </div>
         )}
@@ -782,8 +782,8 @@ export function TicketWorkspace3Col({
                 onKeyDown={handleKeyDown}
                 placeholder={
                   composerMode === 'internal'
-                    ? 'Tulis catatan teknis rahasia... Ketik "/" untuk template cepat, Ctrl+Enter untuk menyimpan.'
-                    : 'Tulis balasan atau instruksi untuk pelapor... Ketik "/" untuk template cepat, Ctrl+Enter untuk mengirim.'
+                    ? 'Tulis catatan internal untuk tim admin... Ketik "/" untuk template cepat, Ctrl+Enter untuk menyimpan.'
+                    : 'Tulis balasan untuk pelapor... Ketik "/" untuk template cepat, Ctrl+Enter untuk mengirim.'
                 }
                 className="w-full bg-canvas p-3 text-xs leading-relaxed text-ink placeholder:text-ink-faint focus:bg-panel focus:outline-none"
               />

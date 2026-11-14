@@ -32,10 +32,10 @@ export function PortalNoSessionGuide() {
               Sesi Pelapor Belum Terhubung
             </h2>
             <p className="text-xs text-ink-muted leading-relaxed">
-              Portal bantuan ini terhubung dengan 7 aplikasi ekosistem VPS (<span className="font-mono text-ink">43.156.236.102</span>). Pelapor biasanya dialihkan secara otomatis ke portal ini melalui tombol bantuan di dalam masing-masing aplikasi.
+              Portal bantuan ini melayani pengguna dari 7 aplikasi VPS. Pengguna biasanya diarahkan secara otomatis melalui tombol bantuan di aplikasi masing-masing.
             </p>
             <p className="text-xs text-ink-muted">
-              Pilih salah satu aplikasi di bawah untuk mensimulasikan sesi pelapor, atau akses meja kerja admin.
+              Pilih salah satu aplikasi di bawah untuk mencoba alur pelapor, atau masuk sebagai admin.
             </p>
           </div>
           {admin && (
@@ -44,7 +44,7 @@ export function PortalNoSessionGuide() {
               className="inline-flex items-center gap-1.5 rounded bg-ink px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:opacity-90 transition-all shrink-0"
             >
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-              Meja Kerja Admin
+              Buka Halaman Admin
             </Link>
           )}
         </div>

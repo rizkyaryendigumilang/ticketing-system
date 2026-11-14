@@ -65,18 +65,18 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
   }, [data.tickets, user.appId, user.externalUid, subject]);
 
   const handleDeflected = (articleTitle: string) => {
-    toast.success(`Senang bisa membantu! Solusi "${articleTitle}" telah menyelesaikan masalah Anda.`);
+    toast.success(`Solusi "${articleTitle}" berhasil diterapkan. Pembuatan tiket dibatalkan.`);
     onCancel();
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!subject.trim()) {
-      setError('Judul laporan wajib diisi.');
+      setError('Mohon isi judul kendala.');
       return;
     }
     if (!description.trim()) {
-      setError('Deskripsi kendala wajib diisi.');
+      setError('Mohon isi penjelasan kendala.');
       return;
     }
 
@@ -103,7 +103,7 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
         <div className="flex items-center justify-between gap-2 text-xs font-semibold text-ink">
           <span className="inline-flex items-center gap-1.5">
             <Lock className="h-3.5 w-3.5 text-ink-muted" />
-            Identitas Pelapor (Terkunci Otomatis dari Tombol Help)
+            Identitas Pelapor (Terisi Otomatis)
           </span>
           <span className="rounded-full border border-line bg-panel px-2.5 py-0.5 font-mono text-[10px] text-ink-muted shadow-xs">
             {user.compositeKey}
@@ -162,7 +162,7 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
             htmlFor="portal-category"
             className="block text-xs font-semibold text-ink"
           >
-            Kategori Masalah
+            Kategori Kendala
           </label>
           <select
             id="portal-category"
@@ -183,7 +183,7 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
             htmlFor="portal-priority"
             className="block text-xs font-semibold text-ink"
           >
-            Skala Prioritas
+            Tingkat Prioritas
           </label>
           <select
             id="portal-priority"
@@ -206,7 +206,7 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
           htmlFor="portal-subject"
           className="block text-xs font-semibold text-ink"
         >
-          Judul Keluhan / Kendala
+          Judul Kendala
         </label>
         <input
           id="portal-subject"
@@ -223,7 +223,7 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
           <div className="mt-2.5 rounded-xl border border-emerald-500/25 bg-emerald-500/[0.04] p-3.5 text-xs text-ink animate-fadeIn shadow-xs">
             <div className="flex items-center gap-1.5 font-semibold text-emerald-800 dark:text-emerald-300">
               <Sparkles className="h-4 w-4 text-emerald-600" />
-              <span>Solusi Mandiri Cepat: Kami menemukan artikel panduan yang mungkin cocok:</span>
+              <span>Panduan Terkait: Coba langkah berikut sebelum mengirim tiket:</span>
             </div>
             <div className="mt-2 space-y-2">
               {suggestions.map(({ article: art }) => (
@@ -242,7 +242,7 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
                       }
                       className="text-[11px] font-medium text-emerald-600 hover:text-emerald-700 underline shrink-0"
                     >
-                      {expandedArticleId === art.id ? 'Tutup Panduan' : 'Lihat Solusi'}
+                      {expandedArticleId === art.id ? 'Tutup Panduan' : 'Buka Panduan'}
                     </button>
                   </div>
                   <p className="mt-1 text-ink-muted text-[11px]">{art.summary}</p>
@@ -250,7 +250,7 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
                   {expandedArticleId === art.id && (
                     <div className="mt-2.5 border-t border-line pt-2.5 space-y-2">
                       <p className="font-semibold text-[11px] text-emerald-900 dark:text-emerald-300">
-                        Langkah Solusi Mandiri:
+                        Langkah Penyelesaian:
                       </p>
                       <ol className="list-decimal pl-4 space-y-1 text-[11px] text-ink">
                         {art.steps.map((st, i) => (
@@ -264,7 +264,7 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
                           className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 active:scale-95 transition-all shadow-xs"
                         >
                           <CheckCircle2 className="h-3.5 w-3.5" />
-                          Masalah Selesai (Batal Buat Tiket)
+                          Kendala Teratasi (Batal Kirim Tiket)
                         </button>
                       </div>
                     </div>
@@ -282,7 +282,7 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
           htmlFor="portal-description"
           className="block text-xs font-semibold text-ink"
         >
-          Detail Kronologi / Deskripsi Masalah
+          Penjelasan Kendala
         </label>
         <textarea
           id="portal-description"
@@ -290,7 +290,7 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
           required
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Jelaskan apa yang sedang Anda kerjakan, langkah yang dilakukan, dan pesan error yang muncul..."
+          placeholder="Jelaskan kendala yang dialami, langkah yang sudah dicoba, dan pesan kesalahan yang muncul..."
           className="mt-1.5 w-full rounded-lg border border-line bg-panel p-3 text-xs leading-relaxed text-ink placeholder:text-ink-faint shadow-xs focus:border-ink focus:ring-2 focus:ring-ink/5 focus:outline-none transition-all"
         />
       </div>
@@ -301,7 +301,7 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
           htmlFor="portal-url"
           className="block text-xs font-semibold text-ink"
         >
-          URL Halaman Saat Terjadi Error
+          Tautan Halaman Kendala (Opsional)
         </label>
         <input
           id="portal-url"
@@ -316,7 +316,7 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
       {/* Attachments Uploader */}
       <div>
         <label className="mb-1.5 block text-xs font-semibold text-ink">
-          Lampiran Berkas / Screenshot Layar (Bisa langsung tekan Ctrl+V)
+          Tangkapan Layar atau Berkas (Bisa tempel dengan Ctrl+V)
         </label>
         <ScreenshotUploader
           attachments={attachments}
@@ -331,16 +331,16 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
             <AlertTriangle className="h-4 w-4 shrink-0 text-amber-700 mt-0.5" />
             <div className="space-y-1">
               <p className="font-semibold text-amber-950">
-                Peringatan: Anda sudah memiliki tiket terbuka untuk kendala serupa
+                Perhatian: Anda sudah memiliki tiket aktif untuk masalah ini
               </p>
               <p className="text-amber-900/90 leading-relaxed">
-                Tiket <strong>#{duplicateTicket.ticketNumber}</strong> (&ldquo;{duplicateTicket.subject}&rdquo;) saat ini berstatus <strong>{statusLabel(duplicateTicket.status)}</strong>. Disarankan untuk mengecek atau membalas di tiket tersebut.
+                Tiket <strong>#{duplicateTicket.ticketNumber}</strong> (&ldquo;{duplicateTicket.subject}&rdquo;) masih berstatus <strong>{statusLabel(duplicateTicket.status)}</strong>. Anda dapat langsung melanjutkan percakapan di tiket tersebut.
               </p>
               <Link
                 to={`/portal/ticket/${duplicateTicket.id}`}
                 className="inline-flex items-center gap-1 font-semibold text-amber-950 underline hover:text-black mt-1"
               >
-                <span>Buka tiket #{duplicateTicket.ticketNumber} yang sudah ada</span>
+                <span>Buka tiket #{duplicateTicket.ticketNumber}</span>
                 <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
@@ -363,7 +363,7 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
           className="btn-primary px-5 py-2 text-xs font-semibold"
         >
           <Send className="h-3.5 w-3.5" />
-          {submitting ? 'Mengirim Laporan...' : 'Kirim Laporan Tiket'}
+          {submitting ? 'Mengirim...' : 'Kirim Tiket'}
         </button>
       </div>
     </form>

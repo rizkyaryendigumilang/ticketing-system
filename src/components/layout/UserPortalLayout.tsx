@@ -61,7 +61,7 @@ export function UserPortalLayout() {
                 </p>
               ) : (
                 <p className="text-[11px] sm:text-xs text-ink-muted">
-                  {lang === 'en' ? 'Unified Support Hub for 7 VPS Apps' : 'Layanan Bantuan Terpadu 7 Aplikasi VPS (43.156.236.102)'}
+                  {lang === 'en' ? 'Support Portal for VPS Applications' : 'Pusat Bantuan Aplikasi VPS'}
                 </p>
               )}
             </div>
@@ -84,10 +84,10 @@ export function UserPortalLayout() {
               <Link
                 to="/admin"
                 className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white shadow-xs transition-all hover:bg-neutral-800 active:scale-[0.98]"
-                title="Buka Meja Kerja Superadmin CRM"
+                title="Buka Halaman Admin"
               >
                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-                {lang === 'en' ? 'Admin Workspace' : 'Meja Kerja Admin'}
+                {lang === 'en' ? 'Admin Portal' : 'Halaman Admin'}
               </Link>
             )}
 

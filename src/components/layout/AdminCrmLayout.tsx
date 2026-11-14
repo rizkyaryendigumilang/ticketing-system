@@ -497,7 +497,7 @@ export function AdminCrmLayout() {
               type="button"
               onClick={() => setPaletteOpen(true)}
               className="group mx-2 flex h-9 w-48 sm:w-72 md:w-88 max-w-sm items-center justify-between rounded-xl border border-line bg-subtle/80 px-3 text-xs text-ink-muted shadow-2xs hover:border-line-strong hover:bg-panel transition-all duration-150 active:scale-[0.99]"
-              title="Buka Pencarian & Perintah Cepat (Ctrl+K)"
+              title="Cari tiket atau perintah (Ctrl+K)"
             >
               <span className="flex items-center gap-2 min-w-0">
                 <Search className="h-3.5 w-3.5 text-ink-faint group-hover:text-ink transition-colors shrink-0" />
@@ -517,7 +517,7 @@ export function AdminCrmLayout() {
                 type="button"
                 onClick={() => setNotificationsOpen(true)}
                 className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-panel text-ink-muted shadow-2xs hover:border-line-strong hover:bg-subtle hover:text-ink active:scale-95 transition-all duration-150"
-                title={`Pusat Notifikasi & Alert ${unreadCount > 0 ? `(${unreadCount} belum dibaca)` : ''}`}
+                title={`Notifikasi ${unreadCount > 0 ? `(${unreadCount} baru)` : ''}`}
               >
                 <Bell className="h-4 w-4" />
                 {unreadCount > 0 && (
@@ -532,7 +532,7 @@ export function AdminCrmLayout() {
                 type="button"
                 onClick={toggleTheme}
                 className="flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-panel text-ink-muted shadow-2xs hover:border-line-strong hover:bg-subtle hover:text-ink active:scale-95 transition-all duration-150"
-                title={isDark ? 'Ganti ke Mode Terang (Light Mode)' : 'Ganti ke Mode Gelap (Dark Mode)'}
+                title={isDark ? 'Ganti ke mode terang' : 'Ganti ke mode gelap'}
                 aria-label={isDark ? 'Mode Terang' : 'Mode Gelap'}
               >
                 {isDark ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4" />}

@@ -91,11 +91,11 @@ export function NotificationCenterDrawer({ open, onClose }: NotificationCenterDr
               <Bell className="h-4 w-4" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-ink">Pusat Notifikasi & Alert</h2>
+              <h2 className="text-sm font-bold text-ink">Notifikasi</h2>
               <p className="text-[11px] text-ink-muted">
                 {unreadCount > 0
-                  ? `${unreadCount} notifikasi belum dibaca`
-                  : 'Semua notifikasi telah dibaca'}
+                  ? `${unreadCount} belum dibaca`
+                  : 'Semua sudah dibaca'}
               </p>
             </div>
           </div>
@@ -120,7 +120,7 @@ export function NotificationCenterDrawer({ open, onClose }: NotificationCenterDr
                     clearNotifications();
                   }
                 }}
-                title="Bersihkan riwayat notifikasi"
+                title="Hapus riwayat notifikasi"
                 className="rounded p-1.5 text-ink-muted hover:text-red-500 hover:bg-subtle transition-colors"
               >
                 <Trash2 className="h-4 w-4" />
@@ -170,7 +170,7 @@ export function NotificationCenterDrawer({ open, onClose }: NotificationCenterDr
                 : 'border-transparent text-ink-muted hover:text-ink'
             }`}
           >
-            Darurat / Alert
+            Mendesak
           </button>
           <button
             type="button"

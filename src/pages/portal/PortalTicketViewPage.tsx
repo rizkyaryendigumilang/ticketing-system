@@ -79,8 +79,8 @@ export function PortalTicketViewPage() {
       replyToTicket(ticket, requesterActor, replyBody, { attachments });
       toast.success(
         isSolved
-          ? 'Pesan terkirim, tiket Anda telah dibuka kembali'
-          : 'Pesan balasan Anda telah terkirim ke Superadmin',
+          ? 'Pesan terkirim. Tiket dibuka kembali.'
+          : 'Balasan Anda berhasil dikirim.',
       );
       setReplyBody('');
       setAttachments([]);
@@ -99,7 +99,7 @@ export function PortalTicketViewPage() {
   const handleMarkSolved = () => {
     if (!requesterActor) return;
     markSolvedByRequester(ticket, requesterActor);
-    toast.success('Terima kasih, tiket telah Anda tandai sebagai selesai');
+    toast.success('Tiket ditandai selesai.');
   };
 
   const handleSubmitCsat = () => {
@@ -107,7 +107,7 @@ export function PortalTicketViewPage() {
     setSubmitting(true);
     try {
       submitSatisfactionFeedback(ticket, requesterActor, csatRating, csatComment);
-      toast.success('Terima kasih banyak atas penilaian kepuasan Anda!');
+      toast.success('Terima kasih atas penilaian Anda.');
     } finally {
       setSubmitting(false);
     }
@@ -133,7 +133,7 @@ export function PortalTicketViewPage() {
             className="inline-flex items-center gap-1.5 rounded bg-emerald-700 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-800 disabled:opacity-50 transition-colors"
           >
             <CheckCircle2 className="h-3.5 w-3.5" />
-            Tandai Masalah Sudah Selesai
+            Tandai Tiket Selesai
           </button>
         )}
       </div>
@@ -195,14 +195,14 @@ export function PortalTicketViewPage() {
         <div className="rounded-lg border border-emerald-300 bg-emerald-50/90 p-4 sm:p-5 shadow-sm">
           <div className="flex items-center gap-2 text-xs font-bold text-emerald-900">
             <CheckCircle2 className="h-4 w-4 text-emerald-700" />
-            Solusi Penyelesaian dari Superadmin
+            Solusi dari Tim Bantuan
           </div>
           <p className="mt-2 whitespace-pre-wrap text-xs leading-relaxed text-emerald-950 font-sans">
             {ticket.resolutionSummary}
           </p>
           <div className="mt-3 flex items-center gap-2 text-[11px] text-emerald-800">
             <Sparkles className="h-3 w-3" />
-            <span>Jika kendala masih terjadi, silakan kirim balasan di bawah untuk membuka kembali tiket ini secara otomatis.</span>
+            <span>Jika kendala belum teratasi, balas pesan di bawah untuk membuka kembali tiket ini.</span>
           </div>
         </div>
       )}
@@ -213,11 +213,11 @@ export function PortalTicketViewPage() {
           <div className="flex items-center justify-between gap-2 border-b border-line pb-3">
             <span className="flex items-center gap-1.5 text-xs font-bold text-ink">
               <Star className="h-4 w-4 fill-amber-400 text-amber-500" />
-              Penilaian Layanan &amp; Kepuasan Solusi (CSAT)
+              Penilaian Kepuasan Layanan
             </span>
             {ticket.satisfactionRating ? (
               <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-800 border border-amber-500/20 tabular-nums">
-                ⭐ {ticket.satisfactionRating} / 5 Bintang
+                {ticket.satisfactionRating} / 5 Bintang
               </span>
             ) : null}
           </div>
@@ -232,7 +232,7 @@ export function PortalTicketViewPage() {
           ) : (
             <div className="mt-3 space-y-3">
               <p className="text-xs text-ink-muted">
-                Bagaimana penilaian Anda terhadap kecepatan dan kejelasan solusi yang diberikan oleh Superadmin?
+                Bagaimana penilaian Anda terhadap penanganan tiket ini?
               </p>
               <div className="flex items-center gap-1.5">
                 {[1, 2, 3, 4, 5].map((star) => (
@@ -285,7 +285,7 @@ export function PortalTicketViewPage() {
 
         {ticket.sourcePageUrl && (
           <div className="mt-3 text-xs">
-            <span className="text-ink-muted">Halaman aplikasi saat error: </span>
+            <span className="text-ink-muted">Halaman saat terjadi kendala: </span>
             <a
               href={ticket.sourcePageUrl}
               target="_blank"
@@ -301,7 +301,7 @@ export function PortalTicketViewPage() {
         {ticket.attachments.length > 0 && (
           <div className="mt-3.5 border-t border-line pt-3">
             <p className="mb-2 text-xs font-medium text-ink-muted">
-              Screenshot Terlampir ({ticket.attachments.length})
+              Tangkapan Layar Terlampir ({ticket.attachments.length})
             </p>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {ticket.attachments.map((src, idx) => (
@@ -311,7 +311,7 @@ export function PortalTicketViewPage() {
                   onClick={() => setLightboxImg(src)}
                   className="overflow-hidden rounded border border-line bg-subtle hover:border-ink transition-colors"
                 >
-                  <img src={src} alt={`Screenshot ${idx + 1}`} className="h-24 w-full object-cover" />
+                  <img src={src} alt={`Tangkapan Layar ${idx + 1}`} className="h-24 w-full object-cover" />
                 </button>
               ))}
             </div>
@@ -325,7 +325,7 @@ export function PortalTicketViewPage() {
       {/* Discussion Timeline */}
       <div className="rounded-2xl border border-line bg-panel shadow-card overflow-hidden">
         <div className="flex items-center justify-between border-b border-line bg-subtle/60 px-4 py-3 text-xs font-semibold text-ink">
-          <span>Riwayat Diskusi dengan Superadmin</span>
+          <span>Riwayat Percakapan</span>
           <span className="rounded-full bg-subtle px-2.5 py-0.5 text-[11px] font-medium text-ink-muted tabular-nums">
             {messages.length} pesan
           </span>
@@ -334,7 +334,7 @@ export function PortalTicketViewPage() {
         <div className="divide-y divide-line">
           {messages.length === 0 ? (
             <div className="px-4 py-8 text-center text-xs text-ink-muted">
-              Belum ada pesan balasan. Anda dapat menambahkan keterangan atau screenshot di bawah.
+              Belum ada balasan. Anda dapat menambahkan rincian atau tangkapan layar di bawah.
             </div>
           ) : (
             messages.map((m) => {
@@ -365,7 +365,7 @@ export function PortalTicketViewPage() {
                             : 'border-line bg-subtle text-ink-muted'
                         }`}
                       >
-                        {isFromAdmin ? 'Superadmin Support' : requester.appRole}
+                        {isFromAdmin ? 'Admin Helpdesk' : requester.appRole}
                       </span>
                     </div>
                     <span className="text-[11px] text-ink-faint">{timeAgo(m.createdAt)}</span>
@@ -400,8 +400,8 @@ export function PortalTicketViewPage() {
           <label htmlFor="portal-reply" className="flex items-center gap-1.5 text-xs font-semibold text-ink">
             <MessageSquare className="h-3.5 w-3.5" />
             {isSolved
-              ? 'Masih ada kendala? Balas untuk membuka kembali tiket ini'
-              : 'Kirim Balasan / Info Tambahan ke Admin'}
+              ? 'Kirim balasan untuk membuka kembali tiket'
+              : 'Tulis Balasan'}
           </label>
         </div>
 
@@ -418,7 +418,7 @@ export function PortalTicketViewPage() {
             value={replyBody}
             onChange={(e) => setReplyBody(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Tulis balasan untuk Superadmin... Tekan Ctrl+Enter untuk langsung mengirim."
+            placeholder="Tulis balasan... Tekan Ctrl+Enter untuk mengirim."
             className="w-full bg-canvas p-3 text-xs leading-relaxed text-ink placeholder:text-ink-faint focus:bg-panel focus:outline-none transition-colors"
           />
         </div>
@@ -427,7 +427,7 @@ export function PortalTicketViewPage() {
 
         <div className="flex items-center justify-between pt-2 border-t border-line/60">
           <span className="hidden text-[10px] text-ink-faint sm:inline">
-            (Bisa tekan Ctrl+Enter untuk kirim cepat)
+            (Tekan Ctrl+Enter untuk mengirim)
           </span>
           <button
             type="submit"
@@ -435,7 +435,7 @@ export function PortalTicketViewPage() {
             className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-4 py-2 text-xs font-semibold text-white hover:opacity-95 shadow-xs active:scale-95 disabled:opacity-40 transition-all"
           >
             <Send className="h-3.5 w-3.5" />
-            {isSolved ? 'Kirim & Buka Kembali Tiket' : 'Kirim Balasan'}
+            {isSolved ? 'Kirim & Buka Kembali' : 'Kirim Balasan'}
           </button>
         </div>
       </form>
