@@ -1,11 +1,16 @@
 import { useState } from 'react';
-import { CheckCircle2, ChevronRight, Plus, Search, X } from 'lucide-react';
+import { CheckCircle2, ChevronRight, FileSpreadsheet, Plus, Search, X } from 'lucide-react';
 import { CATEGORY_LABEL } from '../../config/vpsAppsConfig';
 import { timeAgo } from '../../services/crmLogic';
 import type { Ticket } from '../../types/crm';
 import { PriorityBadge } from '../common/PriorityBadge';
 import { StatusBadge } from '../common/StatusBadge';
 import { useCrm } from '../../context/CrmContext';
+import { useToast } from '../../context/ToastContext';
+import {
+  generateLatestBackup,
+  downloadBackupFile,
+} from '../../services/backupSyncService';
 
 interface Props {
   tickets: Ticket[];
@@ -18,9 +23,30 @@ export function UserTicketList({
   onTicketClick,
   onCreateNew,
 }: Props) {
-  const { t, categoryLabel } = useCrm();
+  const toast = useToast();
+  const { t, categoryLabel, requester } = useCrm();
   const [filter, setFilter] = useState<'all' | 'active' | 'solved'>('all');
   const [search, setSearch] = useState('');
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportPersonalCsv = async () => {
+    if (!requester) return;
+    setExporting(true);
+    try {
+      const res = await generateLatestBackup({
+        scope: 'personal',
+        format: 'csv',
+        requesterId: requester.externalUid,
+        appId: requester.appId,
+      });
+      downloadBackupFile(res);
+      toast.success(`Daftar ${res.count} tiket pribadi Anda berhasil diunduh (CSV).`);
+    } catch {
+      toast.error('Gagal mengekspor berkas tiket.');
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const q = search.trim().toLowerCase();
 
@@ -111,6 +137,19 @@ export function UserTicketList({
             </button>
           )}
         </div>
+
+        {/* Personal CSV Export Button */}
+        <button
+          type="button"
+          onClick={handleExportPersonalCsv}
+          disabled={tickets.length === 0 || exporting}
+          className="inline-flex items-center gap-1.5 rounded border border-line bg-canvas px-3 py-1.5 text-xs font-medium text-ink hover:border-line-strong active:scale-95 disabled:opacity-40 transition-all shadow-2xs"
+          title="Ekspor seluruh daftar tiket pribadi saya ke berkas CSV"
+        >
+          <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-600" />
+          <span className="hidden sm:inline">Ekspor CSV Tiket Saya</span>
+          <span className="sm:hidden">CSV</span>
+        </button>
       </div>
 
       {/* Ticket List Cards */}
