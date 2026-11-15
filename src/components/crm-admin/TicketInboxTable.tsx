@@ -379,8 +379,8 @@ export function TicketInboxTable({
           </div>
 
           {/* Desktop Table View (hidden sm:block) */}
-          <div className="hidden sm:block overflow-x-auto">
-            <table className="w-full border-collapse text-left text-xs">
+          <div className="hidden sm:block overflow-x-auto p-1">
+            <table className="w-full border-collapse text-left text-xs table-hover-pill">
             <thead>
               <tr className="border-b border-line bg-subtle/70 text-[11px] font-semibold text-ink-muted">
                 <th className="py-2.5 pl-4 pr-2">{t('tickets.colTicket')}</th>
@@ -402,12 +402,12 @@ export function TicketInboxTable({
                   <tr
                     key={ticket.id}
                     onClick={() => onTicketClick(ticket.id)}
-                    className={`group cursor-pointer transition-colors ${
+                    className={`group cursor-pointer transition-colors duration-150 ease-ignara ${
                       isHighlighted
                         ? 'bg-ink/10 ring-1 ring-inset ring-ink/30'
                         : isOpen
                           ? 'bg-rose-500/[0.03] hover:bg-rose-500/[0.07]'
-                          : 'hover:bg-subtle/50'
+                          : 'hover:bg-subtle/60'
                     }`}
                   >
                     <td className="whitespace-nowrap py-3 pl-4 pr-2 font-mono font-semibold text-ink">

@@ -81,12 +81,13 @@ export function TicketPeekDrawer({ ticket, onClose }: TicketPeekDrawerProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-xs transition-opacity animate-fade-in">
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-xs transition-opacity animate-fade-in" onClick={onClose}>
       <div
-        className="w-full sm:w-[480px] bg-panel/95 backdrop-blur-xl border-l border-line/60 shadow-2xl flex flex-col h-full overflow-hidden animate-slide-left"
+        className="w-full sm:w-[500px] sm:m-2.5 sm:h-[calc(100vh-1.25rem)] sm:rounded-2xl bg-panel/95 backdrop-blur-xl border border-line/80 shadow-drawer flex flex-col h-full overflow-hidden animate-slide-left"
         role="dialog"
         aria-modal="true"
         aria-label={`Pratinjau Tiket ${ticket.ticketNumber}`}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-line/60 bg-canvas/40">

@@ -41,7 +41,7 @@ export function MemberPassportCard({ user, isOpen, onClose }: Props) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm rounded-3xl border border-line bg-panel p-6 shadow-2xl text-ink space-y-5"
+        className="w-full max-w-sm rounded-3xl border border-line bg-panel p-6 shadow-popover animate-scale-pop text-ink space-y-5"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header with Close */}

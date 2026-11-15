@@ -100,7 +100,7 @@ export function FloatingHelpdeskWidget({
     <div className="fixed bottom-5 right-5 z-50 select-none">
       {/* ═══ Expanded Widget Panel ═══ */}
       {isOpen && (
-        <div className="mb-3 w-[calc(100vw-2.5rem)] sm:w-96 rounded-2xl border border-line bg-panel shadow-2xl overflow-hidden flex flex-col max-h-[82vh] animate-fade-in text-ink">
+        <div className="mb-3 w-[calc(100vw-2.5rem)] sm:w-96 rounded-2xl border border-line bg-panel shadow-drawer overflow-hidden flex flex-col max-h-[82vh] animate-scale-pop origin-bottom-right text-ink">
           {/* Header */}
           <div
             className="p-4 text-white flex items-center justify-between"

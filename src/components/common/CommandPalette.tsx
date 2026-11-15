@@ -270,11 +270,11 @@ export function CommandPalette({ open, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 pt-16 sm:pt-24 backdrop-blur-xs transition-opacity"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 pt-16 sm:pt-24 backdrop-blur-xs transition-opacity animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-xl overflow-hidden rounded-xl border border-line bg-panel shadow-2xl transition-all"
+        className="w-full max-w-xl overflow-hidden rounded-2xl border border-line bg-panel shadow-popover animate-scale-pop origin-top transition-transform"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input Bar */}

@@ -51,7 +51,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {toasts.map((t) => (
           <div
             key={t.id}
-            className={`pointer-events-auto flex items-start gap-2.5 rounded-lg border p-3 shadow-lg transition-all animate-in fade-in slide-in-from-bottom-2 duration-150 ${
+            className={`pointer-events-auto flex items-start gap-2.5 rounded-xl border p-3.5 shadow-toast transition-all animate-toast-pop ${
               t.type === 'success'
                 ? 'border-emerald-700/50 bg-[#0F291E] text-emerald-100'
                 : t.type === 'error'
@@ -68,7 +68,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             <button
               type="button"
               onClick={() => removeToast(t.id)}
-              className="shrink-0 rounded p-0.5 text-neutral-400 hover:text-white active:scale-95 transition-transform"
+              className="shrink-0 rounded-lg p-1 text-neutral-400 hover:text-white hover:bg-white/10 active:scale-90 transition-all duration-150 ease-ignara"
               aria-label="Tutup notifikasi"
             >
               <X className="h-3.5 w-3.5" />

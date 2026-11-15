@@ -13,6 +13,12 @@
     --ink-muted-rgb: 71 85 105;
     --ink-faint-rgb: 148 163 184;
     --rail-rgb: 11 15 23;
+
+    /* Ignara Motion Variables */
+    --ease-ignara: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-exit: cubic-bezier(0.32, 0, 0.67, 0);
   }
 
   .dark {
@@ -73,7 +79,7 @@
     letter-spacing: -0.015em;
   }
 
-  /* Accessibility: Prefers Reduced Motion (Apple Design §14) */
+  /* Accessibility: Prefers Reduced Motion (Apple & Ignara Guidelines) */
   @media (prefers-reduced-motion: reduce) {
     *, ::before, ::after {
       animation-duration: 0.01ms !important;
@@ -85,12 +91,12 @@
 }
 
 @layer components {
-  /* Apple-inspired clean form field */
+  /* Apple & Ignara-inspired clean form field */
   .field {
-    @apply w-full rounded-lg border border-line bg-panel px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:border-ink focus:ring-2 focus:ring-ink/5 focus:outline-none transition-colors duration-150;
+    @apply w-full rounded-lg border border-line bg-panel px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:border-ink focus:ring-2 focus:ring-ink/5 focus:outline-none transition-colors duration-150 ease-out;
   }
 
-  /* Secondary tactile button with instant response */
+  /* Secondary tactile button with Ignara quintic glide response */
   .btn {
     @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-line bg-panel px-3 py-1.5 text-xs sm:text-sm font-medium text-ink shadow-xs hover:border-line-strong hover:bg-subtle active:scale-[0.98] transition-[color,background-color,border-color,transform] duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100;
   }
@@ -100,7 +106,7 @@
     @apply inline-flex items-center justify-center gap-1.5 rounded-lg bg-ink px-3 py-1.5 text-xs sm:text-sm font-medium text-white shadow-xs hover:bg-ink/90 active:scale-[0.98] transition-[color,background-color,opacity,transform] duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100;
   }
 
-  /* Elevated card panel */
+  /* Elevated card panel with multi-layer ambient shadow */
   .panel {
     @apply rounded-xl border border-line bg-panel shadow-card;
   }
@@ -109,11 +115,37 @@
   .badge {
     @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium tracking-tight;
   }
+
+  /* Ignara-style Floating Drawer Surface (Desktop 10px floating margin + rounded-2xl) */
+  .floating-drawer {
+    @apply sm:m-2.5 sm:h-[calc(100vh-1.25rem)] sm:rounded-2xl border border-line/80 bg-panel/95 shadow-drawer backdrop-blur-md;
+  }
+
+  /* Ignara Signature Table Row Pill-Hover Interaction */
+  .table-hover-pill tbody tr {
+    transition: background-color 140ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .table-hover-pill tbody tr:hover td {
+    background-color: rgb(var(--subtle-rgb) / 0.7);
+  }
+  .table-hover-pill tbody tr:hover td:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+  }
+  .table-hover-pill tbody tr:hover td:last-child {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+  }
 }
 
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Ignara Hairline Inset Bevel */
+  .border-hairline {
+    box-shadow: inset 0 0 0 1px rgb(var(--line-rgb) / 0.8);
+  }
 
   /* Hardware-friendly: skips layout & painting of off-screen list items */
   .content-auto {

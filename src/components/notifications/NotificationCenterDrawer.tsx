@@ -78,12 +78,12 @@ export function NotificationCenterDrawer({ open, onClose }: NotificationCenterDr
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-xs transition-opacity">
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-xs transition-opacity animate-fade-in">
       {/* Backdrop click to close */}
       <div className="flex-1" onClick={onClose} />
 
       {/* Drawer Panel */}
-      <div className="w-full max-w-md bg-panel border-l border-line h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-200">
+      <div className="w-full max-w-md sm:m-2.5 sm:h-[calc(100vh-1.25rem)] sm:rounded-2xl bg-panel/95 backdrop-blur-xl border border-line/80 h-full flex flex-col shadow-drawer animate-slide-left">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-line px-5 py-4">
           <div className="flex items-center gap-2.5">
