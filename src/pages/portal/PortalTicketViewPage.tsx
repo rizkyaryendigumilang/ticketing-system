@@ -367,6 +367,17 @@ export function PortalTicketViewPage() {
               ? 'Kirim balasan untuk membuka kembali tiket'
               : 'Tulis Balasan'}
           </label>
+          <span
+            className={`text-[10px] tabular-nums font-mono ${
+              replyBody.length >= 3800
+                ? 'font-bold text-rose-600 dark:text-rose-400'
+                : replyBody.length >= 3200
+                ? 'font-medium text-amber-600 dark:text-amber-400'
+                : 'text-ink-muted'
+            }`}
+          >
+            {replyBody.length}/4000
+          </span>
         </div>
 
         <div className="overflow-hidden rounded-xl border border-line focus-within:border-ink transition-colors">
@@ -379,6 +390,7 @@ export function PortalTicketViewPage() {
             ref={textareaRef}
             id="portal-reply"
             rows={3}
+            maxLength={4000}
             value={replyBody}
             onChange={(e) => setReplyBody(e.target.value)}
             onKeyDown={handleKeyDown}

@@ -785,6 +785,7 @@ export function TicketWorkspace3Col({
               <textarea
                 ref={textareaRef}
                 rows={4}
+                maxLength={20000}
                 value={body}
                 onChange={handleBodyChange}
                 onKeyDown={handleKeyDown}
@@ -819,6 +820,18 @@ export function TicketWorkspace3Col({
               </button>
               <span className="hidden text-[10px] text-ink-faint sm:inline">
                 (Ctrl+Enter)
+              </span>
+              <span
+                className={`ml-1 text-[10px] tabular-nums font-mono ${
+                  body.length >= 19000
+                    ? 'font-bold text-rose-600 dark:text-rose-400'
+                    : body.length >= 16000
+                    ? 'font-medium text-amber-600 dark:text-amber-400'
+                    : 'text-ink-muted'
+                }`}
+                title="Jumlah karakter tersisa untuk balasan"
+              >
+                {body.length}/20000
               </span>
             </div>
 

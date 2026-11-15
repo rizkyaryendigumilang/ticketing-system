@@ -202,16 +202,30 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
 
       {/* Subject */}
       <div>
-        <label
-          htmlFor="portal-subject"
-          className="block text-xs font-semibold text-ink"
-        >
-          Judul Kendala
-        </label>
+        <div className="flex items-center justify-between">
+          <label
+            htmlFor="portal-subject"
+            className="block text-xs font-semibold text-ink"
+          >
+            Judul Kendala
+          </label>
+          <span
+            className={`text-[10px] tabular-nums font-mono ${
+              subject.length >= 190
+                ? 'font-bold text-rose-600 dark:text-rose-400'
+                : subject.length >= 160
+                ? 'font-medium text-amber-600 dark:text-amber-400'
+                : 'text-ink-muted'
+            }`}
+          >
+            {subject.length}/200
+          </span>
+        </div>
         <input
           id="portal-subject"
           type="text"
           required
+          maxLength={200}
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
           placeholder="Contoh: Tombol Simpan di halaman Rekap Harian tidak merespons"
@@ -278,16 +292,30 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
 
       {/* Description */}
       <div>
-        <label
-          htmlFor="portal-description"
-          className="block text-xs font-semibold text-ink"
-        >
-          Penjelasan Kendala
-        </label>
+        <div className="flex items-center justify-between">
+          <label
+            htmlFor="portal-description"
+            className="block text-xs font-semibold text-ink"
+          >
+            Penjelasan Kendala
+          </label>
+          <span
+            className={`text-[10px] tabular-nums font-mono ${
+              description.length >= 3800
+                ? 'font-bold text-rose-600 dark:text-rose-400'
+                : description.length >= 3200
+                ? 'font-medium text-amber-600 dark:text-amber-400'
+                : 'text-ink-muted'
+            }`}
+          >
+            {description.length}/4000
+          </span>
+        </div>
         <textarea
           id="portal-description"
           rows={5}
           required
+          maxLength={4000}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Jelaskan kendala yang dialami, langkah yang sudah dicoba, dan pesan kesalahan yang muncul..."

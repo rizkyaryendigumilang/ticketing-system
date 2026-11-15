@@ -152,37 +152,89 @@ export function UserTicketList({
         </button>
       </div>
 
+      {/* Active Filter Chips Bar */}
+      {(filter !== 'all' || search.trim() !== '') && (
+        <div className="flex flex-wrap items-center gap-1.5 px-1 text-xs">
+          <span className="text-[11px] font-medium text-ink-muted">Filter Aktif:</span>
+
+          {search.trim() !== '' && (
+            <span className="inline-flex items-center gap-1 rounded-full border border-line bg-panel px-2.5 py-0.5 text-[11px] font-medium text-ink shadow-xs">
+              <span className="text-ink-muted">Pencarian:</span> "{search.trim()}"
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                className="ml-0.5 rounded-full p-0.5 text-ink-muted hover:bg-subtle hover:text-ink transition-colors"
+                title="Hapus pencarian"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          )}
+
+          {filter !== 'all' && (
+            <span className="inline-flex items-center gap-1 rounded-full border border-line bg-panel px-2.5 py-0.5 text-[11px] font-medium text-ink shadow-xs">
+              <span className="text-ink-muted">Status:</span>{' '}
+              {filter === 'active' ? t('dash.inProgress') : t('status.solved')}
+              <button
+                type="button"
+                onClick={() => setFilter('all')}
+                className="ml-0.5 rounded-full p-0.5 text-ink-muted hover:bg-subtle hover:text-ink transition-colors"
+                title="Tampilkan semua status"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          )}
+
+          <button
+            type="button"
+            onClick={() => {
+              setFilter('all');
+              setSearch('');
+            }}
+            className="ml-auto text-[11px] font-medium text-rose-600 hover:text-rose-700 underline"
+          >
+            Reset Semua Filter
+          </button>
+        </div>
+      )}
+
       {/* Ticket List Cards */}
       {visible.length === 0 ? (
         <div className="rounded-2xl border border-line bg-panel px-6 py-12 text-center shadow-card">
           <p className="text-sm font-semibold text-ink">
-            {search
-              ? 'Tidak ada tiket yang cocok dengan kata kunci pencarian.'
+            {search || filter !== 'all'
+              ? 'Tidak ada tiket yang cocok dengan filter aktif.'
               : 'Belum ada tiket laporan pada kategori ini.'}
           </p>
           <p className="mt-1 text-xs text-ink-muted">
-            {search
+            {search || filter !== 'all'
               ? 'Coba ganti kata kunci atau bersihkan filter pencarian.'
               : 'Ada kendala di aplikasi? Buat laporan tiket baru agar tim support dapat segera mengecek dan membantu penyelesaiannya.'}
           </p>
-          {search ? (
-            <button
-              type="button"
-              onClick={() => setSearch('')}
-              className="mt-3 btn px-3 py-1.5 text-xs font-medium"
-            >
-              Reset Pencarian
-            </button>
-          ) : (
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+            {(search || filter !== 'all') && (
+              <button
+                type="button"
+                onClick={() => {
+                  setFilter('all');
+                  setSearch('');
+                }}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel px-3.5 py-1.5 text-xs font-semibold text-ink shadow-xs hover:bg-subtle transition-all"
+              >
+                <X className="h-3 w-3" />
+                Reset Filter
+              </button>
+            )}
             <button
               type="button"
               onClick={onCreateNew}
-              className="mt-4 btn-primary px-4 py-2 text-xs font-semibold"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-4 py-2 text-xs font-semibold text-white shadow-xs hover:opacity-90 active:scale-95 transition-all"
             >
               <Plus className="h-3.5 w-3.5" />
               Buat Tiket Laporan Baru
             </button>
-          )}
+          </div>
         </div>
       ) : (
         <div className="divide-y divide-line/70 rounded-2xl border border-line bg-panel shadow-card overflow-hidden">

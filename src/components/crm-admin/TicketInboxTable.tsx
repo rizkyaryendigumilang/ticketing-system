@@ -134,13 +134,15 @@ export function TicketInboxTable({
     selectedApp !== 'all' ||
     selectedStatus !== 'all' ||
     selectedPriority !== 'all' ||
-    searchQuery.trim() !== '';
+    searchQuery.trim() !== '' ||
+    Boolean(assignedFilter && assignedFilter !== 'all');
 
   const resetFilters = () => {
     onAppChange('all');
     onStatusChange('all');
     onPriorityChange('all');
     onSearchChange('');
+    if (onAssignedFilterChange) onAssignedFilterChange('all');
   };
 
   return (
@@ -298,6 +300,99 @@ export function TicketInboxTable({
           </div>
         </div>
       </div>
+
+      {/* Active Filter Chips Bar */}
+      {hasActiveFilter && (
+        <div className="flex flex-wrap items-center gap-1.5 border-b border-line bg-subtle/30 px-3 py-2 text-xs">
+          <span className="text-[11px] font-medium text-ink-muted">Filter Aktif:</span>
+
+          {searchQuery.trim() !== '' && (
+            <span className="inline-flex items-center gap-1 rounded-full border border-line bg-panel px-2.5 py-0.5 text-[11px] font-medium text-ink shadow-xs">
+              <span className="text-ink-muted">Cari:</span> "{searchQuery.trim()}"
+              <button
+                type="button"
+                onClick={() => onSearchChange('')}
+                className="ml-0.5 rounded-full p-0.5 text-ink-muted hover:bg-subtle hover:text-ink transition-colors"
+                title="Hapus filter pencarian"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          )}
+
+          {selectedApp !== 'all' && (
+            <span className="inline-flex items-center gap-1 rounded-full border border-line bg-panel px-2.5 py-0.5 text-[11px] font-medium text-ink shadow-xs">
+              <span className="text-ink-muted">Aplikasi:</span>{' '}
+              {VPS_APPS.find((a) => a.id === selectedApp)?.name ?? selectedApp}
+              <button
+                type="button"
+                onClick={() => onAppChange('all')}
+                className="ml-0.5 rounded-full p-0.5 text-ink-muted hover:bg-subtle hover:text-ink transition-colors"
+                title="Hapus filter aplikasi"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          )}
+
+          {selectedStatus !== 'all' && (
+            <span className="inline-flex items-center gap-1 rounded-full border border-line bg-panel px-2.5 py-0.5 text-[11px] font-medium text-ink shadow-xs">
+              <span className="text-ink-muted">Status:</span>{' '}
+              {selectedStatus === 'active'
+                ? t('tickets.filterActiveOnly')
+                : statusLabel(selectedStatus)}
+              <button
+                type="button"
+                onClick={() => onStatusChange('all')}
+                className="ml-0.5 rounded-full p-0.5 text-ink-muted hover:bg-subtle hover:text-ink transition-colors"
+                title="Hapus filter status"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          )}
+
+          {selectedPriority !== 'all' && (
+            <span className="inline-flex items-center gap-1 rounded-full border border-line bg-panel px-2.5 py-0.5 text-[11px] font-medium text-ink shadow-xs">
+              <span className="text-ink-muted">Prioritas:</span>{' '}
+              {priorityLabel(selectedPriority)}
+              <button
+                type="button"
+                onClick={() => onPriorityChange('all')}
+                className="ml-0.5 rounded-full p-0.5 text-ink-muted hover:bg-subtle hover:text-ink transition-colors"
+                title="Hapus filter prioritas"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          )}
+
+          {assignedFilter && assignedFilter !== 'all' && onAssignedFilterChange && (
+            <span className="inline-flex items-center gap-1 rounded-full border border-line bg-panel px-2.5 py-0.5 text-[11px] font-medium text-ink shadow-xs">
+              <span className="text-ink-muted">Penugasan:</span>{' '}
+              {assignedFilter === 'me'
+                ? 'Ditugaskan ke Saya'
+                : 'Belum Ditugaskan'}
+              <button
+                type="button"
+                onClick={() => onAssignedFilterChange('all')}
+                className="ml-0.5 rounded-full p-0.5 text-ink-muted hover:bg-subtle hover:text-ink transition-colors"
+                title="Hapus filter penugasan"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          )}
+
+          <button
+            type="button"
+            onClick={resetFilters}
+            className="ml-auto text-[11px] font-medium text-rose-600 hover:text-rose-700 underline"
+          >
+            Reset Semua Filter
+          </button>
+        </div>
+      )}
 
       {/* Table */}
       {filtered.length === 0 ? (

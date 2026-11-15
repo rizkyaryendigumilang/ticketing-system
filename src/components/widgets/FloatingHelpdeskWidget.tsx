@@ -215,12 +215,26 @@ export function FloatingHelpdeskWidget({
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-semibold text-ink-muted mb-1">
-                        Subjek Kendala
-                      </label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-[11px] font-semibold text-ink-muted">
+                          Subjek Kendala
+                        </label>
+                        <span
+                          className={`text-[10px] tabular-nums font-mono ${
+                            subject.length >= 190
+                              ? 'text-rose-600 font-bold'
+                              : subject.length >= 160
+                              ? 'text-amber-600 font-medium'
+                              : 'text-ink-muted'
+                          }`}
+                        >
+                          {subject.length}/200
+                        </span>
+                      </div>
                       <input
                         type="text"
                         required
+                        maxLength={200}
                         value={subject}
                         onChange={(e) => setSubject(e.target.value)}
                         placeholder="Contoh: Gagal cetak struk pembayaran"
@@ -229,12 +243,26 @@ export function FloatingHelpdeskWidget({
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-semibold text-ink-muted mb-1">
-                        Rincian Masalah
-                      </label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-[11px] font-semibold text-ink-muted">
+                          Rincian Masalah
+                        </label>
+                        <span
+                          className={`text-[10px] tabular-nums font-mono ${
+                            description.length >= 3800
+                              ? 'text-rose-600 font-bold'
+                              : description.length >= 3200
+                              ? 'text-amber-600 font-medium'
+                              : 'text-ink-muted'
+                          }`}
+                        >
+                          {description.length}/4000
+                        </span>
+                      </div>
                       <textarea
                         rows={3}
                         required
+                        maxLength={4000}
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="Jelaskan apa yang terjadi dan pesan error yang muncul..."
