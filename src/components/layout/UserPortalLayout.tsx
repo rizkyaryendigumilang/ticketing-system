@@ -1,12 +1,15 @@
 import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ExternalLink, Globe, LogOut, Plus, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Globe, LogOut, Plus, QrCode, ShieldCheck } from 'lucide-react';
+import { useState } from 'react';
 import { getApp } from '../../config/vpsAppsConfig';
 import { useCrm } from '../../context/CrmContext';
 import { BroadcastBannerWidget } from '../widgets/BroadcastBannerWidget';
+import { MemberPassportCard } from '../user-portal/MemberPassportCard';
 
 export function UserPortalLayout() {
   const { data, admin, requester, logoutRequester, t, lang, setLanguage } = useCrm();
   const navigate = useNavigate();
+  const [passportOpen, setPassportOpen] = useState(false);
 
   const app = getApp(requester?.appId);
   const returnUrl = requester?.lastSeenUrl ?? app?.appUrl;
@@ -82,6 +85,18 @@ export function UserPortalLayout() {
               <span className="font-mono text-[10px] uppercase font-bold text-ink">{lang}</span>
             </button>
 
+            {requester && (
+              <button
+                type="button"
+                onClick={() => setPassportOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel px-2.5 py-1 text-xs font-medium text-ink shadow-2xs hover:bg-subtle hover:border-line-strong active:scale-95 transition-all"
+                title="Tampilkan Kartu Identitas Digital Pelapor"
+              >
+                <QrCode className="h-3.5 w-3.5 text-ink-muted" />
+                <span className="hidden sm:inline">Kartu ID</span>
+              </button>
+            )}
+
             {admin && (
               <Link
                 to="/admin"
@@ -142,6 +157,14 @@ export function UserPortalLayout() {
       <main className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
         <Outlet />
       </main>
+
+      {requester && (
+        <MemberPassportCard
+          user={requester}
+          isOpen={passportOpen}
+          onClose={() => setPassportOpen(false)}
+        />
+      )}
     </div>
   );
 }
