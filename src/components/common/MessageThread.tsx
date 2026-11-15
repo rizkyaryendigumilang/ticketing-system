@@ -21,12 +21,12 @@ export function MessageThread({ messages, selfId, emptyText }: Props) {
     <ol className="divide-y divide-line">
       {messages.map((m) =>
         m.senderRole === 'system' ? (
-          <li key={m.id} className="flex justify-between gap-4 px-5 py-2 text-xs text-ink-muted">
+          <li key={m.id} className="content-auto-sm flex justify-between gap-4 px-5 py-2 text-xs text-ink-muted">
             <span>{m.body}</span>
             <time dateTime={m.createdAt}>{timeAgo(m.createdAt)}</time>
           </li>
         ) : (
-          <li key={m.id} className={`px-5 py-4 ${m.isInternalNote ? 'bg-amber-50' : ''}`}>
+          <li key={m.id} className={`content-auto-sm px-5 py-4 ${m.isInternalNote ? 'bg-amber-50' : ''}`}>
             <div className="flex items-baseline justify-between gap-4">
               <p className="text-sm">
                 <span className="font-semibold">{m.senderId === selfId ? 'Anda' : m.senderName}</span>

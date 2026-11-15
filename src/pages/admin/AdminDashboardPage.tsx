@@ -190,7 +190,7 @@ export function AdminDashboardPage() {
       {/* ═══ Informative KPI Metrics Strip ═══ */}
       <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-6">
         {/* 1. Total Inflow */}
-        <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-all duration-150">
+        <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-colors duration-150">
           <div className="flex items-center justify-between text-xs text-ink-muted">
             <span className="font-medium">{t('dash.totalTickets')}</span>
             <TrendingUp className="h-4 w-4 text-blue-600" />
@@ -204,7 +204,7 @@ export function AdminDashboardPage() {
         </div>
 
         {/* 2. Active Backlog */}
-        <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-all duration-150">
+        <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-colors duration-150">
           <div className="flex items-center justify-between text-xs text-ink-muted">
             <span className="font-medium">{t('dash.activeBacklog')}</span>
             <Clock className="h-4 w-4 text-amber-600" />
@@ -218,7 +218,7 @@ export function AdminDashboardPage() {
         </div>
 
         {/* 3. Resolution Rate */}
-        <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-all duration-150">
+        <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-colors duration-150">
           <div className="flex items-center justify-between text-xs text-ink-muted">
             <span className="font-medium">{t('dash.resolutionRate')}</span>
             <CheckCircle2 className="h-4 w-4 text-emerald-600" />
@@ -232,7 +232,7 @@ export function AdminDashboardPage() {
         </div>
 
         {/* 4. MTTR */}
-        <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-all duration-150">
+        <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-colors duration-150">
           <div className="text-xs font-medium text-ink-muted">{t('dash.avgResolutionTime')}</div>
           <div className="mt-2 text-2xl font-bold tracking-tight text-ink tabular-nums">
             {metrics.avgResolutionMs > 0 ? formatDuration(metrics.avgResolutionMs) : '—'}
@@ -243,7 +243,7 @@ export function AdminDashboardPage() {
         </div>
 
         {/* 5. CSAT */}
-        <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-all duration-150">
+        <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-colors duration-150">
           <div className="flex items-center justify-between text-xs text-ink-muted">
             <span className="font-medium">{t('dash.csat')}</span>
             <Star className="h-4 w-4 fill-amber-400 text-amber-500" />
@@ -257,7 +257,7 @@ export function AdminDashboardPage() {
         </div>
 
         {/* 6. Critical & Urgent Alert */}
-        <div className={`rounded-xl border p-4 shadow-card transition-all duration-150 ${
+        <div className={`rounded-xl border p-4 shadow-card transition-colors duration-150 ${
           metrics.urgentOpenCount > 0
             ? 'border-rose-500/30 bg-rose-500/[0.04]'
             : 'border-line bg-panel hover:border-line-strong'

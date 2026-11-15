@@ -87,17 +87,17 @@
 @layer components {
   /* Apple-inspired clean form field */
   .field {
-    @apply w-full rounded-lg border border-line bg-panel px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:border-ink focus:ring-2 focus:ring-ink/5 focus:outline-none transition-all duration-150;
+    @apply w-full rounded-lg border border-line bg-panel px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:border-ink focus:ring-2 focus:ring-ink/5 focus:outline-none transition-colors duration-150;
   }
 
   /* Secondary tactile button with instant response */
   .btn {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-line bg-panel px-3 py-1.5 text-xs sm:text-sm font-medium text-ink shadow-xs hover:border-line-strong hover:bg-subtle active:scale-[0.98] transition-all duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-line bg-panel px-3 py-1.5 text-xs sm:text-sm font-medium text-ink shadow-xs hover:border-line-strong hover:bg-subtle active:scale-[0.98] transition-[color,background-color,border-color,transform] duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100;
   }
 
   /* Primary solid button */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-lg bg-ink px-3 py-1.5 text-xs sm:text-sm font-medium text-white shadow-xs hover:bg-ink/90 active:scale-[0.98] transition-all duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg bg-ink px-3 py-1.5 text-xs sm:text-sm font-medium text-white shadow-xs hover:bg-ink/90 active:scale-[0.98] transition-[color,background-color,opacity,transform] duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100;
   }
 
   /* Elevated card panel */
@@ -119,6 +119,10 @@
   .content-auto {
     content-visibility: auto;
     contain-intrinsic-size: auto 120px;
+  }
+  .content-auto-sm {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 60px;
   }
 
   /* Safe area insets for notched phones & gestures */

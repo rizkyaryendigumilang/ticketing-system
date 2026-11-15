@@ -67,15 +67,24 @@ export async function compressImage(
   ctx.fillRect(0, 0, width, height);
   ctx.drawImage(img, 0, 0, width, height);
 
+  let result = '';
   // Try WebP first, fallback to JPEG
   try {
     const webp = canvas.toDataURL('image/webp', quality);
     if (webp.startsWith('data:image/webp')) {
-      return webp;
+      result = webp;
     }
   } catch {
     // Ignore and fallback to JPEG
   }
 
-  return canvas.toDataURL('image/jpeg', quality);
+  if (!result) {
+    result = canvas.toDataURL('image/jpeg', quality);
+  }
+
+  // Hardware efficiency: explicitly clear canvas dimensions to release GPU backing texture immediately
+  canvas.width = 0;
+  canvas.height = 0;
+
+  return result;
 }

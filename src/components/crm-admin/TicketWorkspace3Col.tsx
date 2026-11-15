@@ -100,13 +100,17 @@ export function TicketWorkspace3Col({
   const [slashQuery, setSlashQuery] = useState('');
   const [slashIndex, setSlashIndex] = useState(0);
 
+  // Track typing state via ref to prevent tearing down & recreating presence interval and localStorage writes on every keystroke
+  const isTypingRef = useRef(false);
+  isTypingRef.current = body.trim().length > 0;
+
   // Heartbeat presence: broadcasts every 4s and unmounts cleanly
   useEffect(() => {
-    pingPresence(ticket.id, adminActor, false);
+    pingPresence(ticket.id, adminActor, isTypingRef.current);
     setOtherViewers(getTicketViewers(ticket.id, adminActor.id));
 
     const interval = setInterval(() => {
-      pingPresence(ticket.id, adminActor, body.trim().length > 0);
+      pingPresence(ticket.id, adminActor, isTypingRef.current);
       setOtherViewers(getTicketViewers(ticket.id, adminActor.id));
     }, 4000);
 
@@ -119,7 +123,7 @@ export function TicketWorkspace3Col({
       unsubscribe();
       leavePresence(ticket.id, adminActor.id);
     };
-  }, [ticket.id, adminActor, body]);
+  }, [ticket.id, adminActor.id]);
 
   // Global keyboard shortcut 'r' to focus reply composer
   useEffect(() => {

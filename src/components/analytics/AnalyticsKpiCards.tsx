@@ -21,7 +21,7 @@ export function AnalyticsKpiCards({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
       {/* 1. Total Volume */}
-      <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-all duration-150">
+      <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-colors duration-150">
         <div className="flex items-center justify-between text-xs font-medium text-ink-muted">
           <span>Volume Tiket Masuk</span>
           <Activity className="h-4 w-4 text-ink-muted" />
@@ -40,7 +40,7 @@ export function AnalyticsKpiCards({
       </div>
 
       {/* 2. SLA Compliance */}
-      <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-all duration-150">
+      <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-colors duration-150">
         <div className="flex items-center justify-between text-xs font-medium text-ink-muted">
           <span>Kepatuhan Target SLA</span>
           <CheckCircle2 className="h-4 w-4 text-emerald-600" />
@@ -65,7 +65,7 @@ export function AnalyticsKpiCards({
       </div>
 
       {/* 3. Resolution Velocity */}
-      <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-all duration-150">
+      <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-colors duration-150">
         <div className="flex items-center justify-between text-xs font-medium text-ink-muted">
           <span>Kecepatan Penyelesaian</span>
           <Clock className="h-4 w-4 text-blue-600" />
@@ -82,7 +82,7 @@ export function AnalyticsKpiCards({
       </div>
 
       {/* 4. CSAT Customer Satisfaction */}
-      <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-all duration-150">
+      <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-colors duration-150">
         <div className="flex items-center justify-between text-xs font-medium text-ink-muted">
           <span>Kepuasan Pelapor (CSAT)</span>
           <Star className="h-4 w-4 text-amber-500 fill-amber-500" />

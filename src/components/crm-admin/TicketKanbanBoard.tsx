@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { STATUS_LABEL } from '../../config/vpsAppsConfig';
 import { timeAgo } from '../../services/crmLogic';
@@ -27,6 +27,23 @@ export function TicketKanbanBoard({
 }: Props) {
   const [dragOverCol, setDragOverCol] = useState<TicketStatus | null>(null);
 
+  // Group tickets in a single O(n) pass instead of repeated array filters per column
+  const groupedTickets = useMemo(() => {
+    const map: Record<TicketStatus, Ticket[]> = {
+      open: [],
+      in_progress: [],
+      waiting_on_user: [],
+      solved: [],
+      closed: [],
+    };
+    for (const t of tickets) {
+      if (map[t.status]) {
+        map[t.status].push(t);
+      }
+    }
+    return map;
+  }, [tickets]);
+
   const handleDragStart = (e: React.DragEvent, ticketId: string) => {
     e.dataTransfer.setData('text/plain', ticketId);
   };
@@ -43,7 +60,7 @@ export function TicketKanbanBoard({
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
       {COLUMNS.map((col) => {
-        const items = tickets.filter((t) => t.status === col.status);
+        const items = groupedTickets[col.status] || [];
         const isOver = dragOverCol === col.status;
 
         return (
@@ -55,7 +72,7 @@ export function TicketKanbanBoard({
             }}
             onDragLeave={() => setDragOverCol(null)}
             onDrop={(e) => handleDrop(e, col.status)}
-            className={`flex min-h-[480px] flex-col rounded-2xl border bg-subtle/30 transition-all duration-150 shadow-xs overflow-hidden ${
+            className={`flex min-h-[480px] flex-col rounded-2xl border bg-subtle/30 transition-colors duration-150 shadow-xs overflow-hidden ${
               isOver ? 'border-ink bg-subtle' : 'border-line'
             }`}
           >
@@ -82,7 +99,7 @@ export function TicketKanbanBoard({
                     draggable
                     onDragStart={(e) => handleDragStart(e, ticket.id)}
                     onClick={() => onTicketClick(ticket.id)}
-                    className="cursor-grab rounded-xl border border-line bg-panel p-3.5 shadow-card transition-all duration-150 hover:border-line-strong hover:shadow-md active:cursor-grabbing active:scale-[0.98]"
+                    className="content-auto cursor-grab rounded-xl border border-line bg-panel p-3.5 shadow-card transition-[border-color,box-shadow,transform] duration-150 hover:border-line-strong hover:shadow-md active:cursor-grabbing active:scale-[0.98]"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-mono text-xs font-semibold text-ink">
