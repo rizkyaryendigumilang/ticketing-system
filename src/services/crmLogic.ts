@@ -109,6 +109,15 @@ export function handoffPath(p: HandoffParams, openForm = false): string {
   return `/handoff?${q}`;
 }
 
+export function constantTimeCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
 /** Next number after the highest existing one for this prefix, so deleted tickets never cause reuse. */
 export function nextTicketNumber(prefix: string, existing: string[]): string {
   let max = 0;
@@ -497,7 +506,7 @@ export async function verifyHandoffSignature(
   }
 
   const expectedSig = await createHandoffSignature(app, uid, ts, secret);
-  if (sig.toLowerCase() !== expectedSig.toLowerCase()) {
+  if (!constantTimeCompare(sig.toLowerCase(), expectedSig.toLowerCase())) {
     return { valid: false, reason: 'Tanda tangan digital sig tidak valid (mismatch).' };
   }
 

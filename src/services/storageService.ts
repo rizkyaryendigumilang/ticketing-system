@@ -6,6 +6,7 @@ import type { AppSource, CannedResponse, CrmUser, Ticket, TicketMessage } from '
 export interface SystemSettings {
   handoffSecret: string;
   handoffExpiryMinutes: number;
+  enforceHandoffSignatures?: boolean;
   allowedOrigins: string[];
   telegramEnabled: boolean;
   telegramBotToken: string;

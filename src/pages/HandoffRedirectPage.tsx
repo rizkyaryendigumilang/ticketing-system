@@ -65,7 +65,13 @@ export function HandoffRedirectPage() {
     };
 
     const sig = searchParams.get('sig');
-    if (sig) {
+    const enforceSig = Boolean(settings?.enforceHandoffSignatures);
+
+    if (sig || enforceSig) {
+      if (!sig) {
+        setError('Keamanan handoff aktif: tautan bantuan wajib menyertakan tanda tangan digital (sig).');
+        return;
+      }
       const secret = settings?.handoffSecret || import.meta.env.VITE_HANDOFF_SECRET || 'vps-helpdesk-secret-key';
       verifyHandoffSignature(searchParams, secret).then((check) => {
         if (!check.valid) {

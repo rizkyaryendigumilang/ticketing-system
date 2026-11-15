@@ -23,6 +23,7 @@ import {
   type SystemSettings,
 } from '../services/storageService';
 import { useToast } from './ToastContext';
+import { escapeHtml } from '../services/sanitizer';
 const ADMIN_SENDER_ID = 'system:admin';
 import { runSlaAutomation } from '../services/slaEscalationService';
 import type { Actor } from '../services/ticketCrmService';
@@ -125,12 +126,12 @@ export function CrmProvider({ children }: { children: React.ReactNode }) {
         if (settings.telegramEnabled && settings.telegramBotToken && settings.telegramChatId) {
           const isUrgent = fresh.priority === 'urgent' || fresh.priority === 'high';
           if (!settings.notifyOnUrgentOnly || isUrgent) {
-            const text = `🚨 <b>TIKET BARU #${fresh.ticketNumber}</b>\n` +
-              `📱 <b>Aplikasi:</b> ${appName}\n` +
-              `👤 <b>Pelapor:</b> ${fresh.requesterName} (${fresh.requesterUid})\n` +
-              `⚡ <b>Prioritas:</b> ${fresh.priority.toUpperCase()}\n` +
-              `📝 <b>Subjek:</b> ${fresh.subject}\n` +
-              `🔗 <a href="https://43.156.236.102/helpdesk/admin/tickets/${fresh.id}">Buka Meja Kerja CRM</a>`;
+            const text = `🚨 <b>TIKET BARU #${escapeHtml(fresh.ticketNumber)}</b>\n` +
+              `📱 <b>Aplikasi:</b> ${escapeHtml(appName)}\n` +
+              `👤 <b>Pelapor:</b> ${escapeHtml(fresh.requesterName)} (${escapeHtml(fresh.requesterUid)})\n` +
+              `⚡ <b>Prioritas:</b> ${escapeHtml(fresh.priority.toUpperCase())}\n` +
+              `📝 <b>Subjek:</b> ${escapeHtml(fresh.subject)}\n` +
+              `🔗 <a href="https://43.156.236.102/helpdesk/admin/tickets/${escapeHtml(fresh.id)}">Buka Meja Kerja CRM</a>`;
             void fetch(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },

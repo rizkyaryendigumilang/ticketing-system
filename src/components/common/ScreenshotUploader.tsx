@@ -13,9 +13,12 @@ const ALLOWED_MIME = [
 
 const isValidFile = (file: File) => {
   if (file.size > 5 * 1024 * 1024) return false; // 5MB limit
+  // Strictly block SVG and HTML vectors to eliminate stored XSS exploits
+  if (file.type === 'image/svg+xml' || file.type.includes('xml') || file.type.includes('html')) return false;
+  const name = file.name.toLowerCase();
+  if (name.endsWith('.svg') || name.endsWith('.html') || name.endsWith('.htm')) return false;
   if (file.type.startsWith('image/')) return true;
   if (ALLOWED_MIME.includes(file.type)) return true;
-  const name = file.name.toLowerCase();
   return name.endsWith('.log') || name.endsWith('.txt') || name.endsWith('.json') || name.endsWith('.pdf');
 };
 

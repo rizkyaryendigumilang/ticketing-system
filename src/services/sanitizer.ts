@@ -23,15 +23,18 @@ export function escapeHtml(str: string): string {
 export function safeHttpUrl(url: string | null | undefined): string | null {
   if (!url || typeof url !== 'string') return null;
   const trimmed = stripControlCharacters(url.trim());
+  if (trimmed.length > 2048) return null;
+  if (trimmed.includes('\\')) return null;
   try {
     const parsed = new URL(trimmed);
+    if (parsed.username || parsed.password) return null;
     if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
       return parsed.toString();
     }
     return null;
   } catch {
-    // Relative safe paths
-    if (trimmed.startsWith('/') && !trimmed.startsWith('//')) {
+    // Relative safe paths: must start with / and not // or /\
+    if (trimmed.startsWith('/') && !trimmed.startsWith('//') && !trimmed.startsWith('/\\')) {
       return trimmed;
     }
     return null;

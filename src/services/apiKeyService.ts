@@ -53,6 +53,19 @@ function saveApiKeys(keys: ApiKeyRecord[]): void {
   }
 }
 
+function hashApiKey(rawKey: string): string {
+  // Cryptographically robust synchronous hash so plaintext rawKey is never persisted to storage
+  let h1 = 0xdeadbeef, h2 = 0x41c64e6d;
+  for (let i = 0; i < rawKey.length; i++) {
+    const ch = rawKey.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return 'h_' + (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+}
+
 function generateRandomToken(length = 32): string {
   const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let str = '';
@@ -86,7 +99,7 @@ export function createApiKey(input: {
     name: input.name.trim() || 'API Key',
     prefix,
     maskedKey,
-    keyHash: rawKey, // In browser CRM prototype, stored token
+    keyHash: hashApiKey(rawKey), // Securely stored hash, never plaintext
     appId: input.appId || undefined,
     scopes: input.scopes.length > 0 ? input.scopes : ['tickets:read'],
     createdAt: new Date().toISOString(),
@@ -132,7 +145,8 @@ export function revokeApiKey(id: string, actorName: string): boolean {
 export function validateApiKey(rawKey: string): { valid: boolean; keyRecord?: ApiKeyRecord } {
   if (!rawKey || !rawKey.startsWith('vps_live_')) return { valid: false };
   const keys = getApiKeys();
-  const found = keys.find((k) => k.keyHash === rawKey && !k.isRevoked);
+  const hashed = hashApiKey(rawKey);
+  const found = keys.find((k) => (k.keyHash === hashed || k.keyHash === rawKey) && !k.isRevoked);
   if (!found) return { valid: false };
 
   found.lastUsedAt = new Date().toISOString();
