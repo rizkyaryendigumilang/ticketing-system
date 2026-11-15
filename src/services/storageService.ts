@@ -22,6 +22,10 @@ export interface SystemSettings {
   uiDensity: 'comfortable' | 'compact';
   defaultView: 'dashboard' | 'tickets';
   theme: 'light' | 'dark' | 'system';
+  maintenanceNoticeEnabled?: boolean;
+  maintenanceNoticeTitle?: string;
+  maintenanceNoticeMessage?: string;
+  maintenanceNoticeAppId?: string;
 }
 
 export const DEFAULT_SETTINGS: SystemSettings = {
@@ -43,6 +47,10 @@ export const DEFAULT_SETTINGS: SystemSettings = {
   uiDensity: 'comfortable',
   defaultView: 'dashboard',
   theme: 'light',
+  maintenanceNoticeEnabled: false,
+  maintenanceNoticeTitle: '',
+  maintenanceNoticeMessage: '',
+  maintenanceNoticeAppId: 'all',
 };
 
 export interface CrmData {

@@ -29,6 +29,9 @@ import { StatusBadge } from '../../components/common/StatusBadge';
 import { AppHealthMatrix } from '../../components/crm-admin/AppHealthMatrix';
 import { TicketTrendChart } from '../../components/crm-admin/TicketTrendChart';
 import { DashboardBreakdown } from '../../components/crm-admin/DashboardBreakdown';
+import { SlaRadarWidget } from '../../components/widgets/SlaRadarWidget';
+import { AgentWorkloadWidget } from '../../components/widgets/AgentWorkloadWidget';
+import { AppSpikeDetectorWidget } from '../../components/widgets/AppSpikeDetectorWidget';
 
 type TimeRange = '7d' | '14d' | '30d' | 'all';
 
@@ -277,6 +280,9 @@ export function AdminDashboardPage() {
         </div>
       </div>
 
+      {/* ═══ Anomaly / Spike Detector Alert ═══ */}
+      <AppSpikeDetectorWidget />
+
       {/* ═══ Interactive Charts Section ═══ */}
       <section className="space-y-4">
         {/* Main Trend Line / Bar Chart */}
@@ -325,6 +331,12 @@ export function AdminDashboardPage() {
           matrix={appMatrix}
           onSelectApp={(appId) => navigate(`/admin/tickets?app=${appId}`)}
         />
+      </section>
+
+      {/* ═══ Helpdesk Operations & SLA Widgets ═══ */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <SlaRadarWidget />
+        <AgentWorkloadWidget />
       </section>
 
       {/* ═══ Actionable Priority Queue ═══ */}

@@ -2,6 +2,7 @@ import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ExternalLink, Globe, LogOut, Plus, ShieldCheck } from 'lucide-react';
 import { getApp } from '../../config/vpsAppsConfig';
 import { useCrm } from '../../context/CrmContext';
+import { BroadcastBannerWidget } from '../widgets/BroadcastBannerWidget';
 
 export function UserPortalLayout() {
   const { data, admin, requester, logoutRequester, t, lang, setLanguage } = useCrm();
@@ -26,6 +27,7 @@ export function UserPortalLayout() {
 
   return (
     <div className="min-h-screen bg-canvas text-ink">
+      <BroadcastBannerWidget appId={requester?.appId} />
       <header className="sticky top-0 z-30 border-b border-line/80 bg-panel/85 backdrop-blur-md shadow-xs">
         {/* App identity color stripe */}
         <div className="h-1 w-full" style={{ backgroundColor: app?.color ?? '#0F172A' }} />

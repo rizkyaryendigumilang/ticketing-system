@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, Copy, ExternalLink, HelpCircle, Play, Sparkles, Terminal } from 'lucide-react';
+import { Check, Copy, ExternalLink, HelpCircle, LifeBuoy, Play, Sparkles, Terminal } from 'lucide-react';
 import { DEMO_ACCOUNTS, VPS_APPS, getApp } from '../../config/vpsAppsConfig';
 import { useToast } from '../../context/ToastContext';
+import { FloatingHelpdeskWidget } from '../../components/widgets/FloatingHelpdeskWidget';
 
 export function IntegrationTabContent({ embedded = false }: { embedded?: boolean }) {
   const navigate = useNavigate();
   const toast = useToast();
   const [selectedAppId, setSelectedAppId] = useState<string>(VPS_APPS[1].id); // default snackloop
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [showWidgetPreview, setShowWidgetPreview] = useState<boolean>(false);
 
   // Custom JIT user tester
   const [customApp, setCustomApp] = useState<string>('snackloop');
@@ -502,6 +504,98 @@ function generateSecureHandoffUrl(appId, uid, name, role, fromUrl, secret = proc
             </button>
           </div>
         </form>
+      </section>
+
+      {/* ═══ Section 4: Floating Helpdesk Widget Embed ═══ */}
+      <section className="rounded-lg border border-line bg-panel p-5 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-3.5">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+              <LifeBuoy className="h-4 w-4" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-ink">
+                Widget Melayang (Floating Embed Widget) untuk 7 Aplikasi VPS
+              </h2>
+              <p className="text-xs text-ink-muted">
+                Tombol bantuan interaktif di pojok kanan bawah aplikasi untuk kirim tiket, cek status, dan FAQ mandiri.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowWidgetPreview((prev) => !prev)}
+            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold shadow-2xs transition-all active:scale-95 ${
+              showWidgetPreview
+                ? 'bg-rose-600 text-white'
+                : 'bg-ink text-white hover:opacity-90'
+            }`}
+          >
+            <LifeBuoy className="h-3.5 w-3.5" />
+            {showWidgetPreview ? 'Tutup Simulator Widget' : 'Uji Coba Widget Langsung'}
+          </button>
+        </div>
+
+        <p className="text-xs text-ink-muted leading-relaxed">
+          Salin kode berikut dan pasang di aplikasi ekosistem Anda (misal: sebelum tag <code className="font-mono text-ink">&lt;/body&gt;</code> di Snackloop, Recruiter, atau Kept). Widget otomatis mengadopsi warna brand aplikasi dan mengenali pengguna aktif:
+        </p>
+
+        {/* Snippet box */}
+        <div className="relative rounded-lg border border-line bg-canvas p-4 font-mono text-xs text-ink overflow-x-auto">
+          <button
+            type="button"
+            onClick={() =>
+              copyText(
+                'snippet-widget',
+                `<!-- VPS Helpdesk Floating Widget Embed -->\n<script \n  src="${origin}${basePath}/widget.js" \n  data-app="${selectedApp.id}"\n  data-uid="user_123"\n  data-name="Nama Pengguna"\n  data-role="Staff"\n  async>\n</script>`,
+                'Snippet Widget Melayang',
+              )
+            }
+            className="absolute top-2.5 right-2.5 inline-flex items-center gap-1 rounded border border-line bg-panel px-2 py-1 text-[11px] font-sans font-medium text-ink hover:bg-subtle transition-colors"
+          >
+            {copiedKey === 'snippet-widget' ? (
+              <>
+                <Check className="h-3 w-3 text-emerald-600" />
+                <span>Tersalin</span>
+              </>
+            ) : (
+              <>
+                <Copy className="h-3 w-3 text-ink-muted" />
+                <span>Salin Script</span>
+              </>
+            )}
+          </button>
+          <pre className="text-ink-muted leading-relaxed">
+{`<!-- VPS Helpdesk Floating Widget Embed -->
+<script 
+  src="${origin}${basePath}/widget.js" 
+  data-app="${selectedApp.id}"
+  data-uid="user_123"
+  data-name="Nama Pengguna"
+  data-role="Staff"
+  async>
+</script>`}
+          </pre>
+        </div>
+
+        {/* Live Simulator feedback */}
+        {showWidgetPreview && (
+          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/[0.04] p-3 text-xs text-emerald-900 dark:text-emerald-300 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>
+                Simulator Widget aktif di pojok kanan bawah layar! Coba klik tombol bantuan melayang untuk mencoba formulir kirim tiket dan tab &ldquo;Tiket Saya&rdquo;.
+              </span>
+            </div>
+            <FloatingHelpdeskWidget
+              appId={selectedApp.id}
+              externalUid="demo_simulator_staff"
+              userName="Staff Kasir Simulator"
+              userRole="Operator Outlet"
+            />
+          </div>
+        )}
       </section>
     </div>
   );

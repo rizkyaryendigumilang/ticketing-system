@@ -30,6 +30,7 @@ import { NotificationCenterDrawer } from '../notifications/NotificationCenterDra
 import { CommandPalette } from '../common/CommandPalette';
 import { SyncStatusIndicator } from '../common/SyncStatusIndicator';
 import { PwaInstallPrompt } from '../common/PwaInstallPrompt';
+import { BroadcastBannerWidget } from '../widgets/BroadcastBannerWidget';
 
 type NavItem = {
   to: string;
@@ -461,6 +462,7 @@ export function AdminCrmLayout() {
 
         {/* ═══ MAIN WORKSPACE WITH MODERN APPLE TOP TOOLBAR ═══ */}
         <div className="flex flex-1 flex-col min-w-0 h-screen overflow-hidden">
+          <BroadcastBannerWidget isAdmin />
           {/* Top Header Toolbar */}
           <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between border-b border-line bg-panel/85 px-4 sm:px-6 backdrop-blur-md shadow-xs select-none">
             {/* Left: Mobile hamburger or Context Breadcrumb */}

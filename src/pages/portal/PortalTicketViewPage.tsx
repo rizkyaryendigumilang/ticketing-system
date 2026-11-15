@@ -12,6 +12,7 @@ import { StatusBadge } from '../../components/common/StatusBadge';
 import { FormattedMessage } from '../../components/common/FormattedMessage';
 import { MessageToolbar } from '../../components/common/MessageToolbar';
 import { TicketTimeline } from '../../components/common/TicketTimeline';
+import { TicketProgressStepperWidget } from '../../components/widgets/TicketProgressStepperWidget';
 import { useToast } from '../../context/ToastContext';
 
 const STEPS: TicketStatus[] = ['open', 'in_progress', 'waiting_on_user', 'solved'];
@@ -138,57 +139,8 @@ export function PortalTicketViewPage() {
         )}
       </div>
 
-      {/* Progress Tracker Card */}
-      <div className="rounded-lg border border-line bg-panel p-5 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-3.5">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-sm font-bold text-ink">{ticket.ticketNumber}</span>
-            <StatusBadge status={ticket.status} />
-            <PriorityBadge priority={ticket.priority} />
-            <span className="text-xs text-ink-muted">· {CATEGORY_LABEL[ticket.category]}</span>
-          </div>
-          <span className="text-xs text-ink-muted">Dilaporkan {timeAgo(ticket.createdAt)}</span>
-        </div>
-
-        {/* 4-Step Lifecycle Indicator with Progress Nodes */}
-        <div className="mt-4">
-          <div className="grid grid-cols-4 gap-2">
-            {STEPS.map((step, idx) => {
-              const reached = idx <= currentStepIdx;
-              const isCurrent = idx === currentStepIdx;
-              return (
-                <div key={step} className="space-y-1.5">
-                  <div
-                    className={`h-2 w-full rounded-full transition-colors ${
-                      reached
-                        ? step === 'solved' || isSolved
-                          ? 'bg-emerald-600'
-                          : 'bg-ink'
-                        : 'bg-line'
-                    }`}
-                  />
-                  <div className="flex items-center justify-between">
-                    <span
-                      className={`text-[11px] ${
-                        isCurrent
-                          ? 'font-bold text-ink'
-                          : reached
-                            ? 'font-medium text-ink-muted'
-                            : 'text-ink-faint'
-                      }`}
-                    >
-                      {STATUS_LABEL[step]}
-                    </span>
-                    {isCurrent && (
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+      {/* Interactive Progress Stepper Widget */}
+      <TicketProgressStepperWidget ticket={ticket} messages={messages} />
 
       {/* Resolution Banner from Admin */}
       {ticket.resolutionSummary && (

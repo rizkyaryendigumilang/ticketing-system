@@ -3,6 +3,7 @@ import { getApp } from '../../config/vpsAppsConfig';
 import { useCrm } from '../../context/CrmContext';
 import { UserTicketList } from '../../components/user-portal/UserTicketList';
 import { PortalNoSessionGuide } from '../../components/user-portal/PortalNoSessionGuide';
+import { SelfServiceDeflectionWidget } from '../../components/widgets/SelfServiceDeflectionWidget';
 
 export function PortalHomePage() {
   const { data, requester, t } = useCrm();
@@ -46,6 +47,9 @@ export function PortalHomePage() {
           <div className="mt-1 font-sans text-2xl font-bold tracking-tight text-emerald-700 tabular-nums">{solvedCount}</div>
         </div>
       </div>
+
+      {/* Self-Service Instant Solutions Widget */}
+      <SelfServiceDeflectionWidget appId={requester.appId} />
 
       {/* User's Ticket List */}
       <div className="space-y-2">
