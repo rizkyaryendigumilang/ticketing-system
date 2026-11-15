@@ -6,6 +6,7 @@ import { fromPbRecord, toPbRecord, type CollectionName } from '../config/pbSchem
 import { nextTicketNumber } from './crmLogic.ts';
 import {
   enqueue,
+  getData,
   getOutbox,
   removeLocal,
   replaceAll,
@@ -168,37 +169,84 @@ async function runFlush() {
 }
 
 async function pull() {
-  const [apps, users, tickets, messages] = await Promise.all([
-    pb.collection('apps').getFullList({ batch: 200 }),
-    pb.collection('crm_users').getFullList({ batch: 500, sort: '-created_at' }),
-    pb.collection('tickets').getFullList({ batch: 500, sort: '-created_at' }),
-    pb.collection('ticket_messages').getFullList({ batch: 1000, sort: 'created_at' }),
-  ]);
-  replaceAll({
-    apps: apps.map((r) => fromPb<AppSource>('apps', r)),
-    users: users.map((r) => fromPb<CrmUser>('crm_users', r)),
-    tickets: tickets.map((r) => fromPb<Ticket>('tickets', r)),
-    messages: messages.map((r) => fromPb<TicketMessage>('ticket_messages', r)),
-  });
+  if (isSuperuser()) {
+    const [apps, users, tickets, messages] = await Promise.all([
+      pb.collection('apps').getFullList({ batch: 200 }),
+      pb.collection('crm_users').getFullList({ batch: 500, sort: '-created_at' }),
+      pb.collection('tickets').getFullList({ batch: 500, sort: '-created_at' }),
+      pb.collection('ticket_messages').getFullList({ batch: 1000, sort: 'created_at' }),
+    ]);
+    replaceAll({
+      apps: apps.map((r) => fromPb<AppSource>('apps', r)),
+      users: users.map((r) => fromPb<CrmUser>('crm_users', r)),
+      tickets: tickets.map((r) => fromPb<Ticket>('tickets', r)),
+      messages: messages.map((r) => fromPb<TicketMessage>('ticket_messages', r)),
+    });
+    return;
+  }
+
+  // Non-superuser (requester / visitor): scoped pull to prevent tenant data leakage
+  try {
+    const apps = await pb.collection('apps').getFullList({ batch: 200 });
+    const requesterId = typeof localStorage !== 'undefined' ? localStorage.getItem('vps-crm:requester-id') : null;
+    let scopedTickets: Ticket[] = [];
+    let scopedMessages: TicketMessage[] = [];
+
+    if (requesterId) {
+      const me = getData().users.find((u: CrmUser) => u.id === requesterId);
+      if (me) {
+        const pbTickets = await pb.collection('tickets').getFullList({
+          batch: 200,
+          filter: pb.filter('app_id = {:appId} && requester_uid = {:uid}', {
+            appId: me.appId,
+            uid: me.externalUid,
+          }),
+          sort: '-created_at',
+        });
+        scopedTickets = pbTickets.map((r) => fromPb<Ticket>('tickets', r));
+
+        if (scopedTickets.length > 0) {
+          const ticketIds = scopedTickets.map((t) => t.id);
+          const pbMessages = await pb.collection('ticket_messages').getFullList({
+            batch: 500,
+            filter: ticketIds.map((id) => `ticket_id = "${id}"`).join(' || '),
+            sort: 'created_at',
+          });
+          scopedMessages = pbMessages.map((r) => fromPb<TicketMessage>('ticket_messages', r));
+        }
+      }
+    }
+
+    replaceAll({
+      apps: apps.map((r) => fromPb<AppSource>('apps', r)),
+      users: getData().users,
+      tickets: scopedTickets.length > 0 ? scopedTickets : getData().tickets,
+      messages: scopedMessages.length > 0 ? scopedMessages : getData().messages,
+    });
+  } catch (err) {
+    console.warn('Scoped sync bypassed:', err);
+  }
 }
 
 const REALTIME: Collection[] = ['crm_users', 'tickets', 'ticket_messages'];
 
 async function subscribeRealtime() {
   await pb.realtime.unsubscribe();
-  await Promise.all(
-    REALTIME.map((c) =>
-      pb.collection(c).subscribe('*', (e) => {
-        if (e.action === 'delete') removeLocal(c, e.record.id);
-        else upsertLocal(c, fromPb(c, e.record), true);
-      }),
-    ),
-  );
+  if (isSuperuser()) {
+    await Promise.all(
+      REALTIME.map((c) =>
+        pb.collection(c).subscribe('*', (e) => {
+          if (e.action === 'delete') removeLocal(c, e.record.id);
+          else upsertLocal(c, fromPb(c, e.record), true);
+        }),
+      ),
+    );
+  }
 }
 
 async function probe() {
   try {
-    await pb.collection('tickets').getList(1, 1, { skipTotal: true, signal: AbortSignal.timeout(2500) });
+    await pb.collection('apps').getList(1, 1, { skipTotal: true, signal: AbortSignal.timeout(2500) });
     return true;
   } catch {
     return false;

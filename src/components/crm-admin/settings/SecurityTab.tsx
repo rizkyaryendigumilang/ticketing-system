@@ -33,6 +33,9 @@ export function SecurityTab() {
   const [showSecret, setShowSecret] = useState(false);
   const [copiedSecret, setCopiedSecret] = useState(false);
   const [expiryMinutes, setExpiryMinutes] = useState(settings.handoffExpiryMinutes);
+  const [enforceHandoffSignatures, setEnforceHandoffSignatures] = useState(
+    Boolean(settings.enforceHandoffSignatures)
+  );
   const [allowedOrigins, setAllowedOrigins] = useState(settings.allowedOrigins.join('\n'));
 
   // API Key Management state
@@ -56,6 +59,7 @@ export function SecurityTab() {
       ...settings,
       handoffSecret: cleanSecret,
       handoffExpiryMinutes: Number(expiryMinutes) || 15,
+      enforceHandoffSignatures,
       allowedOrigins: origins.length ? origins : ['https://43.156.236.102'],
     });
     toast.success('Konfigurasi keamanan SSO handoff berhasil disimpan.');
@@ -168,6 +172,24 @@ export function SecurityTab() {
                 <RefreshCw className="h-3.5 w-3.5" />
               </button>
             </div>
+          </div>
+
+          <div className="flex items-start gap-3 rounded-xl border border-line bg-subtle/30 p-3.5">
+            <input
+              type="checkbox"
+              id="enforceHandoffSig"
+              checked={enforceHandoffSignatures}
+              onChange={(e) => setEnforceHandoffSignatures(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-line text-ink focus:ring-ink"
+            />
+            <label htmlFor="enforceHandoffSig" className="cursor-pointer select-none">
+              <span className="block font-semibold text-ink text-xs">
+                Wajibkan Tanda Tangan Digital (HMAC) pada Link Bantuan
+              </span>
+              <span className="block text-[11px] text-ink-muted leading-relaxed">
+                Menolak seluruh akses /handoff yang tidak menyertakan tanda tangan kriptografi (?sig=) untuk mencegah peniruan identitas pelapor (impersonation).
+              </span>
+            </label>
           </div>
 
           <div>

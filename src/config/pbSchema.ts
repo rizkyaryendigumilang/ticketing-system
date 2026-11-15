@@ -115,7 +115,7 @@ export const COLLECTIONS = [
   {
     name: 'crm_users',
     type: 'base',
-    listRule: '', viewRule: '', createRule: '@request.body.system_role = "requester"',
+    listRule: null, viewRule: null, createRule: '@request.body.system_role = "requester"',
     updateRule: '@request.body.system_role:isset = false && @request.body.composite_key:isset = false',
     deleteRule: null,
     fields: [
@@ -135,7 +135,9 @@ export const COLLECTIONS = [
   {
     name: 'tickets',
     type: 'base',
-    listRule: '', viewRule: '', createRule: '@request.body.status = "open"',
+    listRule: '@request.auth.id != "" || (@request.query.requester_uid:isset = true && requester_uid = @request.query.requester_uid && app_id = @request.query.app_id)',
+    viewRule: '@request.auth.id != "" || (@request.query.requester_uid:isset = true && requester_uid = @request.query.requester_uid && app_id = @request.query.app_id)',
+    createRule: '@request.body.status = "open"',
     updateRule:
       '(@request.body.status = "open" || @request.body.status = "solved" || @request.body.satisfaction_rating:isset = true) && ' +
       '@request.body.priority:isset = false && @request.body.category:isset = false && ' +

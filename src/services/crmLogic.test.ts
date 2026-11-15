@@ -5,6 +5,7 @@ import {
   compositeKeyOf,
   computeTicketSla,
   computeTrendMetrics,
+  constantTimeCompare,
   createHandoffSignature,
   filterTickets,
   formatTicketsCsv,
@@ -330,4 +331,11 @@ test('filterTickets supports assignedFilter for me, unassigned, and all', () => 
   // Assigned to me (admin1)
   const myTickets = filterTickets(tickets, { assignedFilter: 'me', currentAdminId: 'admin1' });
   assert.deepEqual(myTickets.map((x) => x.id), ['T1']);
+});
+
+test('constantTimeCompare prevents timing leaks on signature validation', () => {
+  assert.equal(constantTimeCompare('abcdef123456', 'abcdef123456'), true);
+  assert.equal(constantTimeCompare('abcdef123456', 'abcdef123457'), false);
+  assert.equal(constantTimeCompare('abcdef', 'abcdef123456'), false);
+  assert.equal(constantTimeCompare('', ''), true);
 });
