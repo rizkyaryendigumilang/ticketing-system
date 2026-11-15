@@ -125,5 +125,17 @@ export function FormattedMessage({ text, className = '' }: Props) {
     );
   });
 
+  // Guard: if user pasted an unclosed code block, flush remaining lines
+  if (inCodeBlock && codeBlockLines.length > 0) {
+    elements.push(
+      <pre
+        key="code-unclosed"
+        className="my-1.5 overflow-x-auto rounded border border-line bg-subtle/80 p-2 font-mono text-[11px] text-ink"
+      >
+        <code>{codeBlockLines.join('\n')}</code>
+      </pre>,
+    );
+  }
+
   return <div className={`leading-relaxed ${className}`}>{elements}</div>;
 }

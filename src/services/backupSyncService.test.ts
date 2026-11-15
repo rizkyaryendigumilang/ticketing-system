@@ -25,6 +25,10 @@ test('generateLatestBackup produces valid CSV and JSON for all and personal scop
   assert.equal(csvAll.format, 'csv');
   assert.equal(csvAll.scope, 'all');
   assert.ok(csvAll.blob.size > 0);
+  const buf = new Uint8Array(await csvAll.blob.arrayBuffer());
+  assert.equal(buf[0], 0xef, 'First byte of UTF-8 BOM must be 0xEF');
+  assert.equal(buf[1], 0xbb, 'Second byte of UTF-8 BOM must be 0xBB');
+  assert.equal(buf[2], 0xbf, 'Third byte of UTF-8 BOM must be 0xBF');
 
   // Test CSV export (personal)
   const csvPersonal = await generateLatestBackup({
@@ -39,4 +43,17 @@ test('generateLatestBackup produces valid CSV and JSON for all and personal scop
   assert.ok(jsonAll.filename.endsWith('.json'));
   assert.equal(jsonAll.format, 'json');
   assert.ok(jsonAll.count >= 0);
+
+  // Test JSON export (personal by requester) - must NEVER leak internal notes
+  const jsonPersonal = await generateLatestBackup({
+    scope: 'personal',
+    format: 'json',
+    requesterId: 'kasir1',
+    appId: 'snackloop',
+  });
+  const jsonPayload = JSON.parse(await jsonPersonal.blob.text());
+  if (jsonPayload.messages && jsonPayload.messages.length > 0) {
+    const hasInternal = jsonPayload.messages.some((m: { isInternalNote?: boolean }) => m.isInternalNote);
+    assert.equal(hasInternal, false, 'Personal export by requester must not leak internal notes');
+  }
 });

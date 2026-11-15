@@ -127,7 +127,7 @@ export async function generateLatestBackup({
 
   if (format === 'csv') {
     const csvData = formatTicketsCsv(targetTickets);
-    blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+    blob = new Blob(['\uFEFF' + csvData], { type: 'text/csv;charset=utf-8;' });
     filename = `backup-tiket-${scopeLabel}-${dateStr}-${timeStr}.csv`;
   } else {
     const payload = {
@@ -149,7 +149,8 @@ export async function generateLatestBackup({
           }
         : {
             messages: store.messages.filter((m: TicketMessage) =>
-              targetTickets.some((t: Ticket) => t.id === m.ticketId),
+              targetTickets.some((t: Ticket) => t.id === m.ticketId) &&
+              (adminId ? true : !m.isInternalNote),
             ),
           }),
     };

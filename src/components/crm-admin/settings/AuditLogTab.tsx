@@ -23,6 +23,7 @@ import {
 
 const ACTION_LABELS: Record<AuditAction, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
   ticket_status_change: { label: 'Status Tiket', color: 'bg-blue-500/15 text-blue-400 border-blue-500/30', icon: Clock },
+  ticket_priority_change: { label: 'Prioritas Tiket', color: 'bg-amber-500/15 text-amber-400 border-amber-500/30', icon: AlertTriangle },
   ticket_assignment: { label: 'Penugasan Tiket', color: 'bg-purple-500/15 text-purple-400 border-purple-500/30', icon: UserCheck },
   ticket_resolution: { label: 'Penyelesaian Tiket', color: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30', icon: CheckCircle2 },
   sla_breached: { label: 'SLA Terlewat', color: 'bg-rose-500/15 text-rose-400 border-rose-500/30', icon: AlertTriangle },
@@ -140,6 +141,7 @@ export function AuditLogTab() {
           >
             <option value="all">Semua Jenis Aksi ({logs.length})</option>
             <option value="ticket_status_change">Perubahan Status Tiket</option>
+            <option value="ticket_priority_change">Perubahan Prioritas Tiket</option>
             <option value="ticket_assignment">Penugasan Agen</option>
             <option value="ticket_resolution">Penyelesaian Masalah</option>
             <option value="team_invite">Undangan Anggota Tim</option>

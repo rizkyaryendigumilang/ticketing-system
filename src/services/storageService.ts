@@ -189,8 +189,9 @@ export function pruneOldClosedTickets(maxDays = 60): number {
     const isOldClosed =
       (t.status === 'closed' || t.status === 'solved') &&
       Date.parse(t.updatedAt || t.createdAt) < cutoff;
+    const isPendingOutbox = outbox.some((op) => op.item.id === t.id);
 
-    if (isOldClosed) {
+    if (isOldClosed && !isPendingOutbox) {
       removedIds.add(t.id);
     } else {
       toKeep.push(t);

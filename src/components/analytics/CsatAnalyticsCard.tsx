@@ -51,8 +51,9 @@ export function CsatAnalyticsCard({ tickets }: Props) {
   }, [ratedTickets]);
 
   const recentFeedbacks = useMemo(() => {
-    return ratedTickets
+    return [...ratedTickets]
       .filter((t) => t.satisfactionComment && t.satisfactionComment.trim().length > 0)
+      .sort((a, b) => Date.parse(b.solvedAt || b.updatedAt || b.createdAt) - Date.parse(a.solvedAt || a.updatedAt || a.createdAt))
       .slice(0, 6);
   }, [ratedTickets]);
 

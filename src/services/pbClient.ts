@@ -207,12 +207,20 @@ async function pull() {
 
         if (scopedTickets.length > 0) {
           const ticketIds = scopedTickets.map((t) => t.id);
-          const pbMessages = await pb.collection('ticket_messages').getFullList({
-            batch: 500,
-            filter: ticketIds.map((id) => `ticket_id = "${id}"`).join(' || '),
-            sort: 'created_at',
-          });
-          scopedMessages = pbMessages.map((r) => fromPb<TicketMessage>('ticket_messages', r));
+          const chunkSize = 25;
+          const msgPromises: Promise<RecordModel[]>[] = [];
+          for (let i = 0; i < ticketIds.length; i += chunkSize) {
+            const chunk = ticketIds.slice(i, i + chunkSize);
+            msgPromises.push(
+              pb.collection('ticket_messages').getFullList({
+                batch: 500,
+                filter: chunk.map((id) => `ticket_id = "${id}"`).join(' || '),
+                sort: 'created_at',
+              }),
+            );
+          }
+          const allMsgRecords = (await Promise.all(msgPromises)).flat();
+          scopedMessages = allMsgRecords.map((r) => fromPb<TicketMessage>('ticket_messages', r));
         }
       }
     }
@@ -241,6 +249,20 @@ async function subscribeRealtime() {
         }),
       ),
     );
+  } else {
+    try {
+      await pb.collection('ticket_messages').subscribe('*', (e) => {
+        if (e.action === 'delete') removeLocal('ticket_messages', e.record.id);
+        else {
+          const msg = fromPb<TicketMessage>('ticket_messages', e.record);
+          if (!msg.isInternalNote) {
+            upsertLocal('ticket_messages', msg, true);
+          }
+        }
+      });
+    } catch {
+      // Optional realtime for portal guests
+    }
   }
 }
 

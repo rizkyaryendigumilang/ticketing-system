@@ -5,12 +5,15 @@ import { useCrm } from '../../context/CrmContext';
 import { createTicket } from '../../services/ticketCrmService';
 import type { NewTicketInput } from '../../services/ticketCrmService';
 import { UserTicketForm } from '../../components/user-portal/UserTicketForm';
+import { PortalNoSessionGuide } from '../../components/user-portal/PortalNoSessionGuide';
 
 export function PortalNewTicketPage() {
   const { requester } = useCrm();
   const navigate = useNavigate();
 
-  if (!requester) return null;
+  if (!requester) {
+    return <PortalNoSessionGuide />;
+  }
 
   const app = getApp(requester.appId);
 

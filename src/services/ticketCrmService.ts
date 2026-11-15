@@ -1,5 +1,5 @@
 // Ticket actions. Each one writes to the local store immediately and queues the change for PocketBase.
-import { getApp, STATUS_LABEL } from '../config/vpsAppsConfig.ts';
+import { getApp, STATUS_LABEL, PRIORITY_LABEL } from '../config/vpsAppsConfig.ts';
 import { describeDevice, newId, nextTicketNumber, safeHttpUrl, statusAfterRequesterReply } from './crmLogic.ts';
 import { sanitizeTicketInput } from './sanitizer.ts';
 import { logAuditEvent } from './auditLogService.ts';
@@ -77,8 +77,22 @@ export function createTicket(user: CrmUser, input: NewTicketInput): Ticket {
 /** Admin edits from the properties panel, the inbox table, Kanban board, and quick peek drawer. */
 export function changeTicket(ticket: Ticket, patch: Partial<Pick<Ticket, 'status' | 'priority' | 'category' | 'tags'>>, actor: Actor) {
   const statusChanged = patch.status && patch.status !== ticket.status;
+  const priorityChanged = patch.priority && patch.priority !== ticket.priority;
   patchTicket(ticket, statusChanged && patch.status === 'solved' ? { ...patch, solvedAt: now() } : patch, actor);
-  if (statusChanged) {
+
+  if (statusChanged && priorityChanged) {
+    postMessage(ticket.id, 'system', `${actor.name} mengubah status ke ${STATUS_LABEL[patch.status!]} dan prioritas ke ${PRIORITY_LABEL[patch.priority!]}.`);
+    if (actor.role === 'admin') {
+      logAuditEvent({
+        actorId: actor.id,
+        actorName: actor.name,
+        actorRole: actor.role,
+        action: 'ticket_status_change',
+        target: ticket.ticketNumber,
+        details: `${actor.name} mengubah status ${ticket.ticketNumber} ke ${STATUS_LABEL[patch.status!]} dan prioritas ke ${PRIORITY_LABEL[patch.priority!]}.`,
+      });
+    }
+  } else if (statusChanged) {
     postMessage(ticket.id, 'system', `${actor.name} mengubah status ke ${STATUS_LABEL[patch.status!]}.`);
     if (actor.role === 'admin') {
       logAuditEvent({
@@ -88,6 +102,18 @@ export function changeTicket(ticket: Ticket, patch: Partial<Pick<Ticket, 'status
         action: 'ticket_status_change',
         target: ticket.ticketNumber,
         details: `${actor.name} mengubah status ${ticket.ticketNumber} ke ${STATUS_LABEL[patch.status!]}.`,
+      });
+    }
+  } else if (priorityChanged) {
+    postMessage(ticket.id, 'system', `${actor.name} mengubah prioritas ke ${PRIORITY_LABEL[patch.priority!]}.`);
+    if (actor.role === 'admin') {
+      logAuditEvent({
+        actorId: actor.id,
+        actorName: actor.name,
+        actorRole: actor.role,
+        action: 'ticket_priority_change',
+        target: ticket.ticketNumber,
+        details: `${actor.name} mengubah prioritas ${ticket.ticketNumber} ke ${PRIORITY_LABEL[patch.priority!]}.`,
       });
     }
   }
@@ -144,8 +170,9 @@ export function replyToTicket(
 }
 
 export function solveTicket(ticket: Ticket, actor: Actor, resolution: string, attachments: string[] = []) {
-  postMessage(ticket.id, actor, resolution, { attachments });
-  patchTicket(ticket, { status: 'solved', solvedAt: now(), resolutionSummary: resolution.trim() }, actor);
+  const cleanRes = sanitizeTicketInput(resolution);
+  postMessage(ticket.id, actor, cleanRes, { attachments });
+  patchTicket(ticket, { status: 'solved', solvedAt: now(), resolutionSummary: cleanRes }, actor);
   postMessage(ticket.id, 'system', `${actor.name} menyelesaikan tiket ini.`);
   if (actor.role === 'admin') {
     logAuditEvent({
@@ -166,7 +193,7 @@ export function markSolvedByRequester(ticket: Ticket, actor: Actor) {
 
 export function submitSatisfactionFeedback(ticket: Ticket, actor: Actor, rating: number, comment?: string) {
   const boundedRating = Math.max(1, Math.min(5, Math.round(rating)));
-  const cleanComment = comment?.trim();
+  const cleanComment = comment ? sanitizeTicketInput(comment) : '';
   patchTicket(
     ticket,
     {

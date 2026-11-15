@@ -156,6 +156,9 @@ export const COLLECTIONS = [
       { name: 'category', type: 'select', required: true, maxSelect: 1, values: CATEGORY },
       { name: 'priority', type: 'select', required: true, maxSelect: 1, values: PRIORITY },
       { name: 'status', type: 'select', required: true, maxSelect: 1, values: STATUS },
+      { name: 'assigned_to', type: 'text', max: 50 },
+      { name: 'assigned_to_name', type: 'text', max: 120 },
+      { name: 'assigned_to_role', type: 'text', max: 120 },
       { name: 'source_page_url', type: 'text', max: 2000 },
       { name: 'device_info', type: 'text', max: 300 },
       { name: 'attachments', ...IMAGE_FILE },
@@ -170,6 +173,7 @@ export const COLLECTIONS = [
       'CREATE UNIQUE INDEX idx_tickets_number ON tickets (ticket_number)',
       'CREATE INDEX idx_tickets_app_status ON tickets (app_id, status)',
       'CREATE INDEX idx_tickets_requester ON tickets (requester_id)',
+      'CREATE INDEX idx_tickets_assigned ON tickets (assigned_to)',
     ],
   },
   {

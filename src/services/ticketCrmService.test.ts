@@ -167,3 +167,19 @@ test('upsertLocal with isServerRealtime=true guards optimistic outbox mutations 
   // Status must remain 'in_progress' because pending outbox protected it
   assert.equal(getData().tickets.find((t) => t.id === ticket.id)?.status, 'in_progress');
 });
+
+test('solveTicket and submitSatisfactionFeedback sanitize control characters from input', () => {
+  const ticket = getData().tickets[0];
+
+  // Resolution with control characters (\x00, \x07 bell, \x1B escape)
+  const dirtyResolution = 'Solusi berhasil diterapkan.\x00\x07\x1B';
+  solveTicket(ticket, adminActor, dirtyResolution);
+  const solved = getData().tickets.find((t) => t.id === ticket.id);
+  assert.equal(solved?.resolutionSummary, 'Solusi berhasil diterapkan.');
+
+  // Feedback comment with control characters
+  const dirtyComment = 'Bagus sekali layanannya!\x00\x08';
+  submitSatisfactionFeedback(ticket, requesterActor, 5, dirtyComment);
+  const rated = getData().tickets.find((t) => t.id === ticket.id);
+  assert.equal(rated?.satisfactionComment, 'Bagus sekali layanannya!');
+});

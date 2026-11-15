@@ -6,6 +6,7 @@
 
 export type AuditAction =
   | 'ticket_status_change'
+  | 'ticket_priority_change'
   | 'ticket_assignment'
   | 'ticket_resolution'
   | 'sla_breached'

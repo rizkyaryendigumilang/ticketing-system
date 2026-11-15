@@ -45,8 +45,8 @@ export function PortalTicketViewPage() {
   // Security check: requester can only view their own ticket within their respective app
   const isOwner =
     Boolean(ticket && requester) &&
-    (ticket!.requesterId === requester!.id ||
-      (ticket!.appId === requester!.appId && ticket!.requesterUid === requester!.externalUid));
+    ticket!.appId === requester!.appId &&
+    (ticket!.requesterId === requester!.id || ticket!.requesterUid === requester!.externalUid);
 
   if (!ticket || !requester || !isOwner) {
     return (

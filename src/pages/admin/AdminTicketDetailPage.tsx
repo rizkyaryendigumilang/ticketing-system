@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCrm } from '../../context/CrmContext';
@@ -12,6 +13,35 @@ export function AdminTicketDetailPage() {
   const { data, adminActor } = useCrm();
 
   const ticket = data.tickets.find((t) => t.id === id) ?? null;
+
+  const queue = sortQueue(data.tickets);
+  const currentIdx = ticket ? queue.findIndex((t) => t.id === ticket.id) : -1;
+  const prevTicket = currentIdx > 0 ? queue[currentIdx - 1] : null;
+  const nextTicket = currentIdx >= 0 && currentIdx < queue.length - 1 ? queue[currentIdx + 1] : null;
+
+  // Keyboard navigation shortcuts: [ (prev ticket), ] (next ticket)
+  useEffect(() => {
+    const handleKeyNav = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
+      if (
+        tag === 'input' ||
+        tag === 'textarea' ||
+        tag === 'select' ||
+        (e.target as HTMLElement)?.isContentEditable
+      ) {
+        return;
+      }
+      if (e.key === '[' && prevTicket) {
+        e.preventDefault();
+        navigate(`/admin/tickets/${prevTicket.id}`);
+      } else if (e.key === ']' && nextTicket) {
+        e.preventDefault();
+        navigate(`/admin/tickets/${nextTicket.id}`);
+      }
+    };
+    window.addEventListener('keydown', handleKeyNav);
+    return () => window.removeEventListener('keydown', handleKeyNav);
+  }, [prevTicket, nextTicket, navigate]);
 
   if (!ticket) {
     return (
@@ -45,11 +75,6 @@ export function AdminTicketDetailPage() {
       t.requesterId === ticket.requesterId ||
       (t.appId === ticket.appId && t.requesterUid === ticket.requesterUid),
   );
-
-  const queue = sortQueue(data.tickets);
-  const currentIdx = queue.findIndex((t) => t.id === ticket.id);
-  const prevTicket = currentIdx > 0 ? queue[currentIdx - 1] : null;
-  const nextTicket = currentIdx >= 0 && currentIdx < queue.length - 1 ? queue[currentIdx + 1] : null;
 
   const handleStatusChange = (status: TicketStatus) => changeTicket(ticket, { status }, adminActor);
   const handlePriorityChange = (priority: typeof ticket.priority) => changeTicket(ticket, { priority }, adminActor);
