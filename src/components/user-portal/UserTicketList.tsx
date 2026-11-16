@@ -242,7 +242,7 @@ export function UserTicketList({
             <div
               key={ticket.id}
               onClick={() => onTicketClick(ticket.id)}
-              className="content-auto flex cursor-pointer items-start justify-between gap-4 p-4 sm:p-5 transition-colors hover:bg-subtle/50"
+              className="content-auto flex flex-col sm:flex-row cursor-pointer items-start sm:items-center justify-between gap-3 sm:gap-4 p-4 sm:p-5 transition-colors hover:bg-subtle/50 active:bg-subtle"
             >
               <div className="min-w-0 flex-1 space-y-1.5">
                 <div className="flex flex-wrap items-center gap-2">
@@ -275,8 +275,8 @@ export function UserTicketList({
                 )}
               </div>
 
-              <div className="flex shrink-0 flex-col items-end gap-2 text-right">
-                <span className="text-xs text-ink-muted tabular-nums">
+              <div className="flex w-full sm:w-auto items-center justify-between sm:justify-end sm:flex-col sm:items-end gap-2 text-right pt-2 sm:pt-0 border-t sm:border-t-0 border-line/40 shrink-0">
+                <span className="text-[11px] sm:text-xs text-ink-muted tabular-nums">
                   {timeAgo(ticket.createdAt)}
                 </span>
                 <span className="inline-flex items-center gap-0.5 rounded-lg border border-line bg-subtle px-2.5 py-1 text-xs font-medium text-ink shadow-xs hover:border-line-strong hover:bg-panel transition-all active:scale-95">

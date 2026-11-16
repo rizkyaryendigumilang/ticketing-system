@@ -376,11 +376,11 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
         </div>
       )}
 
-      <div className="flex items-center justify-end gap-2.5 border-t border-line pt-4">
+      <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 border-t border-line pt-4">
         <button
           type="button"
           onClick={onCancel}
-          className="btn px-4 py-2 text-xs font-medium"
+          className="btn px-4 py-2 text-xs font-medium w-full sm:w-auto"
         >
           Batal
         </button>
@@ -388,7 +388,7 @@ export function UserTicketForm({ user, onSubmit, onCancel }: Props) {
         <button
           type="submit"
           disabled={submitting}
-          className="btn-primary px-5 py-2 text-xs font-semibold"
+          className="btn-primary px-5 py-2 text-xs font-semibold w-full sm:w-auto"
         >
           <Send className="h-3.5 w-3.5" />
           {submitting ? 'Mengirim...' : 'Kirim Tiket'}
