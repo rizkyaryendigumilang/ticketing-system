@@ -93,7 +93,7 @@ export function AdminTicketDetailPage() {
         <div className="flex items-center gap-2 text-xs">
           <Link
             to="/admin/tickets"
-            className="inline-flex items-center gap-1 rounded border border-line bg-panel px-2.5 py-1 font-medium text-ink hover:border-line-strong"
+            className="inline-flex items-center gap-1 rounded-lg border border-line bg-panel px-2.5 py-1.5 font-medium text-ink shadow-2xs hover:border-line-strong hover:bg-subtle active:scale-95 transition-all"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             Kotak Masuk
@@ -108,7 +108,7 @@ export function AdminTicketDetailPage() {
             type="button"
             disabled={!prevTicket}
             onClick={() => prevTicket && navigate(`/admin/tickets/${prevTicket.id}`)}
-            className="inline-flex items-center gap-1 rounded border border-line bg-panel px-2 py-1 text-ink disabled:opacity-40"
+            className="inline-flex items-center gap-1 rounded-lg border border-line bg-panel px-2.5 py-1.5 text-ink shadow-2xs hover:border-line-strong hover:bg-subtle active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
           >
             <ChevronLeft className="h-3.5 w-3.5" />
             Sebelumnya
@@ -117,7 +117,7 @@ export function AdminTicketDetailPage() {
             type="button"
             disabled={!nextTicket}
             onClick={() => nextTicket && navigate(`/admin/tickets/${nextTicket.id}`)}
-            className="inline-flex items-center gap-1 rounded border border-line bg-panel px-2 py-1 text-ink disabled:opacity-40"
+            className="inline-flex items-center gap-1 rounded-lg border border-line bg-panel px-2.5 py-1.5 text-ink shadow-2xs hover:border-line-strong hover:bg-subtle active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
           >
             Berikutnya
             <ChevronRight className="h-3.5 w-3.5" />

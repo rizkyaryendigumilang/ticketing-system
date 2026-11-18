@@ -71,12 +71,14 @@ export function AdminTicketsPage() {
         </div>
 
         {/* View Toggle */}
-        <div className="inline-flex rounded border border-line bg-panel p-0.5 text-xs">
+        <div className="inline-flex rounded-xl border border-line bg-subtle/80 p-0.5 text-xs shadow-2xs">
           <button
             type="button"
             onClick={() => setViewMode('table')}
-            className={`inline-flex items-center gap-1.5 rounded px-3 py-1.5 font-medium ${
-              viewMode === 'table' ? 'bg-ink text-white' : 'text-ink-muted hover:text-ink'
+            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium transition-all active:scale-95 ${
+              viewMode === 'table'
+                ? 'bg-panel text-ink font-semibold shadow-xs'
+                : 'text-ink-muted hover:text-ink'
             }`}
           >
             <Table2 className="h-3.5 w-3.5" />
@@ -85,8 +87,10 @@ export function AdminTicketsPage() {
           <button
             type="button"
             onClick={() => setViewMode('kanban')}
-            className={`inline-flex items-center gap-1.5 rounded px-3 py-1.5 font-medium ${
-              viewMode === 'kanban' ? 'bg-ink text-white' : 'text-ink-muted hover:text-ink'
+            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium transition-all active:scale-95 ${
+              viewMode === 'kanban'
+                ? 'bg-panel text-ink font-semibold shadow-xs'
+                : 'text-ink-muted hover:text-ink'
             }`}
           >
             <Columns3 className="h-3.5 w-3.5" />
@@ -114,13 +118,13 @@ export function AdminTicketsPage() {
         />
       ) : (
         <div className="space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded border border-line bg-panel p-3 text-xs">
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line bg-panel p-3 text-xs shadow-card">
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-medium text-ink-muted">Filter Aplikasi:</span>
               <select
                 value={selectedApp}
                 onChange={(e) => handleAppChange(e.target.value)}
-                className="rounded border border-line bg-canvas px-2.5 py-1 text-xs text-ink"
+                className="rounded-lg border border-line bg-canvas px-2.5 py-1 text-xs text-ink focus:border-ink focus:outline-none"
               >
                 <option value="all">Semua Aplikasi (7)</option>
                 {VPS_APPS.map((app) => (

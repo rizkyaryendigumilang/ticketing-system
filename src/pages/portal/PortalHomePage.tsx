@@ -32,19 +32,34 @@ export function PortalHomePage() {
     <div className="space-y-5">
       {/* Summary Header */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div className="rounded border border-line bg-panel p-4">
-          <div className="text-xs text-ink-muted">{t('dash.newTickets')}</div>
-          <div className="mt-1 font-sans text-2xl font-bold tracking-tight text-red-600 tabular-nums">{openCount}</div>
+        <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-all duration-150">
+          <div className="flex items-center justify-between text-xs text-ink-muted">
+            <span className="font-medium">{t('dash.newTickets')}</span>
+            <span className="h-2 w-2 rounded-full bg-rose-500 shrink-0" />
+          </div>
+          <div className="mt-2 font-sans text-2xl font-bold tracking-tight text-rose-600 dark:text-rose-400 tabular-nums">
+            {openCount}
+          </div>
         </div>
 
-        <div className="rounded border border-line bg-panel p-4">
-          <div className="text-xs text-ink-muted">{t('dash.inProgress')}</div>
-          <div className="mt-1 font-sans text-2xl font-bold tracking-tight text-amber-700 tabular-nums">{inProgressCount}</div>
+        <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-all duration-150">
+          <div className="flex items-center justify-between text-xs text-ink-muted">
+            <span className="font-medium">{t('dash.inProgress')}</span>
+            <span className="h-2 w-2 rounded-full bg-amber-500 shrink-0" />
+          </div>
+          <div className="mt-2 font-sans text-2xl font-bold tracking-tight text-amber-600 dark:text-amber-400 tabular-nums">
+            {inProgressCount}
+          </div>
         </div>
 
-        <div className="rounded border border-line bg-panel p-4">
-          <div className="text-xs text-ink-muted">{t('status.solved')}</div>
-          <div className="mt-1 font-sans text-2xl font-bold tracking-tight text-emerald-700 tabular-nums">{solvedCount}</div>
+        <div className="rounded-xl border border-line bg-panel p-4 shadow-card hover:border-line-strong transition-all duration-150">
+          <div className="flex items-center justify-between text-xs text-ink-muted">
+            <span className="font-medium">{t('status.solved')}</span>
+            <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
+          </div>
+          <div className="mt-2 font-sans text-2xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400 tabular-nums">
+            {solvedCount}
+          </div>
         </div>
       </div>
 

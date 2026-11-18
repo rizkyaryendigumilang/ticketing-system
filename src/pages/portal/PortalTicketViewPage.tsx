@@ -120,7 +120,7 @@ export function PortalTicketViewPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
           to="/portal"
-          className="inline-flex items-center gap-1.5 rounded-md border border-line bg-panel px-3 py-1.5 text-xs font-medium text-ink hover:border-line-strong transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-panel px-3 py-1.5 text-xs font-medium text-ink shadow-2xs hover:border-line-strong hover:bg-subtle active:scale-95 transition-all"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Daftar Tiket Saya
@@ -131,7 +131,7 @@ export function PortalTicketViewPage() {
             type="button"
             disabled={submitting}
             onClick={handleMarkSolved}
-            className="inline-flex items-center gap-1.5 rounded bg-emerald-700 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-800 disabled:opacity-50 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 active:scale-95 disabled:opacity-50 transition-all"
           >
             <CheckCircle2 className="h-3.5 w-3.5" />
             Tandai Tiket Selesai
@@ -144,15 +144,15 @@ export function PortalTicketViewPage() {
 
       {/* Resolution Banner from Admin */}
       {ticket.resolutionSummary && (
-        <div className="rounded-lg border border-emerald-300 bg-emerald-50/90 p-4 sm:p-5 shadow-sm">
-          <div className="flex items-center gap-2 text-xs font-bold text-emerald-900">
-            <CheckCircle2 className="h-4 w-4 text-emerald-700" />
+        <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 dark:bg-emerald-500/15 p-4 sm:p-5 shadow-card">
+          <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 dark:text-emerald-300">
+            <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             Solusi dari Tim Bantuan
           </div>
-          <p className="mt-2 whitespace-pre-wrap text-xs leading-relaxed text-emerald-950 font-sans">
+          <p className="mt-2 whitespace-pre-wrap text-xs leading-relaxed text-emerald-950 dark:text-emerald-100 font-sans">
             {ticket.resolutionSummary}
           </p>
-          <div className="mt-3 flex items-center gap-2 text-[11px] text-emerald-800">
+          <div className="mt-3 flex items-center gap-2 text-[11px] text-emerald-700 dark:text-emerald-300">
             <Sparkles className="h-3 w-3" />
             <span>Jika kendala belum teratasi, balas pesan di bawah untuk membuka kembali tiket ini.</span>
           </div>
@@ -231,7 +231,7 @@ export function PortalTicketViewPage() {
       {/* Initial Complaint Card */}
       <div className="rounded-2xl border border-line bg-panel p-5 sm:p-6 shadow-card">
         <h1 className="text-base font-semibold text-ink">{ticket.subject}</h1>
-        <div className="mt-2.5 whitespace-pre-wrap rounded border border-line bg-canvas p-3.5 text-xs leading-relaxed text-ink font-sans">
+        <div className="mt-2.5 whitespace-pre-wrap rounded-xl border border-line/80 bg-subtle/40 p-4 text-xs leading-relaxed text-ink font-sans">
           {ticket.description}
         </div>
 
