@@ -178,16 +178,6 @@ export function AdminCrmLayout() {
               <PanelLeftOpen className="h-4 w-4" />
             )}
           </button>
-
-          {/* Admin avatar + logout */}
-          <button
-            type="button"
-            title={`${admin?.name ?? 'Superadmin'} · Keluar`}
-            onClick={handleLogout}
-            className="flex h-8 w-8 items-center justify-center rounded-[9px] bg-neutral-800 border border-white/10 text-[11px] font-semibold text-white transition-all hover:border-red-500/50 hover:bg-red-600 active:scale-95"
-          >
-            {initials}
-          </button>
         </aside>
 
         {/* ═══ SECONDARY TEXT SIDEBAR (desktop only, collapsible) ═══ */}
