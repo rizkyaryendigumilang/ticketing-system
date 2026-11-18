@@ -4,6 +4,7 @@
 import PocketBase, { ClientResponseError, type RecordModel } from 'pocketbase';
 import { fromPbRecord, toPbRecord, type CollectionName } from '../config/pbSchema.ts';
 import { nextTicketNumber } from './crmLogic.ts';
+import { loadAttachment } from './attachmentStore.ts';
 import {
   enqueue,
   getData,
@@ -91,6 +92,22 @@ export function saveRecord(collection: Collection, item: OutboxOp['item'], patch
 
 async function send(op: OutboxOp) {
   const col = pb.collection(op.collection);
+
+  // Hydrate any attachment tokens from IndexedDB before sending payload to PocketBase
+  const itemWithAttachments = op.item as { attachments?: string[] };
+  if (Array.isArray(itemWithAttachments.attachments)) {
+    for (let i = 0; i < itemWithAttachments.attachments.length; i++) {
+      const att = itemWithAttachments.attachments[i];
+      if (typeof att === 'string' && att.startsWith('attachment:')) {
+        const id = att.slice('attachment:'.length);
+        const resolved = await loadAttachment(id);
+        if (resolved) {
+          itemWithAttachments.attachments[i] = resolved;
+        }
+      }
+    }
+  }
+
   if (op.patch) {
     await col.update(op.item.id, toPbRecord(op.collection, op.patch));
     return;
@@ -256,7 +273,12 @@ async function subscribeRealtime() {
         else {
           const msg = fromPb<TicketMessage>('ticket_messages', e.record);
           if (!msg.isInternalNote) {
-            upsertLocal('ticket_messages', msg, true);
+            // Verify message belongs to requester's accessible tickets
+            const myTickets = getData().tickets;
+            const isAccessible = myTickets.some((t) => t.id === msg.ticketId);
+            if (isAccessible) {
+              upsertLocal('ticket_messages', msg, true);
+            }
           }
         }
       });

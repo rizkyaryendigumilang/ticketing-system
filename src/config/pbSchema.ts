@@ -179,7 +179,8 @@ export const COLLECTIONS = [
   {
     name: 'ticket_messages',
     type: 'base',
-    listRule: 'is_internal_note = false', viewRule: 'is_internal_note = false',
+    listRule: '@request.auth.id != "" || (is_internal_note = false && @request.query.requester_uid:isset = true && ticket_id.requester_uid = @request.query.requester_uid && ticket_id.app_id = @request.query.app_id)',
+    viewRule: '@request.auth.id != "" || (is_internal_note = false && @request.query.requester_uid:isset = true && ticket_id.requester_uid = @request.query.requester_uid && ticket_id.app_id = @request.query.app_id)',
     createRule: '@request.body.is_internal_note != true && @request.body.sender_role != "admin"',
     updateRule: null, deleteRule: null,
     fields: [

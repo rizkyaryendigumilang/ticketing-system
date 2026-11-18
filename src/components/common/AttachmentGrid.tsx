@@ -1,9 +1,30 @@
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
+import { loadAttachment } from '../../services/attachmentStore';
 
 /** Thumbnails that open a full-size view on click. Escape or a click anywhere closes it. */
 export function AttachmentGrid({ urls, size = 'md' }: { urls: string[]; size?: 'sm' | 'md' }) {
+  const [resolvedUrls, setResolvedUrls] = useState<string[]>(urls);
   const [open, setOpen] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    Promise.all(
+      urls.map(async (u) => {
+        if (typeof u === 'string' && u.startsWith('attachment:')) {
+          const id = u.slice('attachment:'.length);
+          const dataUrl = await loadAttachment(id);
+          return dataUrl || u;
+        }
+        return u;
+      }),
+    ).then((res) => {
+      if (active) setResolvedUrls(res);
+    });
+    return () => {
+      active = false;
+    };
+  }, [urls]);
 
   useEffect(() => {
     if (!open) return;
@@ -12,12 +33,12 @@ export function AttachmentGrid({ urls, size = 'md' }: { urls: string[]; size?: '
     return () => window.removeEventListener('keydown', onKey);
   }, [open]);
 
-  if (urls.length === 0) return null;
+  if (resolvedUrls.length === 0) return null;
 
   return (
     <>
       <div className="flex flex-wrap gap-2">
-        {urls.map((src, i) => (
+        {resolvedUrls.map((src, i) => (
           <button
             key={i}
             type="button"

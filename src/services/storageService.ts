@@ -1,6 +1,7 @@
 // Local store: the UI always reads from here. PocketBase sync lives in pbClient.ts.
 import { buildSeed, SEED_APPS } from '../config/seedData.ts';
 import { CANNED_RESPONSES } from '../config/vpsAppsConfig.ts';
+import { saveAttachment, loadAttachment } from './attachmentStore.ts';
 import type { AppSource, CannedResponse, CrmUser, Ticket, TicketMessage } from '../types/crm';
 
 export interface SystemSettings {
@@ -106,14 +107,76 @@ function write(key: string, value: unknown) {
       localStorage.setItem(key, JSON.stringify(value));
     }
   } catch (e) {
-    // shortcut: screenshots are base64 in localStorage (~5 MB quota); past it, changes live in memory until reload.
-    console.warn('Penyimpanan browser penuh, perubahan hanya ada di memori sampai PocketBase aktif.', e);
+    // If browser localStorage quota is exceeded, offload large base64 attachments to IndexedDB and retry
+    try {
+      if (key === DATA_KEY && value && typeof value === 'object') {
+        const payload = value as CrmData;
+        const lightweightData: CrmData = {
+          ...payload,
+          tickets: payload.tickets.map((t) => ({
+            ...t,
+            attachments: t.attachments?.map((att, idx) => {
+              if (typeof att === 'string' && att.startsWith('data:') && att.length > 500) {
+                const attId = `att_${t.id}_${idx}`;
+                void saveAttachment(attId, att);
+                return `attachment:${attId}`;
+              }
+              return att;
+            }),
+          })),
+          messages: payload.messages.map((m) => ({
+            ...m,
+            attachments: m.attachments?.map((att, idx) => {
+              if (typeof att === 'string' && att.startsWith('data:') && att.length > 500) {
+                const attId = `att_${m.id}_${idx}`;
+                void saveAttachment(attId, att);
+                return `attachment:${attId}`;
+              }
+              return att;
+            }),
+          })),
+        };
+        localStorage.setItem(key, JSON.stringify(lightweightData));
+        return;
+      }
+    } catch {
+      console.warn('Penyimpanan browser penuh, perubahan hanya ada di memori sampai PocketBase aktif.', e);
+    }
   }
+}
+
+function hydrateAttachmentsAsync(crmData: CrmData) {
+  if (typeof window === 'undefined') return;
+  crmData.tickets.forEach((t) => {
+    t.attachments?.forEach(async (att, idx) => {
+      if (typeof att === 'string' && att.startsWith('attachment:')) {
+        const id = att.slice('attachment:'.length);
+        const resolved = await loadAttachment(id);
+        if (resolved && t.attachments) {
+          t.attachments[idx] = resolved;
+          notify();
+        }
+      }
+    });
+  });
+  crmData.messages.forEach((m) => {
+    m.attachments?.forEach(async (att, idx) => {
+      if (typeof att === 'string' && att.startsWith('attachment:')) {
+        const id = att.slice('attachment:'.length);
+        const resolved = await loadAttachment(id);
+        if (resolved && m.attachments) {
+          m.attachments[idx] = resolved;
+          notify();
+        }
+      }
+    });
+  });
 }
 
 const seed = (): CrmData => ({ apps: SEED_APPS, ...buildSeed() });
 
 let data = read<CrmData>(DATA_KEY, seed);
+hydrateAttachmentsAsync(data);
 let outbox = read<OutboxOp[]>(OUTBOX_KEY, () => []);
 const listeners = new Set<() => void>();
 const notify = () => listeners.forEach((fn) => fn());
