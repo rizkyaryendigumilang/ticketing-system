@@ -28,7 +28,6 @@ import { flush, isSuperuser } from '../../services/pbClient';
 import { getNotifications, subscribeNotifications, syncTicketAlerts } from '../../services/notificationService';
 import { NotificationCenterDrawer } from '../notifications/NotificationCenterDrawer';
 import { CommandPalette } from '../common/CommandPalette';
-import { SyncStatusIndicator } from '../common/SyncStatusIndicator';
 import { PwaInstallPrompt } from '../common/PwaInstallPrompt';
 import { BroadcastBannerWidget } from '../widgets/BroadcastBannerWidget';
 
@@ -284,9 +283,6 @@ export function AdminCrmLayout() {
             {/* Admin footer */}
             <div className="border-t border-rail-line p-3">
               <PwaInstallPrompt />
-              <div className="mb-2">
-                <SyncStatusIndicator />
-              </div>
               {pendingAdminChanges > 0 && (
                 <button
                   type="button"
@@ -430,7 +426,6 @@ export function AdminCrmLayout() {
               {/* Mobile Footer */}
               <div className="border-t border-rail-line p-3 space-y-2">
                 <PwaInstallPrompt />
-                <SyncStatusIndicator />
                 <div className="flex items-center justify-between pt-1">
                   <div className="min-w-0">
                     <p className="truncate text-xs font-semibold text-white">{admin?.name ?? 'Admin'}</p>

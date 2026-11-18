@@ -48,19 +48,7 @@ export function SyncStatusIndicator({ variant = 'rail', className = '' }: Props)
   const isRail = variant === 'rail';
 
   if (status === 'online') {
-    return (
-      <div
-        className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[11px] font-medium tracking-tight select-none shadow-2xs transition-colors ${
-          isRail
-            ? 'border border-white/10 bg-white/[0.05] text-neutral-200'
-            : 'border border-neutral-200/80 bg-neutral-100/70 text-neutral-700 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-200'
-        } ${className}`}
-        title={t('nav.connectedSseTooltip')}
-      >
-        <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500 dark:bg-emerald-400" />
-        <span className="truncate">{t('nav.realtimeOnline')}</span>
-      </div>
-    );
+    return null;
   }
 
   if (status === 'reconnecting') {
