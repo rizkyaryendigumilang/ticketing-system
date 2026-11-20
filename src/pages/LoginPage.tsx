@@ -780,6 +780,7 @@ export function LoginPage() {
                   id="reg-pass"
                   type="password"
                   required
+                  autoComplete="new-password"
                   value={regPassword}
                   onChange={(e) => setRegPassword(e.target.value)}
                   placeholder="Minimal 8 karakter"

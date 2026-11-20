@@ -45,6 +45,16 @@ export function NotificationCenterDrawer({ open, onClose }: NotificationCenterDr
     });
   }, []);
 
+  // Platform dismiss via Escape key
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open, onClose]);
+
   if (!open) return null;
 
   const filteredNotifs = notifications.filter((n) => {
@@ -83,7 +93,13 @@ export function NotificationCenterDrawer({ open, onClose }: NotificationCenterDr
       <div className="flex-1" onClick={onClose} />
 
       {/* Drawer Panel */}
-      <div className="w-full max-w-md sm:m-2.5 sm:h-[calc(100vh-1.25rem)] sm:rounded-2xl bg-panel/95 backdrop-blur-xl border border-line/80 h-full flex flex-col shadow-drawer animate-slide-left">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="notification-drawer-title"
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-md sm:m-2.5 sm:h-[calc(100vh-1.25rem)] sm:rounded-2xl bg-panel/95 backdrop-blur-xl border border-line/80 h-full flex flex-col shadow-drawer animate-slide-left overscroll-contain"
+      >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-line px-5 py-4">
           <div className="flex items-center gap-2.5">
@@ -91,7 +107,7 @@ export function NotificationCenterDrawer({ open, onClose }: NotificationCenterDr
               <Bell className="h-4 w-4" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-ink">Notifikasi</h2>
+              <h2 id="notification-drawer-title" className="text-sm font-bold text-ink">Notifikasi</h2>
               <p className="text-[11px] text-ink-muted">
                 {unreadCount > 0
                   ? `${unreadCount} belum dibaca`

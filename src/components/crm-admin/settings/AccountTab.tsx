@@ -92,6 +92,7 @@ export function AccountTab() {
             <input
               type="password"
               required
+              autoComplete="current-password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               placeholder="••••••••"
@@ -104,6 +105,7 @@ export function AccountTab() {
             <input
               type="password"
               required
+              autoComplete="new-password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="Minimal 8 karakter"
@@ -116,6 +118,7 @@ export function AccountTab() {
             <input
               type="password"
               required
+              autoComplete="new-password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Ketik ulang kata sandi baru"

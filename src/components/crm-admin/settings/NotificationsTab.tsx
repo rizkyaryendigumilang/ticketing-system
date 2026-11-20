@@ -86,6 +86,8 @@ export function NotificationsTab() {
               <label className="block font-medium text-ink">Bot Token Telegram</label>
               <input
                 type="password"
+                autoComplete="off"
+                spellCheck={false}
                 value={telegramBotToken}
                 onChange={(e) => setTelegramBotToken(e.target.value)}
                 placeholder="Contoh: 123456789:ABCdefGHIjklMNOpqrsTUVwxyz"

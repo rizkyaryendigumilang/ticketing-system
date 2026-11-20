@@ -274,15 +274,24 @@ export function CommandPalette({ open, onClose }: Props) {
       onClick={onClose}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Pusat Perintah Cepat"
         className="w-full max-w-xl overflow-hidden rounded-2xl border border-line bg-panel shadow-popover animate-scale-pop origin-top transition-transform"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input Bar */}
         <div className="flex items-center gap-3 border-b border-line px-4 py-3">
-          <Search className="h-4 w-4 text-ink-muted shrink-0" />
+          <Search className="h-4 w-4 text-ink-muted shrink-0" aria-hidden="true" />
           <input
             ref={inputRef}
-            type="text"
+            type="search"
+            role="combobox"
+            aria-expanded={filteredItems.length > 0}
+            aria-controls="command-palette-results"
+            aria-autocomplete="list"
+            autoComplete="off"
+            spellCheck={false}
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
@@ -307,7 +316,12 @@ export function CommandPalette({ open, onClose }: Props) {
         </div>
 
         {/* Results List */}
-        <div className="max-h-80 overflow-y-auto p-2 divide-y divide-line/40">
+        <div 
+          id="command-palette-results"
+          role="listbox"
+          aria-label="Hasil Pencarian Perintah"
+          className="max-h-80 overflow-y-auto overscroll-contain p-2 divide-y divide-line/40"
+        >
           {filteredItems.length === 0 ? (
             <div className="p-8 text-center text-xs text-ink-muted">
               Tidak ada hasil yang cocok dengan &quot;{query}&quot;.
@@ -320,6 +334,8 @@ export function CommandPalette({ open, onClose }: Props) {
               return (
                 <div
                   key={item.id}
+                  role="option"
+                  aria-selected={isSelected}
                   onClick={item.action}
                   onMouseEnter={() => setSelectedIndex(index)}
                   className={`flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-xs transition-colors ${

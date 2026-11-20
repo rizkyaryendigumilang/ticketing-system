@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, Printer, ShieldCheck, Award, Clock, CheckCircle2, TrendingUp, AlertCircle } from 'lucide-react';
 import { VPS_APPS } from '../../config/vpsAppsConfig';
 import type { Ticket } from '../../types/crm';
@@ -38,9 +38,27 @@ export function ExecutiveReportModal({ isOpen, onClose, tickets }: Props) {
     window.print();
   };
 
+  // Platform dismiss via Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs overflow-y-auto print:p-0 print:bg-white animate-fade-in">
-      <div className="relative w-full max-w-3xl rounded-2xl border border-line bg-panel p-6 sm:p-8 shadow-2xl overflow-hidden print:border-none print:shadow-none print:w-full print:max-w-none text-ink">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs overflow-y-auto overscroll-contain print:p-0 print:bg-white animate-fade-in"
+      onClick={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="report-modal-title"
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-3xl rounded-2xl border border-line bg-panel p-6 sm:p-8 shadow-2xl overflow-hidden print:border-none print:shadow-none print:w-full print:max-w-none text-ink"
+      >
         {/* Top Control Bar (Hidden when printing) */}
         <div className="flex items-center justify-between border-b border-line pb-4 mb-6 print:hidden">
           <div className="flex items-center gap-2">
@@ -76,7 +94,7 @@ export function ExecutiveReportModal({ isOpen, onClose, tickets }: Props) {
                 <div className="h-7 w-7 rounded-lg bg-ink flex items-center justify-center text-white font-bold text-sm">
                   H
                 </div>
-                <h1 className="text-xl font-bold tracking-tight text-ink">
+                <h1 id="report-modal-title" className="text-xl font-bold tracking-tight text-ink">
                   VPS Helpdesk CRM — Ringkasan Eksekutif
                 </h1>
               </div>

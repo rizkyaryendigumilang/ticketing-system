@@ -137,7 +137,7 @@ const PRIORITY_RANK: Record<TicketPriority, number> = { urgent: 0, high: 1, medi
 
 /** Queue order: open first, then by priority, then newest. */
 export function sortQueue(tickets: Ticket[]): Ticket[] {
-  return [...tickets].sort(
+  return tickets.toSorted(
     (a, b) =>
       STATUS_RANK[a.status] - STATUS_RANK[b.status] ||
       PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority] ||
